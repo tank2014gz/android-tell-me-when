@@ -1,0 +1,3 @@
+[submodule "AndroidCommons"]
+	path = AndroidCommons
+	url = https://github.com/relayr/AndroidCommons.git
