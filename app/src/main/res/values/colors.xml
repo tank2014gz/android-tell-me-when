@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="background">#00486D</color>
+    <color name="navigation_background">#1A000000</color>
+
+    <color name="red_background">#EF4136</color>
+
+    <color name="tab_active_top">#F16A21</color>
+    <color name="tab_active_bottom">#FF145C</color>
+    <color name="tab_inactive">#00282D</color>
+
+    <color name="button_gray_background">#33000000</color>
+    <color name="button_pink_background">#FF4071</color>
+    <color name="button_green_background">#A0C12D</color>
+
+    <color name="divider_top_color">#73000000</color>
+    <color name="divider_bottom_color">#1AFFFFFF</color>
+
+</resources>

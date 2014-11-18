@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/default_object_height"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/default_object_padding"
+    android:paddingRight="@dimen/default_object_padding"
+    android:gravity="center_vertical">
+
+    <io.relayr.commons.widget.CustomTextView
+        android:id="@+id/object_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ma_tab_rules_text"
+        android:textColor="@android:color/white"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/default_object_title_text_size"
+        android:textAllCaps="true"
+        style="@style/BoldText" />
+
+    <io.relayr.commons.widget.CustomTextView
+        android:id="@+id/object_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ma_tab_notifications_text"
+        android:textColor="@android:color/white"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/default_object_subtitle_text_size"
+        style="@style/NormalText"/>
+</LinearLayout>

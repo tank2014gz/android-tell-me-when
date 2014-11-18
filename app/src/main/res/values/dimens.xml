@@ -1,5 +1,28 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="ma_tab_text_size">20sp</dimen>
+    <dimen name="ma_tab_padding">30dp</dimen>
+
+    <dimen name="navigation_text_size">22sp</dimen>
+    <dimen name="navigation_button_text_size">18sp</dimen>
+    <dimen name="navigation_title_padding">20dp</dimen>
+    <dimen name="navigation_drawable_padding">10dp</dimen>
+    <dimen name="navigation_height">80dp</dimen>
+    <dimen name="navigation_button_radius">30dp</dimen>
+
+    <dimen name="vf_operator_size">70sp</dimen>
+
+    <dimen name="default_object_padding">15dp</dimen>
+    <dimen name="default_object_height">100dp</dimen>
+    <dimen name="default_object_title_text_size">22sp</dimen>
+    <dimen name="default_object_subtitle_text_size">22sp</dimen>
+
+    <dimen name="notification_date_text_size">15sp</dimen>
+    <dimen name="notification_time_text_size">18sp</dimen>
+    <dimen name="button_radius">50dp</dimen>
+    <dimen name="button_done_padding">20dp</dimen>
+    <dimen name="button_done_text_size">20sp</dimen>
+    <dimen name="nf_edit_text_padding">20dp</dimen>
+
 </resources>
