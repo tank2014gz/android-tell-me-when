@@ -40,7 +40,7 @@ public class SensorFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Storage.getCurrentRule().setSensorType(SensorUtil.getSensors().get(position));
+                Storage.saveRuleSensor(SensorUtil.getSensors().get(position));
                 EventBus.getDefault().post(new WhenEvents.MeasurementSelected());
             }
         });

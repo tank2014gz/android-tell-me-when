@@ -40,6 +40,8 @@ public class RuleValueFragment extends Fragment {
     @InjectView(R.id.vf_rule_value_indicator)
     TextView mValueIndicator;
 
+    private OperatorType currentOperator;
+
     public static RuleValueFragment newInstance() {
         return new RuleValueFragment();
     }
@@ -50,8 +52,8 @@ public class RuleValueFragment extends Fragment {
 
         ButterKnife.inject(this, view);
 
-        ((TextView)view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_value));
-        ((TextView)view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
+        ((TextView) view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_value));
+        ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 
         changeOperator(OperatorType.EQUALS);
 
@@ -81,13 +83,16 @@ public class RuleValueFragment extends Fragment {
     }
 
     private void showSavedData() {
-        mObjectIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.getCurrentRule().getSensorType()));
-        mObjectInfo.setText(SensorUtil.getTitle(Storage.getCurrentRule().getSensorType()));
-        mObjectName.setText(Storage.getCurrentRule().getTransmitterName());
+        mObjectIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.loadRuleSensor()));
+        mObjectInfo.setText(SensorUtil.getTitle(Storage.loadRuleSensor()));
+        mObjectName.setText(Storage.loadRuleTransName());
     }
 
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
+        Storage.saveRuleValue(mValueSeek.getProgress());
+        Storage.saveRuleOperator(currentOperator);
+
         EventBus.getDefault().post(new WhenEvents.ValueFragDone());
     }
 
@@ -107,6 +112,8 @@ public class RuleValueFragment extends Fragment {
     }
 
     private void changeOperator(OperatorType operator) {
+        currentOperator = operator;
+
         mOperatorEquals.setBackgroundResource(android.R.color.transparent);
         mOperatorLess.setBackgroundResource(android.R.color.transparent);
         mOperatorGreater.setBackgroundResource(android.R.color.transparent);

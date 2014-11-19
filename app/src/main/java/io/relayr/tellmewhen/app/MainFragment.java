@@ -27,6 +27,7 @@ import io.relayr.tellmewhen.adapter.RulesAdapter;
 import io.relayr.tellmewhen.model.Notification;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Subscriber;
 
@@ -106,6 +107,7 @@ public class MainFragment extends Fragment {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View view = inflater.inflate(R.layout.warning_onboarding, null, false);
+        ((TextView)view.findViewById(R.id.button_done)).setText(getString(R.string.warning_onboard_btn_text));
         view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -138,6 +140,7 @@ public class MainFragment extends Fragment {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View view = inflater.inflate(R.layout.warning_no_rules, null, false);
+        ((TextView)view.findViewById(R.id.button_done)).setText(getString(R.string.warning_no_rules_btn_text));
         view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -198,7 +201,8 @@ public class MainFragment extends Fragment {
     }
 
     private void loadRules() {
-        mRules.add(new Rule("transmitter"));
+        mRules.clear();
+        mRules.addAll(RuleService.getsDbRules());
     }
 
     private void showNotifications() {

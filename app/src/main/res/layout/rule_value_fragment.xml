@@ -95,7 +95,6 @@
                 android:id="@+id/vf_rule_value_indicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/vf_equals_operator"
                 android:textSize="@dimen/vf_operator_size"
                 android:layout_centerHorizontal="true"
                 android:gravity="center" />
@@ -106,6 +105,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_object_padding"
+                android:progress="50"
                 android:max="100" />
         </RelativeLayout>
 

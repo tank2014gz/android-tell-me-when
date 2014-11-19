@@ -7,7 +7,7 @@
     <io.relayr.commons.widget.CustomTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/warning_onboard_title"
+        android:text="@string/warning_no_rules_title"
         android:textColor="@android:color/white"
         android:gravity="center"
         android:textSize="@dimen/default_object_title_text_size"
@@ -18,7 +18,7 @@
     <io.relayr.commons.widget.CustomTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/warning_onboard_text_top"
+        android:text="@string/warning_no_rules_text"
         android:textColor="@android:color/white"
         android:gravity="center"
         android:textSize="@dimen/default_object_subtitle_text_size"

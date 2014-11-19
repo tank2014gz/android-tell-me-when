@@ -48,5 +48,7 @@
     <string name="title_edit_rule">rule</string>
 
     <string name="button_done">done</string>
+    <string name="warning_no_rules_title">no rules yet</string>
+    <string name="warning_no_rules_text">Create rules to get notifications from your WunderBar sensors</string>
 
 </resources>

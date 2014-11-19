@@ -19,6 +19,7 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Subscriber;
 import rx.Subscription;
@@ -107,8 +108,7 @@ public class MainActivity extends Activity implements LoginEventListener {
     }
 
     public void onEvent(WhenEvents.BackClicked bc) {
-//        switchToPrevious();
-        showFragment(RuleEditFragment.newInstance());
+        switchToPrevious();
     }
 
     public void onEvent(WhenEvents.NewRule nre) {
@@ -128,6 +128,7 @@ public class MainActivity extends Activity implements LoginEventListener {
     }
 
     public void onEvent(WhenEvents.NameFragDone nfd) {
+        RuleService.saveRule();
         switchToNext();
     }
 
@@ -168,7 +169,8 @@ public class MainActivity extends Activity implements LoginEventListener {
 
         showFragment(fragment);
     }
-    private void showFragment(Fragment fragment){
+
+    private void showFragment(Fragment fragment) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 

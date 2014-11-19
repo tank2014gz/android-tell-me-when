@@ -16,7 +16,6 @@ public class Rule {
 
     public Rule(String transmitterName) {
         this.transmitterName = transmitterName;
-
         this.transmitterType = "Relayr WunderBar";
         this.isNotifying = true;
     }

@@ -19,6 +19,7 @@ import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.storage.Storage;
 
 public class RuleNameFragment extends Fragment {
 
@@ -37,8 +38,8 @@ public class RuleNameFragment extends Fragment {
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        ((TextView)view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_rule_name));
-        ((TextView)view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
+        ((TextView) view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_rule_name));
+        ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 
         return view;
     }
@@ -72,7 +73,11 @@ public class RuleNameFragment extends Fragment {
 
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
-        if (isNameOk()) EventBus.getDefault().post(new WhenEvents.NameFragDone());
+        if (isNameOk()) {
+            Storage.saveRuleName(mRuleName.getText().toString());
+
+            EventBus.getDefault().post(new WhenEvents.NameFragDone());
+        }
     }
 
     @OnClick(R.id.navigation_back)

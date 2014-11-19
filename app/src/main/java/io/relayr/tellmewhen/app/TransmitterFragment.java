@@ -49,7 +49,10 @@ public class TransmitterFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Storage.createRule(mTransmitters.get(position));
+                Transmitter transmitter = mTransmitters.get(position);
+                Storage.saveRuleTransName(transmitter.getName());
+                Storage.saveRuleTransType("Relayr WunderBar");
+
                 EventBus.getDefault().post(new WhenEvents.WunderBarSelected());
             }
         });

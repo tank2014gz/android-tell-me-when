@@ -33,8 +33,10 @@ public class RulesAdapter extends ArrayAdapter<Rule> {
             view.setTag(holder);
         }
 
-        holder.name.setText("temp watch");
-        holder.value.setText("temperature < 30");
+        Rule rule = getItem(position);
+        holder.name.setText(rule.getName());
+        holder.value.setText(rule.getSensorType().getName() + " " +
+                rule.getOperatorType().getName() + " " + rule.getValue());
 
         return view;
     }
