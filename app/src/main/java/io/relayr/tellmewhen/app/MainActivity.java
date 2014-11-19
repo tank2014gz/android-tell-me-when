@@ -18,7 +18,7 @@ import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
 import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.util.WhenEvents;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Subscriber;
@@ -29,7 +29,9 @@ import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends Activity implements LoginEventListener {
 
-    private int currentFragment = 0;
+    private boolean isEditing = false;
+    private int fragmentPos = 0;
+
     private AlertDialog mNetworkDialog;
     private Subscription mUserInfoSubscription = Subscriptions.empty();
 
@@ -97,7 +99,7 @@ public class MainActivity extends Activity implements LoginEventListener {
                     @Override
                     public void onNext(User user) {
                         Storage.saveUserId(user.id);
-                        switchFragment(currentFragment);
+                        switchFragment(fragmentPos);
                     }
                 });
     }
@@ -107,46 +109,34 @@ public class MainActivity extends Activity implements LoginEventListener {
         switchToPrevious();
     }
 
-    public void onEvent(WhenEvents.BackClicked bc) {
+    public void onEvent(WhenEvents.BackEvent bc) {
         switchToPrevious();
     }
 
-    public void onEvent(WhenEvents.NewRule nre) {
+    public void onEvent(WhenEvents.DoneEvent nre) {
         switchToNext();
     }
 
-    public void onEvent(WhenEvents.WunderBarSelected ws) {
-        switchToNext();
-    }
-
-    public void onEvent(WhenEvents.MeasurementSelected ms) {
-        switchToNext();
-    }
-
-    public void onEvent(WhenEvents.ValueFragDone vfd) {
-        switchToNext();
-    }
-
-    public void onEvent(WhenEvents.NameFragDone nfd) {
+    public void onEvent(WhenEvents.DoneCreateEvent nfd) {
         RuleService.saveRule();
         switchToNext();
     }
 
     private void switchToNext() {
-        switchFragment(++currentFragment);
+        switchFragment(++fragmentPos);
     }
 
     private void switchToPrevious() {
-        if (--currentFragment >= 0) {
-            switchFragment(currentFragment);
+        if (--fragmentPos >= 0) {
+            switchFragment(fragmentPos);
         } else {
             super.onBackPressed();
         }
     }
 
-    private void switchFragment(int fragmentId) {
+    private void switchFragment(int fragPos) {
         Fragment fragment;
-        switch (fragmentId) {
+        switch (fragPos) {
             case 0:
                 fragment = MainFragment.newInstance();
                 break;
@@ -163,7 +153,7 @@ public class MainActivity extends Activity implements LoginEventListener {
                 fragment = RuleNameFragment.newInstance();
                 break;
             default:
-                currentFragment = 0;
+                fragmentPos = 0;
                 fragment = MainFragment.newInstance();
         }
 
@@ -180,11 +170,8 @@ public class MainActivity extends Activity implements LoginEventListener {
 
     private void checkWiFi() {
         if (isConnected()) {
-            if (RelayrSdk.isUserLoggedIn()) {
-                loadUserInfo();
-            } else {
-                RelayrSdk.logIn(this, this);
-            }
+            if (RelayrSdk.isUserLoggedIn()) loadUserInfo();
+            else RelayrSdk.logIn(this, this);
         } else {
             showNetworkDialog();
         }

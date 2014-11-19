@@ -20,7 +20,7 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.TransmitterAdapter;
-import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.util.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Subscriber;
 
@@ -53,7 +53,7 @@ public class TransmitterFragment extends Fragment {
                 Storage.saveRuleTransName(transmitter.getName());
                 Storage.saveRuleTransType("Relayr WunderBar");
 
-                EventBus.getDefault().post(new WhenEvents.WunderBarSelected());
+                EventBus.getDefault().post(new WhenEvents.DoneEvent());
             }
         });
 
@@ -62,7 +62,7 @@ public class TransmitterFragment extends Fragment {
 
     @OnClick(R.id.navigation_back)
     public void onBackClicked() {
-        EventBus.getDefault().post(new WhenEvents.BackClicked());
+        EventBus.getDefault().post(new WhenEvents.BackEvent());
     }
 
     private void refreshTransmitters() {

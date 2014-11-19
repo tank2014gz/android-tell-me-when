@@ -5,16 +5,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.util.WhenEvents;
 
 public class RuleEditFragment extends Fragment {
 
@@ -36,11 +33,12 @@ public class RuleEditFragment extends Fragment {
 
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
+        EventBus.getDefault().post(new WhenEvents.DoneEditEvent());
     }
 
     @OnClick(R.id.navigation_back)
     public void onBackClicked() {
-        EventBus.getDefault().post(new WhenEvents.BackClicked());
+        EventBus.getDefault().post(new WhenEvents.BackEvent());
     }
 
 }

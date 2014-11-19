@@ -14,7 +14,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.util.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.OperatorType;
 import io.relayr.tellmewhen.util.SensorUtil;
@@ -93,7 +93,7 @@ public class RuleValueFragment extends Fragment {
         Storage.saveRuleValue(mValueSeek.getProgress());
         Storage.saveRuleOperator(currentOperator);
 
-        EventBus.getDefault().post(new WhenEvents.ValueFragDone());
+        EventBus.getDefault().post(new WhenEvents.DoneEvent());
     }
 
     @OnClick(R.id.vf_operator_equals)
@@ -133,7 +133,7 @@ public class RuleValueFragment extends Fragment {
 
     @OnClick(R.id.navigation_back)
     public void onBackClicked() {
-        EventBus.getDefault().post(new WhenEvents.BackClicked());
+        EventBus.getDefault().post(new WhenEvents.BackEvent());
     }
 
 }

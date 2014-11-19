@@ -15,7 +15,7 @@ import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.SensorAdapter;
-import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.util.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.SensorUtil;
 
@@ -41,7 +41,7 @@ public class SensorFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Storage.saveRuleSensor(SensorUtil.getSensors().get(position));
-                EventBus.getDefault().post(new WhenEvents.MeasurementSelected());
+                EventBus.getDefault().post(new WhenEvents.DoneEvent());
             }
         });
         return view;
@@ -49,6 +49,6 @@ public class SensorFragment extends Fragment {
 
     @OnClick(R.id.navigation_back)
     public void onBackClicked() {
-        EventBus.getDefault().post(new WhenEvents.BackClicked());
+        EventBus.getDefault().post(new WhenEvents.BackEvent());
     }
 }

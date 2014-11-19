@@ -26,7 +26,7 @@ import io.relayr.tellmewhen.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.adapter.RulesAdapter;
 import io.relayr.tellmewhen.model.Notification;
 import io.relayr.tellmewhen.model.Rule;
-import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.util.WhenEvents;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Subscriber;
@@ -144,7 +144,7 @@ public class MainFragment extends Fragment {
         view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventBus.getDefault().post(new WhenEvents.NewRule());
+                EventBus.getDefault().post(new WhenEvents.DoneEvent());
             }
         });
 
@@ -172,13 +172,13 @@ public class MainFragment extends Fragment {
     public void onLogoutClick() {
         if (RelayrSdk.isUserLoggedIn()) {
             RelayrSdk.logOut();
-            EventBus.getDefault().post(new WhenEvents.BackClicked());
+            EventBus.getDefault().post(new WhenEvents.BackEvent());
         }
     }
 
     @OnClick(R.id.rf_controls_new_rule)
     public void onNewRuleClick() {
-        EventBus.getDefault().post(new WhenEvents.NewRule());
+        EventBus.getDefault().post(new WhenEvents.DoneEvent());
     }
 
     @OnClick(R.id.rf_controls_clear)
@@ -195,7 +195,7 @@ public class MainFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                EventBus.getDefault().post(new WhenEvents.BackClicked());
+                EventBus.getDefault().post(new WhenEvents.DoneEvent());
             }
         });
     }

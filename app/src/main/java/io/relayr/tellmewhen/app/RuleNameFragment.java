@@ -18,7 +18,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.util.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
 
 public class RuleNameFragment extends Fragment {
@@ -76,13 +76,13 @@ public class RuleNameFragment extends Fragment {
         if (isNameOk()) {
             Storage.saveRuleName(mRuleName.getText().toString());
 
-            EventBus.getDefault().post(new WhenEvents.NameFragDone());
+            EventBus.getDefault().post(new WhenEvents.DoneCreateEvent());
         }
     }
 
     @OnClick(R.id.navigation_back)
     public void onBackClicked() {
-        EventBus.getDefault().post(new WhenEvents.BackClicked());
+        EventBus.getDefault().post(new WhenEvents.BackEvent());
     }
 
     private void toggleKeyboard(boolean show) {
