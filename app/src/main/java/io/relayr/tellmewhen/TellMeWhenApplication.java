@@ -14,6 +14,6 @@ public class TellMeWhenApplication extends Application {
         RelayrSdkInitializer.initSdk(this);
 
         Storage.init(getApplicationContext());
-        MeasurementUtil.init(getApplicationContext());
+//        MeasurementUtil.init(getApplicationContext());
     }
 }

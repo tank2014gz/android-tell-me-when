@@ -10,6 +10,8 @@ public class Storage {
     private static final String MEASUREMENT_NAME = "maesurement.name";
     private static final String USER_ID = "user.id";
 
+    private static final String TRANSMITTER_CONTROL = "transmitter.control";
+
     private static SharedPreferences sStorage = null;
 
     public static void init(Context applicationContext) {
@@ -42,6 +44,16 @@ public class Storage {
 
     public static String loadUserId(){
         return sStorage.getString(USER_ID, null);
+    }
+
+    public static void saveTransmiterState(boolean exist){
+        SharedPreferences.Editor editor = sStorage.edit();
+        editor.putBoolean(TRANSMITTER_CONTROL, exist);
+        editor.apply();
+    }
+
+    public static boolean transmitterExists(){
+        return sStorage.getBoolean(TRANSMITTER_CONTROL, false);
     }
 
     private static void save(String key, String value) {

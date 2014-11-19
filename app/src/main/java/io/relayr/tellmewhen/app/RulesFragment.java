@@ -2,6 +2,8 @@ package io.relayr.tellmewhen.app;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,14 +18,20 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
+import io.relayr.RelayrSdk;
+import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.adapter.RulesAdapter;
 import io.relayr.tellmewhen.model.Notification;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.storage.Storage;
+import rx.Subscriber;
 
 public class RulesFragment extends Fragment {
+
+    private static final String ON_BOARD_APP_PACKAGE = "io.relayr.wunderbar";
 
     @InjectView(R.id.rf_warning_layout)
     ViewGroup mWarningLayout;
@@ -38,10 +46,10 @@ public class RulesFragment extends Fragment {
     @InjectView(R.id.rf_controls_new_rule)
     View mNavNewRule;
     @InjectView(R.id.rf_controls_clear)
-    View mNavClearNotif;
+    View mNavClear;
 
-    private List<Rule> rules = new ArrayList<Rule>();
-    private List<Notification> notifications = new ArrayList<Notification>();
+    private List<Rule> mRules = new ArrayList<Rule>();
+    private List<Notification> mNotifications = new ArrayList<Notification>();
 
     private RulesAdapter mRulesAdapter;
     private NotificationsAdapter mNotificationsAdapter;
@@ -59,34 +67,91 @@ public class RulesFragment extends Fragment {
         initiateAdapters();
         toggleTabs(true);
 
-//        showOnBoardWarning();
-//        showRulesWarning();
-        showRules();
-
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (!Storage.transmitterExists()) checkOnBoarding();
+        else checkRules();
+    }
+
+    private void checkOnBoarding() {
+        RelayrSdk.getRelayrApi().getTransmitters(Storage.loadUserId()).subscribe(new Subscriber<List<Transmitter>>() {
+            @Override
+            public void onCompleted() {
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+
+            @Override
+            public void onNext(List<Transmitter> transmitters) {
+                Storage.saveTransmiterState(!transmitters.isEmpty());
+
+                if (transmitters.isEmpty()) showOnBoardWarning();
+                else checkRules();
+            }
+        });
+    }
+
     private void showOnBoardWarning() {
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mWarningLayout.addView(inflater.inflate(R.layout.warning_onboarding, null, false));
+        LayoutInflater inflater = (LayoutInflater) getActivity()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.warning_onboarding, null, false);
+        view.findViewById(R.id.warning_onboard_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("market://details?id=" + ON_BOARD_APP_PACKAGE)));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://play.google.com/store/apps/details?id=" + ON_BOARD_APP_PACKAGE)));
+                }
+            }
+        });
+
+        mWarningLayout.addView(view);
         mWarningLayout.setVisibility(View.VISIBLE);
 
         mListView.setVisibility(View.GONE);
-        mNavClearNotif.setVisibility(View.GONE);
+        mNavClear.setVisibility(View.GONE);
         mNavNewRule.setVisibility(View.GONE);
     }
 
+    private void checkRules() {
+        loadRules();
+
+        if (mRules.isEmpty()) showRulesWarning();
+        else showRules();
+    }
+
     private void showRulesWarning() {
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mWarningLayout.addView(inflater.inflate(R.layout.warning_no_rules, null, false));
+        LayoutInflater inflater = (LayoutInflater) getActivity()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.warning_no_rules, null, false);
+        view.findViewById(R.id.warning_no_rules_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventBus.getDefault().post(new WhenEvents.NewRule());
+            }
+        });
+
+        mWarningLayout.addView(view);
         mWarningLayout.setVisibility(View.VISIBLE);
 
         mListView.setVisibility(View.GONE);
     }
 
     private void initiateAdapters() {
-        mRulesAdapter = new RulesAdapter(this.getActivity(), rules);
-        mNotificationsAdapter = new NotificationsAdapter(this.getActivity(), notifications);
+        mRulesAdapter = new RulesAdapter(this.getActivity(), mRules);
+        mNotificationsAdapter = new NotificationsAdapter(this.getActivity(), mNotifications);
     }
 
     @OnClick(R.id.rf_tab_rules)
@@ -100,24 +165,27 @@ public class RulesFragment extends Fragment {
     }
 
     @OnClick(R.id.rf_controls_logout)
-    public void onLogoutClick(View view) {
+    public void onLogoutClick() {
+        if (RelayrSdk.isUserLoggedIn()) {
+            RelayrSdk.logOut();
+            EventBus.getDefault().post(new WhenEvents.BackClicked());
+        }
     }
 
     @OnClick(R.id.rf_controls_new_rule)
-    public void onNewRuleClick(View view) {
+    public void onNewRuleClick() {
         EventBus.getDefault().post(new WhenEvents.NewRule());
     }
 
     @OnClick(R.id.rf_controls_clear)
-    public void onNavClearClick(View view) {
-        notifications.clear();
+    public void onNavClearClick() {
+        mNotifications.clear();
         mNotificationsAdapter.notifyDataSetChanged();
     }
 
     private void showRules() {
         toggleTabs(true);
-
-        rules.add(new Rule());
+        loadRules();
 
         mListView.setAdapter(mRulesAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -127,11 +195,19 @@ public class RulesFragment extends Fragment {
         });
     }
 
+    private void loadRules() {
+        mRules.add(new Rule());
+    }
+
     private void showNotifications() {
         toggleTabs(false);
+        loadNotifications();
 
-        notifications.add(new Notification());
         mListView.setAdapter(mNotificationsAdapter);
+    }
+
+    private void loadNotifications() {
+        mNotifications.add(new Notification());
     }
 
     private void toggleTabs(boolean isRules) {
@@ -139,6 +215,6 @@ public class RulesFragment extends Fragment {
         mNavNewRule.setVisibility(isRules ? View.VISIBLE : View.GONE);
 
         mTabNotifications.setBackgroundResource(isRules ? R.color.tab_inactive : R.drawable.tab_active);
-        mNavClearNotif.setVisibility(isRules ? View.GONE : View.VISIBLE);
+        mNavClear.setVisibility(isRules ? View.GONE : View.VISIBLE);
     }
 }

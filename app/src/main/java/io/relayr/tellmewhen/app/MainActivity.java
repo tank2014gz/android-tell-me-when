@@ -43,8 +43,8 @@ public class MainActivity extends Activity implements LoginEventListener {
     public void onResume() {
         super.onResume();
 
-//        checkWiFi();
-        switchFragment(currentFragment);
+        checkWiFi();
+//        switchFragment(currentFragment);
 
         EventBus.getDefault().register(this);
     }
@@ -191,7 +191,8 @@ public class MainActivity extends Activity implements LoginEventListener {
     }
 
     private void showNetworkDialog() {
-        mNetworkDialog = new AlertDialog.Builder(this).setTitle(getString(R.string.please_connect_to_wifi))
+        mNetworkDialog = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.please_connect_to_wifi))
                 .setPositiveButton(getString(R.string.connect), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
