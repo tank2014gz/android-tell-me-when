@@ -13,6 +13,10 @@ android {
     }
 
     buildTypes {
+        production {
+            debuggable true
+            signingConfig signingConfigs.debug
+        }
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -25,5 +29,6 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.jakewharton:butterknife:6.0.0'
     compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'io.relayr:android-sdk:0.0.4'
     compile project(':AndroidCommons:RelayrCommons')
 }

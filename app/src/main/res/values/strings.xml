@@ -3,30 +3,47 @@
 
     <string name="app_name">TellMeWhen</string>
 
+    <string name="successfully_logged_in">You were successfully logged in!</string>
+    <string name="unsuccessfully_logged_in">There was a problem in the log in.</string>
+    <string name="err_loading_user_data">Oops! Loading user data failed</string>
+    <string name="err_loading_devices">Oops! Loading devices failed</string>
+    <string name="err_socket_problem">Oops! Web socket problem</string>
+    <string name="please_connect_to_wifi">Please connect to WiFi</string>
+    <string name="connect">Connect</string>
+    <string name="cancel">Cancel</string>
+
     <string name="ma_title">rules</string>
     <string name="ma_tab_rules_text">rules</string>
     <string name="ma_tab_notifications_text">notifications</string>
 
+    <string name="warning_onboard_title">onboard wunderbar</string>
+    <string name="warning_onboard_text_top">Looks like you haven\'t registered a WunderBar to your account yet.</string>
+    <string name="warning_onboard_text_bottom">Please do so, with the relayr Wunderbar onboarding app.</string>
+    <string name="warning_onboard_btn_text">onboarding app</string>
+    <string name="warning_no_rules_btn_text">create rule</string>
+
     <string name="rf_title">rules</string>
+    <string name="rf_clear">clear</string>
+    <string name="rf_logout">logout</string>
 
     <string name="tf_title">select transmitter</string>
-
-    <string name="mf_title">measurement</string>
 
     <string name="vf_rule_name">rule name</string>
     <string name="vf_title">value</string>
     <string name="vf_less_operator"><![CDATA[<]]></string>
     <string name="vf_greater_operator"><![CDATA[>]]></string>
     <string name="vf_equals_operator">=</string>
-    <string name="rf_logout">logout</string>
     <string name="vf_button_done">done</string>
+
     <string name="nf_rule_hint">rule name</string>
     <string name="nf_rule_name_empty">Please set name for your rule.</string>
-    <string name="rf_clear">clear</string>
-    <string name="warning_onboard_title">onboard wunderbar</string>
-    <string name="warning_onboard_text_top">Looks like you haven\'t registered a WunderBar to your account yet.</string>
-    <string name="warning_onboard_text_bottom">Please do so, with the relayr Wunderbar onboarding app.</string>
-    <string name="warning_onboard_btn_text">onboarding app</string>
-    <string name="warning_no_rules_btn_text">create rule</string>
+
+    <string name="mf_title">measurement</string>
+    <string name="measurement_temperature">temperature</string>
+    <string name="measurement_humidity">humidity</string>
+    <string name="measurement_noise">noise</string>
+    <string name="measurement_proximity">proximity</string>
+    <string name="measurement_light">light</string>
+    <string name="measurement_acceleration">acceleration</string>
 
 </resources>

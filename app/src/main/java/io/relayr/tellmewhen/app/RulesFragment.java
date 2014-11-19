@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen;
+package io.relayr.tellmewhen.app;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -16,6 +16,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
+import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.adapter.RulesAdapter;
 import io.relayr.tellmewhen.model.Notification;

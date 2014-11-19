@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen;
+package io.relayr.tellmewhen.app;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -15,9 +15,11 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
+import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.TransmitterAdapter;
 import io.relayr.tellmewhen.model.Transmitter;
 import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.storage.Storage;
 
 public class TransmitterFragment extends Fragment {
 
@@ -42,6 +44,7 @@ public class TransmitterFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Storage.saveWunderbarName(mTransmitters.get(position).getName());
                 EventBus.getDefault().post(new WhenEvents.WunderBarSelected());
             }
         });
@@ -54,7 +57,7 @@ public class TransmitterFragment extends Fragment {
     }
 
     private void refreshTransmitters() {
-        mTransmitters.add(new Transmitter());
+        mTransmitters.add(new Transmitter("Wunderbar 1"));
     }
 
 

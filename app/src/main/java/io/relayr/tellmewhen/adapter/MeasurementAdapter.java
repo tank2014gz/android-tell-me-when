@@ -1,6 +1,5 @@
 package io.relayr.tellmewhen.adapter;
 
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,22 +8,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.List;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.Measurement;
-import io.relayr.tellmewhen.model.Transmitter;
+import io.relayr.tellmewhen.util.MeasurementUtil;
 
-public class MeasurementAdapter extends ArrayAdapter<Measurement> {
+public class MeasurementAdapter extends ArrayAdapter<String> {
 
-    private final Context context;
-
-    public MeasurementAdapter(Context context, List<Measurement> objects) {
-        super(context, R.layout.measurement_object, objects);
-
-        this.context = context;
+    public MeasurementAdapter(Context context) {
+        super(context, R.layout.measurement_object, MeasurementUtil.getMeasurementList());
     }
 
     @Override
@@ -39,8 +31,8 @@ public class MeasurementAdapter extends ArrayAdapter<Measurement> {
             view.setTag(holder);
         }
 
-        holder.icon.setImageResource(R.drawable.ic_launcher);
-        holder.info.setText("name");
+        holder.icon.setImageResource(MeasurementUtil.getIcon(getContext(), getItem(position)));
+        holder.info.setText(MeasurementUtil.getTitle(getItem(position)));
 
         return view;
     }

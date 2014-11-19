@@ -1,26 +1,22 @@
-package io.relayr.tellmewhen;
+package io.relayr.tellmewhen.app;
 
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
-import io.relayr.tellmewhen.adapter.TransmitterAdapter;
-import io.relayr.tellmewhen.model.Transmitter;
+import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.WhenEvents;
+import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.MeasurementUtil;
 
 public class ValueFragment extends Fragment {
 
@@ -66,6 +62,8 @@ public class ValueFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        showSavedData();
+
         mValueSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -80,6 +78,12 @@ public class ValueFragment extends Fragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+    }
+
+    private void showSavedData() {
+        mObjectIcon.setImageResource(MeasurementUtil.getIcon(getActivity(), Storage.loadMeasurement()));
+        mObjectInfo.setText(MeasurementUtil.getTitle(Storage.loadMeasurement()));
+        mObjectName.setText(Storage.loadWunderbarName());
     }
 
     @OnClick(R.id.vf_button_done)
@@ -109,13 +113,13 @@ public class ValueFragment extends Fragment {
 
         switch (operator) {
             case OP_EQUALS:
-                mOperatorEquals.setBackgroundResource(R.color.red_background);
+                mOperatorEquals.setBackgroundResource(R.drawable.tab_active);
                 break;
             case OP_LESS:
-                mOperatorLess.setBackgroundResource(R.color.red_background);
+                mOperatorLess.setBackgroundResource(R.drawable.tab_active);
                 break;
             case OP_GREATER:
-                mOperatorGreater.setBackgroundResource(R.color.red_background);
+                mOperatorGreater.setBackgroundResource(R.drawable.tab_active);
                 break;
         }
     }

@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen;
+package io.relayr.tellmewhen.app;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -10,14 +10,13 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
+import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.WhenEvents;
 
 public class NameFragment extends Fragment {
@@ -39,16 +38,30 @@ public class NameFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(final View view, Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         mRuleName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                return (actionId == EditorInfo.IME_ACTION_DONE && isNameOk());
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    onDoneClicked();
+                    return true;
+                } else {
+                    return false;
+                }
             }
         });
+
+        toggleKeyboard(true);
         mRuleName.requestFocus();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        toggleKeyboard(false);
     }
 
     @OnClick(R.id.nf_button_done)
@@ -61,15 +74,21 @@ public class NameFragment extends Fragment {
         EventBus.getDefault().post(new WhenEvents.BackClicked());
     }
 
+    private void toggleKeyboard(boolean show) {
+        InputMethodManager imm = (InputMethodManager) mRuleName
+                .getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        if (show) imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        else imm.hideSoftInputFromWindow(mRuleName.getWindowToken(), 0);
+    }
+
     private boolean isNameOk() {
         if (mRuleName.getText().toString() == null || mRuleName.getText().toString().isEmpty()) {
             mRuleName.setError(getActivity().getString(R.string.nf_rule_name_empty));
             return false;
         }
 
-        InputMethodManager imm = (InputMethodManager) mRuleName
-                .getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mRuleName.getWindowToken(), 0);
+        toggleKeyboard(false);
 
         return true;
     }

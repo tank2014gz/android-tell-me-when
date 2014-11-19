@@ -6,27 +6,47 @@ import android.content.SharedPreferences;
 public class Storage {
 
     private static final String NAME = "Storage";
-    private static SharedPreferences mStorage = null;
-
-    private static final String WUNDERBAR_ID = "wunderbar.id";
     private static final String WUNDERBAR_NAME = "wunderbar.name";
     private static final String MEASUREMENT_NAME = "maesurement.name";
+    private static final String USER_ID = "user.id";
+
+    private static SharedPreferences sStorage = null;
 
     public static void init(Context applicationContext) {
         new Storage(applicationContext);
     }
 
     private Storage(Context context) {
-        mStorage = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
+        sStorage = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
     }
 
-    public static void setWunderbarName(String wunderbarName) {
-        SharedPreferences.Editor editor = mStorage.edit();
-        editor.putString(WUNDERBAR_NAME, wunderbarName);
+    public static void saveWunderbarName(String wunderbarName) {
+        save(WUNDERBAR_NAME, wunderbarName);
+    }
+
+    public static String loadWunderbarName() {
+        return sStorage.getString(WUNDERBAR_NAME, null);
+    }
+
+    public static void saveMeasurement(String measurement) {
+        save(MEASUREMENT_NAME, measurement);
+    }
+
+    public static String loadMeasurement() {
+        return sStorage.getString(MEASUREMENT_NAME, null);
+    }
+
+    public static void saveUserId(String id) {
+        save(USER_ID, id);
+    }
+
+    public static String loadUserId(){
+        return sStorage.getString(USER_ID, null);
+    }
+
+    private static void save(String key, String value) {
+        SharedPreferences.Editor editor = sStorage.edit();
+        editor.putString(key, value);
         editor.apply();
-    }
-
-    public static String getWunderbarName() {
-        return mStorage.getString(WUNDERBAR_NAME, null);
     }
 }
