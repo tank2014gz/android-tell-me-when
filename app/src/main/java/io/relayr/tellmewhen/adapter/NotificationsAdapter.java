@@ -14,12 +14,11 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.Notification;
-import io.relayr.tellmewhen.model.Rule;
 
 public class NotificationsAdapter extends ArrayAdapter<Notification> {
 
     public NotificationsAdapter(Context context, List<Notification> objects) {
-        super(context, R.layout.notification_object, objects);
+        super(context, R.layout.main_notification_object, objects);
     }
 
     @Override
@@ -29,7 +28,7 @@ public class NotificationsAdapter extends ArrayAdapter<Notification> {
             holder = (ViewHolder) view.getTag();
         } else {
              LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.notification_object, parent, false);
+            view = inflater.inflate(R.layout.main_notification_object, parent, false);
             holder = new ViewHolder(view);
             view.setTag(holder);
         }

@@ -10,7 +10,7 @@
         android:id="@+id/object_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/ma_tab_rules_text"
+        android:text="@string/ma_tab_rules"
         android:textColor="@android:color/white"
         android:gravity="center_vertical"
         android:textSize="@dimen/default_object_title_text_size"
@@ -18,12 +18,23 @@
         style="@style/BoldText" />
 
     <io.relayr.commons.widget.CustomTextView
-        android:id="@+id/object_info"
+        android:id="@+id/object_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/ma_tab_notifications_text"
+        android:text="@string/ma_tab_notification"
         android:textColor="@android:color/white"
         android:gravity="center_vertical"
         android:textSize="@dimen/default_object_subtitle_text_size"
         style="@style/NormalText"/>
+
+    <io.relayr.commons.widget.CustomTextView
+        android:id="@+id/object_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Current sensor value: 0.5"
+        android:textColor="@android:color/white"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/default_object_small_subtitle_text_size"
+        style="@style/NormalText"/>
 </LinearLayout>
+

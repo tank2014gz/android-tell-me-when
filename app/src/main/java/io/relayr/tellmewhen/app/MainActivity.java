@@ -44,7 +44,6 @@ public class MainActivity extends Activity implements LoginEventListener {
         super.onResume();
 
         checkWiFi();
-//        switchFragment(currentFragment);
 
         EventBus.getDefault().register(this);
     }
@@ -108,7 +107,8 @@ public class MainActivity extends Activity implements LoginEventListener {
     }
 
     public void onEvent(WhenEvents.BackClicked bc) {
-        switchToPrevious();
+//        switchToPrevious();
+        showFragment(RuleEditFragment.newInstance());
     }
 
     public void onEvent(WhenEvents.NewRule nre) {
@@ -147,25 +147,28 @@ public class MainActivity extends Activity implements LoginEventListener {
         Fragment fragment;
         switch (fragmentId) {
             case 0:
-                fragment = RulesFragment.newInstance();
+                fragment = MainFragment.newInstance();
                 break;
             case 1:
                 fragment = TransmitterFragment.newInstance();
                 break;
             case 2:
-                fragment = MeasurementFragment.newInstance();
+                fragment = SensorFragment.newInstance();
                 break;
             case 3:
-                fragment = ValueFragment.newInstance();
+                fragment = RuleValueFragment.newInstance();
                 break;
             case 4:
-                fragment = NameFragment.newInstance();
+                fragment = RuleNameFragment.newInstance();
                 break;
             default:
                 currentFragment = 0;
-                fragment = RulesFragment.newInstance();
+                fragment = MainFragment.newInstance();
         }
 
+        showFragment(fragment);
+    }
+    private void showFragment(Fragment fragment){
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 

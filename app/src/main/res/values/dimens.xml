@@ -4,7 +4,7 @@
     <dimen name="ma_tab_text_size">16sp</dimen>
     <dimen name="ma_tab_padding">25dp</dimen>
 
-    <dimen name="navigation_text_size">20sp</dimen>
+    <dimen name="navigation_text_size">18sp</dimen>
     <dimen name="navigation_button_text_size">16sp</dimen>
     <dimen name="navigation_title_padding">20dp</dimen>
     <dimen name="navigation_drawable_padding">10dp</dimen>
@@ -24,5 +24,6 @@
     <dimen name="button_done_padding">20dp</dimen>
     <dimen name="button_done_text_size">20sp</dimen>
     <dimen name="nf_edit_text_padding">20dp</dimen>
+    <dimen name="default_object_small_subtitle_text_size">15sp</dimen>
 
 </resources>

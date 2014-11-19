@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ import io.relayr.tellmewhen.model.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Subscriber;
 
-public class RulesFragment extends Fragment {
+public class MainFragment extends Fragment {
 
     private static final String ON_BOARD_APP_PACKAGE = "io.relayr.wunderbar";
 
@@ -47,6 +48,8 @@ public class RulesFragment extends Fragment {
     View mNavNewRule;
     @InjectView(R.id.rf_controls_clear)
     View mNavClear;
+    @InjectView(R.id.rf_controls_title)
+    TextView mNavTitle;
 
     private List<Rule> mRules = new ArrayList<Rule>();
     private List<Notification> mNotifications = new ArrayList<Notification>();
@@ -54,13 +57,13 @@ public class RulesFragment extends Fragment {
     private RulesAdapter mRulesAdapter;
     private NotificationsAdapter mNotificationsAdapter;
 
-    public static RulesFragment newInstance() {
-        return new RulesFragment();
+    public static MainFragment newInstance() {
+        return new MainFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.rules_fragment, container, false);
+        View view = inflater.inflate(R.layout.main_fragment, container, false);
 
         ButterKnife.inject(this, view);
 
@@ -103,7 +106,7 @@ public class RulesFragment extends Fragment {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View view = inflater.inflate(R.layout.warning_onboarding, null, false);
-        view.findViewById(R.id.warning_onboard_btn).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
@@ -118,7 +121,6 @@ public class RulesFragment extends Fragment {
 
         mWarningLayout.addView(view);
         mWarningLayout.setVisibility(View.VISIBLE);
-
         mListView.setVisibility(View.GONE);
         mNavClear.setVisibility(View.GONE);
         mNavNewRule.setVisibility(View.GONE);
@@ -136,7 +138,7 @@ public class RulesFragment extends Fragment {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View view = inflater.inflate(R.layout.warning_no_rules, null, false);
-        view.findViewById(R.id.warning_no_rules_btn).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 EventBus.getDefault().post(new WhenEvents.NewRule());
@@ -145,7 +147,6 @@ public class RulesFragment extends Fragment {
 
         mWarningLayout.addView(view);
         mWarningLayout.setVisibility(View.VISIBLE);
-
         mListView.setVisibility(View.GONE);
     }
 
@@ -191,12 +192,13 @@ public class RulesFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                EventBus.getDefault().post(new WhenEvents.BackClicked());
             }
         });
     }
 
     private void loadRules() {
-        mRules.add(new Rule());
+        mRules.add(new Rule("transmitter"));
     }
 
     private void showNotifications() {
@@ -211,6 +213,8 @@ public class RulesFragment extends Fragment {
     }
 
     private void toggleTabs(boolean isRules) {
+        mNavTitle.setText(getString(isRules ? R.string.ma_tab_rules : R.string.ma_tab_notification));
+
         mTabRules.setBackgroundResource(isRules ? R.drawable.tab_active : R.color.tab_inactive);
         mNavNewRule.setVisibility(isRules ? View.VISIBLE : View.GONE);
 

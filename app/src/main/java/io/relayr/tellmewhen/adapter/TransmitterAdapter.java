@@ -12,17 +12,13 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.Transmitter;
 
 public class TransmitterAdapter extends ArrayAdapter<Transmitter> {
 
-    private final Context context;
-
     public TransmitterAdapter(Context context, List<Transmitter> objects) {
-        super(context, R.layout.name_info_object, objects);
-
-        this.context = context;
+        super(context, R.layout.transmitter_object, objects);
     }
 
     @Override
@@ -32,13 +28,13 @@ public class TransmitterAdapter extends ArrayAdapter<Transmitter> {
             holder = (ViewHolder) view.getTag();
         } else {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.name_info_object, parent, false);
+            view = inflater.inflate(R.layout.transmitter_object, parent, false);
             holder = new ViewHolder(view);
             view.setTag(holder);
         }
 
-        holder.name.setText("Wunderbar");
-        holder.info.setText("info");
+        holder.name.setText("Relayr WunderBar");
+        holder.info.setText(getItem(position).getName());
 
         return view;
     }

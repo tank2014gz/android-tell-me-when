@@ -16,13 +16,10 @@ import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.MeasurementUtil;
+import io.relayr.tellmewhen.util.OperatorType;
+import io.relayr.tellmewhen.util.SensorUtil;
 
-public class ValueFragment extends Fragment {
-
-    private final int OP_EQUALS = 1;
-    private final int OP_LESS = 2;
-    private final int OP_GREATER = 3;
+public class RuleValueFragment extends Fragment {
 
     @InjectView(R.id.vf_object_icon)
     ImageView mObjectIcon;
@@ -43,17 +40,20 @@ public class ValueFragment extends Fragment {
     @InjectView(R.id.vf_rule_value_indicator)
     TextView mValueIndicator;
 
-    public static ValueFragment newInstance() {
-        return new ValueFragment();
+    public static RuleValueFragment newInstance() {
+        return new RuleValueFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.value_fragment, container, false);
+        View view = inflater.inflate(R.layout.rule_value_fragment, container, false);
 
         ButterKnife.inject(this, view);
 
-        changeOperator(OP_GREATER);
+        ((TextView)view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_value));
+        ((TextView)view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
+
+        changeOperator(OperatorType.EQUALS);
 
         return view;
     }
@@ -81,50 +81,50 @@ public class ValueFragment extends Fragment {
     }
 
     private void showSavedData() {
-        mObjectIcon.setImageResource(MeasurementUtil.getIcon(getActivity(), Storage.loadMeasurement()));
-        mObjectInfo.setText(MeasurementUtil.getTitle(Storage.loadMeasurement()));
-        mObjectName.setText(Storage.loadWunderbarName());
+        mObjectIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.getCurrentRule().getSensorType()));
+        mObjectInfo.setText(SensorUtil.getTitle(Storage.getCurrentRule().getSensorType()));
+        mObjectName.setText(Storage.getCurrentRule().getTransmitterName());
     }
 
-    @OnClick(R.id.vf_button_done)
+    @OnClick(R.id.button_done)
     public void onDoneClicked() {
         EventBus.getDefault().post(new WhenEvents.ValueFragDone());
     }
 
     @OnClick(R.id.vf_operator_equals)
     public void operatorEqualsClicked() {
-        changeOperator(OP_EQUALS);
+        changeOperator(OperatorType.EQUALS);
     }
 
     @OnClick(R.id.vf_operator_less)
     public void operatorLessClicked() {
-        changeOperator(OP_LESS);
+        changeOperator(OperatorType.LESS);
     }
 
     @OnClick(R.id.vf_operator_greater)
     public void operatorGreaterClicked() {
-        changeOperator(OP_GREATER);
+        changeOperator(OperatorType.GREATER);
     }
 
-    private void changeOperator(int operator) {
+    private void changeOperator(OperatorType operator) {
         mOperatorEquals.setBackgroundResource(android.R.color.transparent);
         mOperatorLess.setBackgroundResource(android.R.color.transparent);
         mOperatorGreater.setBackgroundResource(android.R.color.transparent);
 
         switch (operator) {
-            case OP_EQUALS:
+            case EQUALS:
                 mOperatorEquals.setBackgroundResource(R.drawable.tab_active);
                 break;
-            case OP_LESS:
+            case LESS:
                 mOperatorLess.setBackgroundResource(R.drawable.tab_active);
                 break;
-            case OP_GREATER:
+            case GREATER:
                 mOperatorGreater.setBackgroundResource(R.drawable.tab_active);
                 break;
         }
     }
 
-    @OnClick(R.id.vf_back_button)
+    @OnClick(R.id.navigation_back)
     public void onBackClicked() {
         EventBus.getDefault().post(new WhenEvents.BackClicked());
     }

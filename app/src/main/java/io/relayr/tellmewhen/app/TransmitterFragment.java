@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,16 +16,18 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
+import io.relayr.RelayrSdk;
+import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.TransmitterAdapter;
-import io.relayr.tellmewhen.model.Transmitter;
 import io.relayr.tellmewhen.model.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
+import rx.Subscriber;
 
 public class TransmitterFragment extends Fragment {
 
-    @InjectView(R.id.tf_list_view)
-    ListView listView;
+    @InjectView(R.id.list_view)
+    ListView mListView;
 
     private List<Transmitter> mTransmitters = new ArrayList<Transmitter>();
 
@@ -38,27 +41,42 @@ public class TransmitterFragment extends Fragment {
 
         ButterKnife.inject(this, view);
 
+        ((TextView)view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_select_transmitter));
+
         refreshTransmitters();
 
-        listView.setAdapter(new TransmitterAdapter(this.getActivity(), mTransmitters));
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setAdapter(new TransmitterAdapter(this.getActivity(), mTransmitters));
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Storage.saveWunderbarName(mTransmitters.get(position).getName());
+                Storage.createRule(mTransmitters.get(position));
                 EventBus.getDefault().post(new WhenEvents.WunderBarSelected());
             }
         });
+
         return view;
     }
 
-    @OnClick(R.id.tf_back_button)
+    @OnClick(R.id.navigation_back)
     public void onBackClicked() {
         EventBus.getDefault().post(new WhenEvents.BackClicked());
     }
 
     private void refreshTransmitters() {
-        mTransmitters.add(new Transmitter("Wunderbar 1"));
+        RelayrSdk.getRelayrApi().getTransmitters(Storage.loadUserId()).subscribe(new Subscriber<List<io.relayr.model.Transmitter>>() {
+            @Override
+            public void onCompleted() {
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+
+            @Override
+            public void onNext(List<Transmitter> transmitters) {
+                mTransmitters.clear();
+                mTransmitters.addAll(transmitters);
+            }
+        });
     }
-
-
 }

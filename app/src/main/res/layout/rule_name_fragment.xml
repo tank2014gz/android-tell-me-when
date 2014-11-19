@@ -1,0 +1,33 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <include layout="@layout/view_navigation" />
+
+    <EditText
+        android:id="@+id/nf_rule_name_et"
+        android:layout_marginTop="@dimen/default_object_height"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/nf_edit_text_padding"
+        android:layout_marginRight="@dimen/nf_edit_text_padding"
+        android:hint="@string/nf_rule_hint"
+        android:textSize="@dimen/default_object_title_text_size"
+        android:textColor="@color/background"
+        android:background="@android:color/white"
+        android:gravity="center"
+        android:padding="@dimen/nf_edit_text_padding"
+        android:drawableRight="@drawable/icon_edit_text"
+        android:textStyle="bold"
+        android:imeOptions="actionDone"
+        android:singleLine="true"
+        android:maxLength="20" />
+
+    <include
+        layout="@layout/view_button_green"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/button_done_padding"
+        android:layout_alignParentBottom="true" />
+</RelativeLayout>

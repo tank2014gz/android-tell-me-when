@@ -2,29 +2,30 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/default_object_height"
     android:orientation="vertical"
-    android:padding="@dimen/default_object_padding">
+    android:paddingLeft="@dimen/default_object_padding"
+    android:paddingRight="@dimen/default_object_padding"
+    android:gravity="center_vertical">
 
     <io.relayr.commons.widget.CustomTextView
+        android:id="@+id/object_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/warning_onboard_title"
+        android:text="@string/ma_tab_rules"
         android:textColor="@android:color/white"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:textSize="@dimen/default_object_title_text_size"
         android:textAllCaps="true"
-        android:padding="@dimen/default_object_padding"
+        android:singleLine="true"
         style="@style/BoldText" />
 
     <io.relayr.commons.widget.CustomTextView
+        android:id="@+id/object_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/warning_onboard_text_top"
+        android:text="@string/ma_tab_notification"
         android:textColor="@android:color/white"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:textSize="@dimen/default_object_subtitle_text_size"
-        android:padding="@dimen/default_object_padding"
-        style="@style/NormalText" />
-
-    <include layout="@layout/view_button_green" />
-
+        android:singleLine="true"
+        style="@style/NormalText"/>
 </LinearLayout>

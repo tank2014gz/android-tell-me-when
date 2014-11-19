@@ -3,13 +3,13 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <include layout="@layout/view_navigation"/>
+    <include layout="@layout/view_navigation" />
 
     <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/navigation_height"
-        android:divider="@drawable/divider"/>
+        android:divider="@drawable/divider" />
 
 </RelativeLayout>

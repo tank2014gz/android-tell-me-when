@@ -2,7 +2,7 @@
 <resources>
 
     <color name="background">#00486D</color>
-    <color name="navigation_background">#33000000</color>
+    <color name="navigation_background">#66000000</color>
 
     <color name="red_background">#EF4136</color>
 
@@ -12,7 +12,7 @@
 
     <color name="button_gray_background">#33000000</color>
     <color name="button_pink_background">#FF4071</color>
-    <color name="button_green_background">#A0C12D</color>
+    <color name="button_green_background">#769e00</color>
 
     <color name="divider_top_color">#73000000</color>
     <color name="divider_bottom_color">#1AFFFFFF</color>

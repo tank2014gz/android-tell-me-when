@@ -5,18 +5,18 @@
     android:padding="@dimen/default_object_padding">
 
     <ImageView
-        android:id="@+id/measurement_object_icon"
+        android:id="@+id/sensor_object_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:src="@drawable/ic_action_next_item" />
 
     <io.relayr.commons.widget.CustomTextView
-        android:id="@+id/measurement_object_name"
+        android:id="@+id/sensor_object_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:text="@string/ma_tab_notifications_text"
+        android:text="@string/ma_tab_notification"
         android:textColor="@android:color/white"
         android:textSize="@dimen/default_object_title_text_size"
         android:layout_gravity="center_vertical"

@@ -7,6 +7,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -19,20 +20,25 @@ import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.WhenEvents;
 
-public class NameFragment extends Fragment {
+public class RuleNameFragment extends Fragment {
 
     @InjectView(R.id.nf_rule_name_et)
     EditText mRuleName;
 
-    public static NameFragment newInstance() {
-        return new NameFragment();
+    public static RuleNameFragment newInstance() {
+        return new RuleNameFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.name_fragment, container, false);
+        View view = inflater.inflate(R.layout.rule_name_fragment, container, false);
 
         ButterKnife.inject(this, view);
+
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+        ((TextView)view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_rule_name));
+        ((TextView)view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 
         return view;
     }
@@ -64,12 +70,12 @@ public class NameFragment extends Fragment {
         toggleKeyboard(false);
     }
 
-    @OnClick(R.id.nf_button_done)
+    @OnClick(R.id.button_done)
     public void onDoneClicked() {
         if (isNameOk()) EventBus.getDefault().post(new WhenEvents.NameFragDone());
     }
 
-    @OnClick(R.id.nf_back_button)
+    @OnClick(R.id.navigation_back)
     public void onBackClicked() {
         EventBus.getDefault().post(new WhenEvents.BackClicked());
     }

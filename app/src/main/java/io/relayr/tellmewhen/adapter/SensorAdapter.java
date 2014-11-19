@@ -11,12 +11,13 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.util.MeasurementUtil;
+import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.util.SensorUtil;
 
-public class MeasurementAdapter extends ArrayAdapter<String> {
+public class SensorAdapter extends ArrayAdapter<SensorType> {
 
-    public MeasurementAdapter(Context context) {
-        super(context, R.layout.measurement_object, MeasurementUtil.getMeasurementList());
+    public SensorAdapter(Context context) {
+        super(context, R.layout.sensor_object, SensorUtil.getSensors());
     }
 
     @Override
@@ -25,22 +26,24 @@ public class MeasurementAdapter extends ArrayAdapter<String> {
         if (view != null) {
             holder = (ViewHolder) view.getTag();
         } else {
-            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.measurement_object, parent, false);
+            LayoutInflater inflater = (LayoutInflater) getContext()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            view = inflater.inflate(R.layout.sensor_object, parent, false);
             holder = new ViewHolder(view);
             view.setTag(holder);
         }
 
-        holder.icon.setImageResource(MeasurementUtil.getIcon(getContext(), getItem(position)));
-        holder.info.setText(MeasurementUtil.getTitle(getItem(position)));
+        holder.icon.setImageResource(SensorUtil.getIcon(getContext(), getItem(position)));
+        holder.info.setText(SensorUtil.getTitle(getItem(position)));
 
         return view;
     }
 
     static class ViewHolder {
-        @InjectView(R.id.measurement_object_icon)
+        @InjectView(R.id.sensor_object_icon)
         ImageView icon;
-        @InjectView(R.id.measurement_object_name)
+        @InjectView(R.id.sensor_object_name)
         TextView info;
 
         public ViewHolder(View view) {

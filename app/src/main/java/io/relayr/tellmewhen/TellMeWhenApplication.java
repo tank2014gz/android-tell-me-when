@@ -3,7 +3,7 @@ package io.relayr.tellmewhen;
 import android.app.Application;
 
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.MeasurementUtil;
+import io.relayr.tellmewhen.util.SensorUtil;
 
 public class TellMeWhenApplication extends Application {
 
@@ -14,6 +14,6 @@ public class TellMeWhenApplication extends Application {
         RelayrSdkInitializer.initSdk(this);
 
         Storage.init(getApplicationContext());
-//        MeasurementUtil.init(getApplicationContext());
+        SensorUtil.init(getApplicationContext());
     }
 }

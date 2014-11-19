@@ -35,15 +35,6 @@
         android:padding="@dimen/default_object_padding"
         style="@style/NormalText" />
 
-    <io.relayr.commons.widget.CustomTextView
-        android:id="@+id/warning_onboard_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_green"
-        android:layout_margin="@dimen/button_done_padding"
-        android:text="@string/warning_onboard_btn_text"
-        android:padding="@dimen/button_done_padding"
-        android:textSize="@dimen/button_done_text_size"
-        android:gravity="center_horizontal"
-        style="@style/BoldText" />
+    <include layout="@layout/view_button_green" />
+
 </LinearLayout>
