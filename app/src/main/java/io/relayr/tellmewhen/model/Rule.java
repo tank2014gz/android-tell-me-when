@@ -8,11 +8,13 @@ public class Rule {
     private boolean isNotifying;
 
     private String name;
+    private String transmitterId;
     private String transmitterType;
     private String transmitterName;
     private SensorType sensorType;
     private OperatorType operatorType;
-    private float value;
+    private int value;
+    private String sensorId;
 
     public Rule(String transmitterName) {
         this.transmitterName = transmitterName;
@@ -68,11 +70,27 @@ public class Rule {
         this.operatorType = operatorType;
     }
 
-    public float getValue() {
+    public int getValue() {
         return value;
     }
 
-    public void setValue(float value) {
+    public void setValue(int value) {
         this.value = value;
+    }
+
+    public void setTransmitterId(String transmitterId) {
+        this.transmitterId = transmitterId;
+    }
+
+    public String getTransmitterId() {
+        return transmitterId;
+    }
+
+    public void setSensorId(String sensorId) {
+        this.sensorId = sensorId;
+    }
+
+    public String getSensorId() {
+        return sensorId;
     }
 }

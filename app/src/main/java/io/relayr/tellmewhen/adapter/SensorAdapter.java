@@ -41,10 +41,8 @@ public class SensorAdapter extends ArrayAdapter<SensorType> {
     }
 
     static class ViewHolder {
-        @InjectView(R.id.sensor_object_icon)
-        ImageView icon;
-        @InjectView(R.id.sensor_object_name)
-        TextView info;
+        @InjectView(R.id.sensor_object_icon) ImageView icon;
+        @InjectView(R.id.sensor_object_name) TextView info;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

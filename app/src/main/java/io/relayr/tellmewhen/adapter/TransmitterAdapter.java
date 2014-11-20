@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.List;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.model.Transmitter;
@@ -17,8 +15,8 @@ import io.relayr.tellmewhen.R;
 
 public class TransmitterAdapter extends ArrayAdapter<Transmitter> {
 
-    public TransmitterAdapter(Context context, List<Transmitter> objects) {
-        super(context, R.layout.transmitter_object, objects);
+    public TransmitterAdapter(Context context) {
+        super(context, R.layout.transmitter_object);
     }
 
     @Override
@@ -40,10 +38,8 @@ public class TransmitterAdapter extends ArrayAdapter<Transmitter> {
     }
 
     static class ViewHolder {
-        @InjectView(R.id.object_name)
-        TextView name;
-        @InjectView(R.id.object_info)
-        TextView info;
+        @InjectView(R.id.object_name) TextView name;
+        @InjectView(R.id.object_info) TextView info;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.List;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
@@ -17,8 +15,8 @@ import io.relayr.tellmewhen.model.Notification;
 
 public class NotificationsAdapter extends ArrayAdapter<Notification> {
 
-    public NotificationsAdapter(Context context, List<Notification> objects) {
-        super(context, R.layout.main_notification_object, objects);
+    public NotificationsAdapter(Context context) {
+        super(context, R.layout.main_notification_object);
     }
 
     @Override
@@ -40,14 +38,10 @@ public class NotificationsAdapter extends ArrayAdapter<Notification> {
     }
 
     static class ViewHolder {
-        @InjectView(R.id.notification_object_name)
-        TextView name;
-        @InjectView(R.id.notification_object_info)
-        TextView info;
-        @InjectView(R.id.notification_object_date)
-        TextView date;
-        @InjectView(R.id.notification_object_time)
-        TextView time;
+        @InjectView(R.id.notification_object_name) TextView name;
+        @InjectView(R.id.notification_object_info) TextView info;
+        @InjectView(R.id.notification_object_date) TextView date;
+        @InjectView(R.id.notification_object_time) TextView time;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

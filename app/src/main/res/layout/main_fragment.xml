@@ -2,105 +2,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
     tools:context=".MainActivity">
 
-    <RelativeLayout
-        android:id="@+id/ma_controls"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/navigation_height"
-        android:orientation="horizontal"
-        android:background="@color/navigation_background"
-        android:layout_alignParentTop="true">
-
-        <io.relayr.commons.widget.CustomTextView
-            android:id="@+id/rf_controls_logout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rf_logout"
-            android:background="@drawable/navigation_button_gray"
-            android:textSize="@dimen/navigation_button_text_size"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:padding="@dimen/navigation_drawable_padding"
-            android:layout_marginLeft="@dimen/navigation_drawable_padding"
-            android:gravity="center"
-            style="@style/BoldText" />
-
-        <io.relayr.commons.widget.CustomTextView
-            android:id="@+id/rf_controls_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ma_tab_rules"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/navigation_text_size"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:padding="@dimen/navigation_title_padding"
-            android:textAllCaps="true"
-            style="@style/BoldText" />
-
-        <ImageView
-            android:id="@+id/rf_controls_new_rule"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/icon_new"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:paddingRight="@dimen/navigation_title_padding"
-            android:gravity="center" />
-
-        <io.relayr.commons.widget.CustomTextView
-            android:id="@+id/rf_controls_clear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rf_clear"
-            android:background="@drawable/navigation_button_pink"
-            android:textSize="@dimen/navigation_button_text_size"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:padding="@dimen/navigation_drawable_padding"
-            android:layout_marginRight="@dimen/navigation_drawable_padding"
-            android:gravity="center"
-            android:visibility="gone"
-            style="@style/BoldText" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_alignParentBottom="true"
-            android:background="@drawable/divider" />
-    </RelativeLayout>
-
     <ListView
-        android:id="@+id/rf_list_view"
+        android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/ma_controls"
-        android:layout_above="@+id/ma_tabs"
-        android:divider="@drawable/divider" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/default_object_height"
+        android:divider="@drawable/divider"
+        android:footerDividersEnabled="true"
+        android:animateLayoutChanges="true" />
 
     <LinearLayout
-        android:id="@+id/rf_warning_layout"
+        android:id="@+id/warning_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/ma_controls"
         android:orientation="vertical"
-        android:visibility="gone"/>
+        android:animateLayoutChanges="true"
+        android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/ma_tabs"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_object_height"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true">
 
         <io.relayr.commons.widget.CustomTextView
-            android:id="@+id/rf_tab_rules"
+            android:id="@+id/tab_rules"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/ma_tab_rules"
+            android:text="@string/title_tab_rules"
             android:textColor="@android:color/white"
             android:gravity="center"
             android:textSize="@dimen/ma_tab_text_size"
@@ -109,11 +43,11 @@
             style="@style/NormalText" />
 
         <io.relayr.commons.widget.CustomTextView
-            android:id="@+id/rf_tab_notifications"
+            android:id="@+id/tab_notifications"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/ma_tab_notification"
+            android:text="@string/title_tab_notifications"
             android:textColor="@android:color/white"
             android:gravity="center"
             android:textSize="@dimen/ma_tab_text_size"

@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.List;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
@@ -17,8 +15,8 @@ import io.relayr.tellmewhen.model.Rule;
 
 public class RulesAdapter extends ArrayAdapter<Rule> {
 
-    public RulesAdapter(Context context, List<Rule> objects) {
-        super(context, R.layout.main_rule_object, objects);
+    public RulesAdapter(Context context) {
+        super(context, R.layout.main_rule_object);
     }
 
     @Override
@@ -33,21 +31,21 @@ public class RulesAdapter extends ArrayAdapter<Rule> {
             view.setTag(holder);
         }
 
-        Rule rule = getItem(position);
-        holder.name.setText(rule.getName());
-        holder.value.setText(rule.getSensorType().getName() + " " +
-                rule.getOperatorType().getName() + " " + rule.getValue());
+        holder.name.setText(getItem(position).getName());
+        holder.value.setText(buildRuleValue(getItem(position)));
 
         return view;
     }
 
+    private String buildRuleValue(Rule rule){
+       return rule.getSensorType().getName() + " " +
+                rule.getOperatorType().getName() + " " + rule.getValue();
+    }
+
     static class ViewHolder {
-        @InjectView(R.id.object_name)
-        TextView name;
-        @InjectView(R.id.object_value)
-        TextView value;
-        @InjectView(R.id.object_info)
-        TextView info;
+        @InjectView(R.id.object_name) TextView name;
+        @InjectView(R.id.object_value) TextView value;
+        @InjectView(R.id.object_info) TextView info;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

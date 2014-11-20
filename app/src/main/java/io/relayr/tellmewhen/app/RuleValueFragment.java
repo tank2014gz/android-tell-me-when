@@ -14,33 +14,25 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.util.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.OperatorType;
 import io.relayr.tellmewhen.util.SensorUtil;
+import io.relayr.tellmewhen.util.WhenEvents;
 
 public class RuleValueFragment extends Fragment {
 
-    @InjectView(R.id.vf_object_icon)
-    ImageView mObjectIcon;
-    @InjectView(R.id.vf_object_name)
-    TextView mObjectName;
-    @InjectView(R.id.vf_object_info)
-    TextView mObjectInfo;
+    @InjectView(R.id.vf_object_icon) ImageView mObjectIcon;
+    @InjectView(R.id.vf_object_name) TextView mObjectName;
+    @InjectView(R.id.vf_object_info) TextView mObjectInfo;
 
-    @InjectView(R.id.vf_operator_equals)
-    TextView mOperatorEquals;
-    @InjectView(R.id.vf_operator_less)
-    TextView mOperatorLess;
-    @InjectView(R.id.vf_operator_greater)
-    TextView mOperatorGreater;
+    @InjectView(R.id.vf_operator_equals) TextView mOperatorEquals;
+    @InjectView(R.id.vf_operator_less) TextView mOperatorLess;
+    @InjectView(R.id.vf_operator_greater) TextView mOperatorGreater;
 
-    @InjectView(R.id.vf_rule_value_seek)
-    SeekBar mValueSeek;
-    @InjectView(R.id.vf_rule_value_indicator)
-    TextView mValueIndicator;
+    @InjectView(R.id.vf_rule_value_seek) SeekBar mValueSeek;
+    @InjectView(R.id.vf_rule_value_indicator) TextView mValueIndicator;
 
-    private OperatorType currentOperator;
+    private OperatorType mCurrentOperator;
 
     public static RuleValueFragment newInstance() {
         return new RuleValueFragment();
@@ -52,10 +44,9 @@ public class RuleValueFragment extends Fragment {
 
         ButterKnife.inject(this, view);
 
-        ((TextView) view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_value));
         ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 
-        changeOperator(OperatorType.EQUALS);
+        toggleOperator(OperatorType.EQUALS);
 
         return view;
     }
@@ -82,37 +73,49 @@ public class RuleValueFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
+    }
+
     private void showSavedData() {
         mObjectIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.loadRuleSensor()));
         mObjectInfo.setText(SensorUtil.getTitle(Storage.loadRuleSensor()));
         mObjectName.setText(Storage.loadRuleTransName());
+
+        if (Storage.isRuleEditing()) {
+            mValueSeek.setProgress(Storage.loadRuleValue());
+            mValueIndicator.setText("" + Storage.loadRuleValue());
+            toggleOperator(Storage.loadRuleOperator());
+        }
     }
 
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
         Storage.saveRuleValue(mValueSeek.getProgress());
-        Storage.saveRuleOperator(currentOperator);
+        Storage.saveRuleOperator(mCurrentOperator);
 
         EventBus.getDefault().post(new WhenEvents.DoneEvent());
     }
 
     @OnClick(R.id.vf_operator_equals)
     public void operatorEqualsClicked() {
-        changeOperator(OperatorType.EQUALS);
+        toggleOperator(OperatorType.EQUALS);
     }
 
     @OnClick(R.id.vf_operator_less)
     public void operatorLessClicked() {
-        changeOperator(OperatorType.LESS);
+        toggleOperator(OperatorType.LESS);
     }
 
     @OnClick(R.id.vf_operator_greater)
     public void operatorGreaterClicked() {
-        changeOperator(OperatorType.GREATER);
+        toggleOperator(OperatorType.GREATER);
     }
 
-    private void changeOperator(OperatorType operator) {
-        currentOperator = operator;
+    private void toggleOperator(OperatorType operator) {
+        mCurrentOperator = operator;
 
         mOperatorEquals.setBackgroundResource(android.R.color.transparent);
         mOperatorLess.setBackgroundResource(android.R.color.transparent);
@@ -130,10 +133,4 @@ public class RuleValueFragment extends Fragment {
                 break;
         }
     }
-
-    @OnClick(R.id.navigation_back)
-    public void onBackClicked() {
-        EventBus.getDefault().post(new WhenEvents.BackEvent());
-    }
-
 }

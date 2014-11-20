@@ -9,30 +9,41 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import butterknife.OnItemClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.RelayrSdk;
 import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.TransmitterAdapter;
-import io.relayr.tellmewhen.util.WhenEvents;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.WhenEvents;
 import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.Subscriptions;
 
 public class TransmitterFragment extends Fragment {
 
-    @InjectView(R.id.list_view)
-    ListView mListView;
+    @InjectView(R.id.list_view) ListView mListView;
 
-    private List<Transmitter> mTransmitters = new ArrayList<Transmitter>();
+    private static TransmitterAdapter mTransmitterAdapter;
+
+    private Subscription mTransmitterSubscription = Subscriptions.empty();
 
     public static TransmitterFragment newInstance() {
         return new TransmitterFragment();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        loadTransmitters();
     }
 
     @Override
@@ -41,45 +52,54 @@ public class TransmitterFragment extends Fragment {
 
         ButterKnife.inject(this, view);
 
-        ((TextView)view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_select_transmitter));
-
-        refreshTransmitters();
-
-        mListView.setAdapter(new TransmitterAdapter(this.getActivity(), mTransmitters));
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Transmitter transmitter = mTransmitters.get(position);
-                Storage.saveRuleTransName(transmitter.getName());
-                Storage.saveRuleTransType("Relayr WunderBar");
-
-                EventBus.getDefault().post(new WhenEvents.DoneEvent());
-            }
-        });
+        mTransmitterAdapter = new TransmitterAdapter(this.getActivity());
+        mListView.setAdapter(mTransmitterAdapter);
 
         return view;
     }
 
-    @OnClick(R.id.navigation_back)
-    public void onBackClicked() {
-        EventBus.getDefault().post(new WhenEvents.BackEvent());
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
     }
 
-    private void refreshTransmitters() {
-        RelayrSdk.getRelayrApi().getTransmitters(Storage.loadUserId()).subscribe(new Subscriber<List<io.relayr.model.Transmitter>>() {
-            @Override
-            public void onCompleted() {
-            }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
 
-            @Override
-            public void onError(Throwable e) {
-            }
+        if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
+    }
 
-            @Override
-            public void onNext(List<Transmitter> transmitters) {
-                mTransmitters.clear();
-                mTransmitters.addAll(transmitters);
-            }
-        });
+    @OnItemClick(R.id.list_view)
+    public void onItemClick(int position) {
+        Storage.saveRuleTransId(mTransmitterAdapter.getItem(position).id);
+        Storage.saveRuleTransName(mTransmitterAdapter.getItem(position).getName());
+        Storage.saveRuleTransType("Relayr WunderBar");
+
+        EventBus.getDefault().post(new WhenEvents.DoneEvent());
+    }
+
+    private void loadTransmitters() {
+        mTransmitterSubscription = RelayrSdk.getRelayrApi()
+                .getTransmitters(Storage.loadUserId())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Transmitter>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(List<Transmitter> transmitters) {
+                        mTransmitterAdapter.clear();
+                        mTransmitterAdapter.addAll(transmitters);
+                        mTransmitterAdapter.notifyDataSetChanged();
+                    }
+                });
     }
 }

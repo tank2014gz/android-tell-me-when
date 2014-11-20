@@ -1,20 +1,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background">
-
-    <include layout="@layout/view_navigation" />
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="@dimen/navigation_height">
+        android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/default_object_height"
-            android:padding="@dimen/default_object_padding">
+            android:paddingLeft="@dimen/default_object_padding"
+            android:paddingRight="@dimen/default_object_padding">
 
             <ImageView
                 android:id="@+id/vf_object_icon"
@@ -24,30 +21,33 @@
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_action_next_item" />
 
-            <io.relayr.commons.widget.CustomTextView
-                android:id="@+id/vf_object_name"
-                android:layout_toRightOf="@+id/vf_object_icon"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/ma_tab_rules"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/default_object_title_text_size"
-                android:textAllCaps="true"
-                android:singleLine="true"
-                style="@style/BoldText" />
+                android:layout_toRightOf="@id/vf_object_icon"
+                android:layout_centerVertical="true"
+                android:orientation="vertical">
 
-            <io.relayr.commons.widget.CustomTextView
-                android:id="@+id/vf_object_info"
-                android:layout_toRightOf="@+id/vf_object_icon"
-                android:layout_below="@id/vf_object_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/ma_tab_notification"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/default_object_subtitle_text_size" />
+                <io.relayr.commons.widget.CustomTextView
+                    android:id="@+id/vf_object_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/default_object_title_text_size"
+                    android:textAllCaps="true"
+                    android:singleLine="true"
+                    style="@style/BoldText" />
+
+                <io.relayr.commons.widget.CustomTextView
+                    android:id="@+id/vf_object_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/default_object_subtitle_text_size" />
+            </LinearLayout>
         </RelativeLayout>
 
-        <include layout="@layout/view_divider"/>
+        <include layout="@layout/view_divider" />
 
         <LinearLayout
             android:id="@+id/vf_rule_operator"
@@ -61,7 +61,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="@string/vf_equals_operator"
-                android:textSize="@dimen/vf_operator_size"
+                android:textSize="@dimen/operator_size_large"
                 android:gravity="center" />
 
             <TextView
@@ -70,7 +70,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="@string/vf_less_operator"
-                android:textSize="@dimen/vf_operator_size"
+                android:textSize="@dimen/operator_size_large"
                 android:gravity="center" />
 
             <TextView
@@ -79,23 +79,24 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="@string/vf_greater_operator"
-                android:textSize="@dimen/vf_operator_size"
+                android:textSize="@dimen/operator_size_large"
                 android:gravity="center" />
         </LinearLayout>
 
-        <include layout="@layout/view_divider"/>
+        <include layout="@layout/view_divider" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_object_padding"
-            android:orientation="horizontal">
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/vf_rule_value_indicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/vf_operator_size"
+                android:textSize="@dimen/operator_size_large"
                 android:layout_centerHorizontal="true"
                 android:gravity="center" />
 
@@ -117,6 +118,6 @@
         layout="@layout/view_button_green"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/button_done_padding"
+        android:layout_margin="@dimen/button_done_margin"
         android:layout_alignParentBottom="true" />
 </RelativeLayout>

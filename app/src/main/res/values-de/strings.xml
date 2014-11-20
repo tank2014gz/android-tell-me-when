@@ -12,6 +12,9 @@
     <string name="connect">Connect</string>
     <string name="cancel">Cancel</string>
 
+    <string name="title_tab_rules">rules</string>
+    <string name="title_tab_notifications">notifications</string>
+
     <string name="warning_onboard_title">onboard wunderbar</string>
     <string name="warning_onboard_text_top">Looks like you haven\'t registered a WunderBar to your account yet.</string>
     <string name="warning_onboard_text_bottom">Please do so, with the relayr Wunderbar onboarding app.</string>
@@ -38,8 +41,6 @@
     <string name="measurement_light">light</string>
     <string name="measurement_acceleration">acceleration</string>
 
-    <string name="title_tab_rules">rules</string>
-    <string name="title_tab_notifications">notifications</string>
     <string name="title_rule_name">name rule</string>
     <string name="title_select_transmitter">select transmitter</string>
     <string name="title_select_sensor">select sensor</string>

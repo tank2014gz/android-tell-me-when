@@ -18,13 +18,13 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.util.WhenEvents;
+import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.WhenEvents;
 
 public class RuleNameFragment extends Fragment {
 
-    @InjectView(R.id.nf_rule_name_et)
-    EditText mRuleName;
+    @InjectView(R.id.nf_rule_name_et) EditText mRuleName;
 
     public static RuleNameFragment newInstance() {
         return new RuleNameFragment();
@@ -38,7 +38,6 @@ public class RuleNameFragment extends Fragment {
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        ((TextView) view.findViewById(R.id.navigation_title)).setText(getString(R.string.title_rule_name));
         ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 
         return view;
@@ -62,6 +61,14 @@ public class RuleNameFragment extends Fragment {
 
         toggleKeyboard(true);
         mRuleName.requestFocus();
+
+        if (Storage.isRuleEditing()) mRuleName.setText(Storage.loadRuleName());
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
     }
 
     @Override
@@ -76,13 +83,10 @@ public class RuleNameFragment extends Fragment {
         if (isNameOk()) {
             Storage.saveRuleName(mRuleName.getText().toString());
 
+            RuleService.saveRule();
+
             EventBus.getDefault().post(new WhenEvents.DoneCreateEvent());
         }
-    }
-
-    @OnClick(R.id.navigation_back)
-    public void onBackClicked() {
-        EventBus.getDefault().post(new WhenEvents.BackEvent());
     }
 
     private void toggleKeyboard(boolean show) {

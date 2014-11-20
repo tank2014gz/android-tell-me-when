@@ -11,16 +11,20 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
 import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.util.WhenEvents;
-import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.WhenEvents;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -29,9 +33,18 @@ import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends Activity implements LoginEventListener {
 
-    private boolean isEditing = false;
-    private int fragmentPos = 0;
+    public enum FragNames {
+        MAIN, TRANS, SENSOR, RULE_VALUE, RULE_NAME, RULE_EDIT
+    }
 
+    @InjectView(R.id.navigation_title) TextView mNavigationTitle;
+    @InjectView(R.id.navigation_back) View mNavigationBack;
+    @InjectView(R.id.navigation_logout) TextView mNavigationLogOut;
+    @InjectView(R.id.navigation_new_rule) View mNavigationNewRule;
+    @InjectView(R.id.navigation_clear_notif) View mNavigationClear;
+
+    private int fragmentPos = 0;
+    private Fragment mCurrentFragment;
     private AlertDialog mNetworkDialog;
     private Subscription mUserInfoSubscription = Subscriptions.empty();
 
@@ -40,6 +53,8 @@ public class MainActivity extends Activity implements LoginEventListener {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        ButterKnife.inject(this);
     }
 
     @Override
@@ -64,9 +79,7 @@ public class MainActivity extends Activity implements LoginEventListener {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (!mUserInfoSubscription.isUnsubscribed()) {
-            mUserInfoSubscription.unsubscribe();
-        }
+        if (!mUserInfoSubscription.isUnsubscribed()) mUserInfoSubscription.unsubscribe();
     }
 
     @Override
@@ -80,89 +93,111 @@ public class MainActivity extends Activity implements LoginEventListener {
         Toast.makeText(this, R.string.unsuccessfully_logged_in, Toast.LENGTH_SHORT).show();
     }
 
-    private void loadUserInfo() {
-        mUserInfoSubscription = RelayrSdk.getRelayrApi()
-                .getUserInfo()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<User>() {
-                    @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Toast.makeText(MainActivity.this, R.string.err_loading_user_data,
-                                Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onNext(User user) {
-                        Storage.saveUserId(user.id);
-                        switchFragment(fragmentPos);
-                    }
-                });
-    }
-
     @Override
     public void onBackPressed() {
-        switchToPrevious();
+        onBackClicked();
     }
 
-    public void onEvent(WhenEvents.BackEvent bc) {
-        switchToPrevious();
+    @OnClick(R.id.navigation_logout)
+    public void logOutClicked() {
+        if (RelayrSdk.isUserLoggedIn()) RelayrSdk.logOut();
+    }
+
+    @OnClick(R.id.navigation_back)
+    public void onBackClicked() {
+        if (Storage.isRuleEditing()) {
+            if (mCurrentFragment instanceof RuleEditFragment) {
+                onEvent(new WhenEvents.DoneEditEvent());
+            } else {
+                switchFragment(FragNames.RULE_EDIT);
+            }
+        } else {
+            switchToPrevious();
+        }
     }
 
     public void onEvent(WhenEvents.DoneEvent nre) {
-        switchToNext();
+        if (Storage.isRuleEditing()) switchFragment(FragNames.RULE_EDIT);
+        else switchFragment(FragNames.values()[++fragmentPos]);
     }
 
     public void onEvent(WhenEvents.DoneCreateEvent nfd) {
-        RuleService.saveRule();
-        switchToNext();
+        if (Storage.isRuleEditing()) switchFragment(FragNames.RULE_EDIT);
+        else switchFragment(FragNames.MAIN);
     }
 
-    private void switchToNext() {
-        switchFragment(++fragmentPos);
+    public void onEvent(WhenEvents.StartEditEvent dee) {
+        Storage.setRuleEditing(true);
+        Storage.prepareRuleForEdit(dee.getRule());
+        switchFragment(FragNames.RULE_EDIT);
+    }
+
+    public void onEvent(WhenEvents.EditEvent ee) {
+        switchFragment(ee.getFrag());
+    }
+
+    public void onEvent(WhenEvents.DoneEditEvent dee) {
+        Storage.setRuleEditing(false);
+        switchFragment(FragNames.MAIN);
     }
 
     private void switchToPrevious() {
         if (--fragmentPos >= 0) {
-            switchFragment(fragmentPos);
+            switchFragment(FragNames.values()[fragmentPos]);
         } else {
             super.onBackPressed();
         }
     }
 
-    private void switchFragment(int fragPos) {
-        Fragment fragment;
-        switch (fragPos) {
-            case 0:
-                fragment = MainFragment.newInstance();
+    private void switchFragment(FragNames name) {
+        switch (name) {
+            case MAIN:
+                fragmentPos = 0;
+                mCurrentFragment = MainFragment.newInstance();
+                mNavigationTitle.setText(getString(R.string.title_tab_rules));
                 break;
-            case 1:
-                fragment = TransmitterFragment.newInstance();
+            case TRANS:
+                mCurrentFragment = TransmitterFragment.newInstance();
+                mNavigationTitle.setText(getString(R.string.title_select_transmitter));
                 break;
-            case 2:
-                fragment = SensorFragment.newInstance();
+            case SENSOR:
+                mCurrentFragment = SensorFragment.newInstance();
+                mNavigationTitle.setText(getString(R.string.title_select_sensor));
                 break;
-            case 3:
-                fragment = RuleValueFragment.newInstance();
+            case RULE_VALUE:
+                mCurrentFragment = RuleValueFragment.newInstance();
+                mNavigationTitle.setText(getString(R.string.title_rule_value));
                 break;
-            case 4:
-                fragment = RuleNameFragment.newInstance();
+            case RULE_NAME:
+                mCurrentFragment = RuleNameFragment.newInstance();
+                mNavigationTitle.setText(getString(R.string.title_rule_name));
+                break;
+            case RULE_EDIT:
+                mCurrentFragment = RuleEditFragment.newInstance();
+                mNavigationTitle.setText(getString(R.string.title_rule_edit));
                 break;
             default:
                 fragmentPos = 0;
-                fragment = MainFragment.newInstance();
+                mCurrentFragment = MainFragment.newInstance();
+                mNavigationTitle.setText(getString(R.string.title_tab_rules));
         }
 
-        showFragment(fragment);
+        showFragment(mCurrentFragment);
+        toggleNavigationButtons(name.equals(FragNames.MAIN));
+    }
+
+    private void toggleNavigationButtons(boolean main) {
+        mNavigationClear.setVisibility(main ? View.VISIBLE : View.GONE);
+        mNavigationNewRule.setVisibility(main ? View.VISIBLE : View.GONE);
+        mNavigationLogOut.setVisibility(main ? View.VISIBLE : View.GONE);
+
+        mNavigationBack.setVisibility(main ? View.GONE : View.VISIBLE);
     }
 
     private void showFragment(Fragment fragment) {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.setCustomAnimations(R.anim.pop_enter, 0);
 
         fragmentTransaction.replace(R.id.container, fragment);
         fragmentTransaction.commit();
@@ -199,5 +234,29 @@ public class MainActivity extends Activity implements LoginEventListener {
                         finish();
                     }
                 }).show();
+    }
+
+    private void loadUserInfo() {
+        mUserInfoSubscription = RelayrSdk.getRelayrApi()
+                .getUserInfo()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<User>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(MainActivity.this, R.string.err_loading_user_data,
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNext(User user) {
+                        Storage.saveUserId(user.id);
+                        switchFragment(FragNames.MAIN);
+                    }
+                });
     }
 }
