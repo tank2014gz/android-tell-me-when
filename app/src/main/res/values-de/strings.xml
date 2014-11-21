@@ -25,9 +25,9 @@
     <string name="rf_logout">logout</string>
 
     <string name="vf_rule_name">rule name</string>
-    <string name="vf_less_operator"><![CDATA[<]]></string>
-    <string name="vf_greater_operator"><![CDATA[>]]></string>
-    <string name="vf_equals_operator">=</string>
+    <string name="operator_less"><![CDATA[<]]></string>
+    <string name="operator_greater"><![CDATA[>]]></string>
+    <string name="operator_equals">=</string>
 
     <string name="nf_rule_hint">rule name</string>
     <string name="nf_rule_name_empty">Please set name for your rule.</string>

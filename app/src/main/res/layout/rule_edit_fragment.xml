@@ -1,10 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/background">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/default_object_height">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -26,17 +28,17 @@
                     android:textColor="@android:color/white"
                     android:layout_alignParentLeft="true"
                     android:textSize="@dimen/default_object_subtitle_text_size"
-                    style="@style/BoldText" />
+                    style="@style/BoldText"/>
 
                 <Switch
                     android:id="@+id/ref_notification_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/white"
-                    android:layout_alignParentRight="true" />
+                    android:layout_alignParentRight="true"/>
             </RelativeLayout>
 
-            <include layout="@layout/view_divider" />
+            <include layout="@layout/view_divider"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -54,15 +56,15 @@
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/default_object_title_text_size"
                     android:textAllCaps="true"
-                    style="@style/BoldText" />
+                    style="@style/BoldText"/>
 
                 <include
                     android:id="@+id/ref_rule_name_edit"
-                    layout="@layout/view_edit_button" />
+                    layout="@layout/view_edit_button"/>
 
             </RelativeLayout>
 
-            <include layout="@layout/view_divider" />
+            <include layout="@layout/view_divider"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -85,7 +87,7 @@
                         android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_title_text_size"
                         android:textAllCaps="true"
-                        style="@style/BoldText" />
+                        style="@style/BoldText"/>
 
                     <io.relayr.commons.widget.CustomTextView
                         android:id="@+id/ref_transmitter_name"
@@ -96,16 +98,16 @@
                         android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_subtitle_text_size"
                         android:singleLine="true"
-                        style="@style/NormalText" />
+                        style="@style/NormalText"/>
                 </LinearLayout>
 
                 <include
                     android:id="@+id/ref_transmitter_edit"
-                    layout="@layout/view_edit_button" />
+                    layout="@layout/view_edit_button"/>
 
             </RelativeLayout>
 
-            <include layout="@layout/view_divider" />
+            <include layout="@layout/view_divider"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -119,7 +121,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/ic_action_next_item" />
+                    android:src="@drawable/ic_action_next_item"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -138,7 +140,7 @@
                         android:textSize="@dimen/default_object_title_text_size"
                         android:textAllCaps="true"
                         android:gravity="center_vertical"
-                        style="@style/NormalText" />
+                        style="@style/NormalText"/>
 
                     <io.relayr.commons.widget.CustomTextView
                         android:id="@+id/ref_sensor_info"
@@ -148,15 +150,15 @@
                         android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_subtitle_text_size"
                         android:gravity="center_vertical"
-                        style="@style/NormalText" />
+                        style="@style/NormalText"/>
                 </LinearLayout>
 
                 <include
                     android:id="@+id/ref_sensor_edit"
-                    layout="@layout/view_edit_button" />
+                    layout="@layout/view_edit_button"/>
             </RelativeLayout>
 
-            <include layout="@layout/view_divider" />
+            <include layout="@layout/view_divider"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -174,22 +176,23 @@
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/operator_size_small"
                     android:textAllCaps="true"
-                    style="@style/BoldText" />
+                    style="@style/BoldText"/>
 
                 <include
                     android:id="@+id/ref_rule_value_edit"
-                    layout="@layout/view_edit_button" />
+                    layout="@layout/view_edit_button"/>
 
             </RelativeLayout>
 
-            <include layout="@layout/view_divider" />
-
-            <include
-                layout="@layout/view_button_green"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/button_done_margin" />
+            <include layout="@layout/view_divider"/>
 
         </LinearLayout>
     </ScrollView>
+
+    <include
+        layout="@layout/view_button_green"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/button_done_margin"/>
 </RelativeLayout>

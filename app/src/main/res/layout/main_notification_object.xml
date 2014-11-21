@@ -1,10 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/default_object_height"
-    android:gravity="center_vertical"
-    android:layout_gravity="center_vertical"
-    android:paddingLeft="@dimen/default_object_padding"
-    android:paddingRight="@dimen/default_object_padding">
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_object_height"
+                android:gravity="center_vertical"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="@dimen/default_object_padding"
+                android:paddingRight="@dimen/default_object_padding">
 
     <io.relayr.commons.widget.CustomTextView
         android:id="@+id/notification_object_name"
@@ -16,7 +16,7 @@
         android:textSize="@dimen/default_object_title_text_size"
         android:gravity="center_vertical"
         android:textAllCaps="true"
-        style="@style/BoldText" />
+        style="@style/BoldText"/>
 
     <io.relayr.commons.widget.CustomTextView
         android:id="@+id/notification_object_value"
@@ -64,5 +64,5 @@
         android:textColor="@android:color/white"
         android:textSize="@dimen/notification_time_text_size"
         android:gravity="center_vertical"
-        style="@style/BoldText" />
+        style="@style/BoldText"/>
 </RelativeLayout>

@@ -2,9 +2,7 @@
 <resources>
 
     <color name="background">#00486D</color>
-    <color name="navigation_background">#66000000</color>
-
-    <color name="red_background">#EF4136</color>
+    <color name="navigation_background">#5500486D</color>
 
     <color name="tab_active_top">#F16A21</color>
     <color name="tab_active_bottom">#FF145C</color>

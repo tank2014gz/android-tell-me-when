@@ -25,9 +25,9 @@ public class RuleValueFragment extends Fragment {
     @InjectView(R.id.vf_object_name) TextView mObjectName;
     @InjectView(R.id.vf_object_info) TextView mObjectInfo;
 
-    @InjectView(R.id.vf_operator_equals) TextView mOperatorEquals;
-    @InjectView(R.id.vf_operator_less) TextView mOperatorLess;
-    @InjectView(R.id.vf_operator_greater) TextView mOperatorGreater;
+    //    @InjectView(R.id.vf_operator_equals) TextView mOperatorEquals;
+    @InjectView(R.id.vf_operator_less) View mOperatorLess;
+    @InjectView(R.id.vf_operator_greater) View mOperatorGreater;
 
     @InjectView(R.id.vf_rule_value_seek) SeekBar mValueSeek;
     @InjectView(R.id.vf_rule_value_indicator) TextView mValueIndicator;
@@ -46,7 +46,7 @@ public class RuleValueFragment extends Fragment {
 
         ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 
-        toggleOperator(OperatorType.EQUALS);
+        toggleOperator(OperatorType.LESS);
 
         return view;
     }
@@ -57,6 +57,10 @@ public class RuleValueFragment extends Fragment {
 
         showSavedData();
 
+        mValueIndicator.setText("" + 50);
+
+        mValueSeek.setMax(100);
+        mValueSeek.setProgress(50);
         mValueSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -99,10 +103,10 @@ public class RuleValueFragment extends Fragment {
         EventBus.getDefault().post(new WhenEvents.DoneEvent());
     }
 
-    @OnClick(R.id.vf_operator_equals)
-    public void operatorEqualsClicked() {
-        toggleOperator(OperatorType.EQUALS);
-    }
+//    @OnClick(R.id.vf_operator_equals)
+//    public void operatorEqualsClicked() {
+//        toggleOperator(OperatorType.EQUALS);
+//    }
 
     @OnClick(R.id.vf_operator_less)
     public void operatorLessClicked() {
@@ -117,14 +121,14 @@ public class RuleValueFragment extends Fragment {
     private void toggleOperator(OperatorType operator) {
         mCurrentOperator = operator;
 
-        mOperatorEquals.setBackgroundResource(android.R.color.transparent);
+//        mOperatorEquals.setBackgroundResource(android.R.color.transparent);
         mOperatorLess.setBackgroundResource(android.R.color.transparent);
         mOperatorGreater.setBackgroundResource(android.R.color.transparent);
 
         switch (operator) {
-            case EQUALS:
-                mOperatorEquals.setBackgroundResource(R.drawable.tab_active);
-                break;
+//            case EQUALS:
+//                mOperatorEquals.setBackgroundResource(R.drawable.tab_active);
+//                break;
             case LESS:
                 mOperatorLess.setBackgroundResource(R.drawable.tab_active);
                 break;

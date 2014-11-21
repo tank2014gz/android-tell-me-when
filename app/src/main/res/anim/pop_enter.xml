@@ -8,17 +8,17 @@
         android:valueTo="0.0" />
 
     <objectAnimator
-        android:duration="300"
+        android:duration="200"
         android:propertyName="scaleX"
-        android:startOffset="300"
+        android:startOffset="200"
         android:valueFrom="0.0"
         android:valueTo="1.0"
         android:valueType="floatType" />
 
     <objectAnimator
-        android:duration="300"
+        android:duration="200"
         android:propertyName="scaleY"
-        android:startOffset="300"
+        android:startOffset="200"
         android:valueFrom="0.0"
         android:valueTo="1.0"
         android:valueType="floatType" />
@@ -26,7 +26,7 @@
     <objectAnimator
         android:duration="1"
         android:propertyName="alpha"
-        android:startOffset="300"
+        android:startOffset="200"
         android:valueFrom="0.0"
         android:valueTo="1.0" />
 

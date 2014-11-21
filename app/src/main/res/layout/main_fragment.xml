@@ -1,8 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/background"
+                tools:context=".MainActivity">
 
     <ListView
         android:id="@+id/list_view"
@@ -12,8 +13,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="@dimen/default_object_height"
         android:divider="@drawable/divider"
-        android:footerDividersEnabled="true"
-        android:animateLayoutChanges="true" />
+        android:footerDividersEnabled="true"/>
 
     <LinearLayout
         android:id="@+id/warning_layout"
@@ -21,12 +21,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:animateLayoutChanges="true"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_object_height"
         android:orientation="horizontal"
+        android:animateLayoutChanges="true"
         android:layout_alignParentBottom="true">
 
         <io.relayr.commons.widget.CustomTextView
@@ -40,7 +41,7 @@
             android:textSize="@dimen/ma_tab_text_size"
             android:paddingTop="@dimen/default_object_padding"
             android:drawableTop="@drawable/icon_rules"
-            style="@style/NormalText" />
+            style="@style/NormalText"/>
 
         <io.relayr.commons.widget.CustomTextView
             android:id="@+id/tab_notifications"
@@ -53,6 +54,6 @@
             android:textSize="@dimen/ma_tab_text_size"
             android:paddingTop="@dimen/default_object_padding"
             android:drawableTop="@drawable/icon_notifications"
-            style="@style/NormalText" />
+            style="@style/NormalText"/>
     </LinearLayout>
 </RelativeLayout>
