@@ -45,7 +45,6 @@ public class MainFragment extends Fragment {
 
     private View mNewRuleBtn;
     private View mClearNotificationsBtn;
-    private TextView mNavTitle;
 
     private RulesAdapter mRulesAdapter;
     private NotificationsAdapter mNotificationsAdapter;
@@ -79,8 +78,6 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mNavTitle = (TextView) getActivity().findViewById(R.id.navigation_title);
-
         initiateAdapters();
         toggleTabs(true);
 
@@ -98,6 +95,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
         ButterKnife.reset(this);
     }
 
@@ -119,27 +117,27 @@ public class MainFragment extends Fragment {
     }
 
     private void checkOnBoarding() {
-        mTransmitterSubscription = RelayrSdk.getRelayrApi()
-                .getTransmitters(Storage.loadUserId())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<Transmitter>>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+            mTransmitterSubscription = RelayrSdk.getRelayrApi()
+                    .getTransmitters(Storage.loadUserId())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Subscriber<List<Transmitter>>() {
+                        @Override
+                        public void onCompleted() {
+                        }
 
-                    @Override
-                    public void onError(Throwable e) {
-                    }
+                        @Override
+                        public void onError(Throwable e) {
+                        }
 
-                    @Override
-                    public void onNext(List<Transmitter> transmitters) {
-                        Storage.saveTransmiterState(!transmitters.isEmpty());
+                        @Override
+                        public void onNext(List<Transmitter> transmitters) {
+                            Storage.saveTransmiterState(!transmitters.isEmpty());
 
-                        if (transmitters.isEmpty()) showOnBoardWarning();
-                        else checkRules();
-                    }
-                });
+                            if (transmitters.isEmpty()) showOnBoardWarning();
+                            else checkRules();
+                        }
+                    });
     }
 
     private void showOnBoardWarning() {
@@ -232,7 +230,8 @@ public class MainFragment extends Fragment {
     }
 
     private void toggleTabs(boolean isRules) {
-        mNavTitle.setText(getString(isRules ? R.string.title_tab_rules : R.string.title_tab_notifications));
+        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(isRules ? R.string.title_tab_rules :
+                R.string.title_tab_notifications));
 
         mTabRules.setBackgroundResource(isRules ? R.drawable.tab_active : R.color.tab_inactive);
         mNewRuleBtn.setVisibility(isRules ? View.VISIBLE : View.GONE);

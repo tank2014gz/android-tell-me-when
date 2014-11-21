@@ -6,7 +6,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/default_object_height">
+        android:layout_marginBottom="@dimen/navigation_height">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,8 +24,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_action_next_item"/>
+                    android:layout_centerVertical="true"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -138,8 +137,7 @@
                     android:layout_below="@id/vf_rule_value_indicator"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:progress="50"
-                    android:max="100"/>
+                    android:progressDrawable="@drawable/progressbar"/>
             </RelativeLayout>
 
         </LinearLayout>

@@ -8,8 +8,7 @@
         android:id="@+id/sensor_object_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_action_next_item" />
+        android:layout_gravity="center_vertical"/>
 
     <io.relayr.commons.widget.CustomTextView
         android:id="@+id/sensor_object_name"

@@ -1,0 +1,32 @@
+<resources>
+
+    <dimen name="navigation_text_size">26sp</dimen>
+    <dimen name="navigation_button_text_size">22sp</dimen>
+    <dimen name="navigation_title_padding">20dp</dimen>
+    <dimen name="navigation_drawable_padding">20dp</dimen>
+    <dimen name="navigation_height">100dp</dimen>
+    <dimen name="navigation_button_radius">40dp</dimen>
+
+    <dimen name="tab_text_size">22sp</dimen>
+
+    <dimen name="default_object_padding">30dp</dimen>
+    <dimen name="default_object_height">130dp</dimen>
+    <dimen name="default_object_title_text_size">30sp</dimen>
+    <dimen name="default_object_subtitle_text_size">30sp</dimen>
+    <dimen name="default_object_small_subtitle_text_size">22sp</dimen>
+
+    <dimen name="notification_date_text_size">22sp</dimen>
+    <dimen name="notification_time_text_size">24sp</dimen>
+
+    <dimen name="button_radius">50dp</dimen>
+    <dimen name="button_done_padding">24dp</dimen>
+    <dimen name="button_done_margin">20dp</dimen>
+    <dimen name="button_done_text_size">26sp</dimen>
+
+    <dimen name="edit_text_padding">30dp</dimen>
+
+    <dimen name="operator_size_small">45sp</dimen>
+    <dimen name="operator_size_large">90sp</dimen>
+    <dimen name="operator_size_large_padding">-10sp</dimen>
+
+</resources>

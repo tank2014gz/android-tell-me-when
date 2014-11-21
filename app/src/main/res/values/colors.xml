@@ -12,7 +12,10 @@
     <color name="button_pink_background">#FF4071</color>
     <color name="button_green_background">#769e00</color>
 
-    <color name="divider_top_color">#73000000</color>
-    <color name="divider_bottom_color">#1AFFFFFF</color>
+    <color name="divider_top_color">#40000000</color>
+    <color name="divider_bottom_color">#26FFFFFF</color>
 
+    <color name="rounded_container_bg">#222222</color>
+    <color name="rounded_container_border">#3b3f44</color>
+    <color name="light_gray_header_color">#646663</color>
 </resources>

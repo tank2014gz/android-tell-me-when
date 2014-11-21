@@ -72,14 +72,9 @@ public class MainActivity extends Activity implements LoginEventListener {
 
         if (mNetworkDialog != null) mNetworkDialog.dismiss();
 
-        EventBus.getDefault().unregister(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
         if (!mUserInfoSubscription.isUnsubscribed()) mUserInfoSubscription.unsubscribe();
+
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -114,6 +109,10 @@ public class MainActivity extends Activity implements LoginEventListener {
         } else {
             switchToPrevious();
         }
+    }
+
+    public void onEvent(WhenEvents.TitleChangeEvent tce) {
+        mNavigationTitle.setText(getString(tce.getTitle()));
     }
 
     public void onEvent(WhenEvents.DoneEvent nre) {
@@ -154,32 +153,25 @@ public class MainActivity extends Activity implements LoginEventListener {
             case MAIN:
                 fragmentPos = 0;
                 mCurrentFragment = MainFragment.newInstance();
-                mNavigationTitle.setText(getString(R.string.title_tab_rules));
                 break;
             case TRANS:
                 mCurrentFragment = TransmitterFragment.newInstance();
-                mNavigationTitle.setText(getString(R.string.title_select_transmitter));
                 break;
             case SENSOR:
                 mCurrentFragment = SensorFragment.newInstance();
-                mNavigationTitle.setText(getString(R.string.title_select_sensor));
                 break;
             case RULE_VALUE:
                 mCurrentFragment = RuleValueFragment.newInstance();
-                mNavigationTitle.setText(getString(R.string.title_rule_value));
                 break;
             case RULE_NAME:
                 mCurrentFragment = RuleNameFragment.newInstance();
-                mNavigationTitle.setText(getString(R.string.title_rule_name));
                 break;
             case RULE_EDIT:
                 mCurrentFragment = RuleEditFragment.newInstance();
-                mNavigationTitle.setText(getString(R.string.title_rule_edit));
                 break;
             default:
                 fragmentPos = 0;
                 mCurrentFragment = MainFragment.newInstance();
-                mNavigationTitle.setText(getString(R.string.title_tab_rules));
         }
 
         showFragment(mCurrentFragment);

@@ -43,6 +43,8 @@ public class RuleEditFragment extends Fragment {
         View view = inflater.inflate(R.layout.rule_edit_fragment, container, false);
 
         ButterKnife.inject(this, view);
+        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(R.string
+                .title_select_sensor));
 
         ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 
@@ -67,7 +69,6 @@ public class RuleEditFragment extends Fragment {
 
         mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.loadRuleSensor()));
         mSensorName.setText(SensorUtil.getTitle(Storage.loadRuleSensor()));
-//        mSensorInfo
 
         mRuleValue.setText(Storage.loadRuleOperator().getName() + " " + Storage.loadRuleValue());
     }

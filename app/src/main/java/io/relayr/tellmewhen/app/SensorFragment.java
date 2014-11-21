@@ -44,16 +44,12 @@ public class SensorFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        loadDevices();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.sensor_fragment, container, false);
 
         ButterKnife.inject(this, view);
+        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(R.string
+                        .title_select_sensor));
 
         mListView.setAdapter(new SensorAdapter(this.getActivity()));
 
@@ -61,16 +57,24 @@ public class SensorFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.reset(this);
+    public void onResume() {
+        super.onResume();
+
+        loadDevices();
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onPause();
 
         if (!mDevicesSubscription.isUnsubscribed()) mDevicesSubscription.unsubscribe();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        ButterKnife.reset(this);
     }
 
     @OnItemClick(R.id.list_view)

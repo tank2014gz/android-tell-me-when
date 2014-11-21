@@ -4,6 +4,8 @@
               android:orientation="vertical"
               android:paddingLeft="@dimen/default_object_padding"
               android:paddingRight="@dimen/default_object_padding"
+              android:layout_marginLeft="@dimen/default_object_padding"
+              android:layout_marginRight="@dimen/default_object_padding"
               android:gravity="center_vertical">
 
     <io.relayr.commons.widget.CustomTextView

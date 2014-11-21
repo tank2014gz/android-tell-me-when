@@ -35,6 +35,8 @@ public class RuleNameFragment extends Fragment {
         View view = inflater.inflate(R.layout.rule_name_fragment, container, false);
 
         ButterKnife.inject(this, view);
+        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(R.string
+                .title_select_sensor));
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 

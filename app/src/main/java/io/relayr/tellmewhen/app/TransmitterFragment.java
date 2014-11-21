@@ -41,16 +41,12 @@ public class TransmitterFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        loadTransmitters();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.transmitter_fragment, container, false);
 
         ButterKnife.inject(this, view);
+        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(R.string
+                .title_select_sensor));
 
         mTransmitterAdapter = new TransmitterAdapter(this.getActivity());
         mListView.setAdapter(mTransmitterAdapter);
@@ -59,16 +55,24 @@ public class TransmitterFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.reset(this);
+    public void onResume() {
+        super.onResume();
+
+        loadTransmitters();
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onPause();
 
         if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        ButterKnife.reset(this);
     }
 
     @OnItemClick(R.id.list_view)

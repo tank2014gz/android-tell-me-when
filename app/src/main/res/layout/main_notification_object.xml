@@ -4,7 +4,9 @@
                 android:gravity="center_vertical"
                 android:layout_gravity="center_vertical"
                 android:paddingLeft="@dimen/default_object_padding"
-                android:paddingRight="@dimen/default_object_padding">
+                android:paddingRight="@dimen/default_object_padding"
+                android:layout_marginLeft="@dimen/default_object_padding"
+                android:layout_marginRight="@dimen/default_object_padding">
 
     <io.relayr.commons.widget.CustomTextView
         android:id="@+id/notification_object_name"

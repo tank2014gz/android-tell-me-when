@@ -30,30 +30,49 @@
         android:animateLayoutChanges="true"
         android:layout_alignParentBottom="true">
 
-        <io.relayr.commons.widget.CustomTextView
+        <LinearLayout
             android:id="@+id/tab_rules"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/title_tab_rules"
-            android:textColor="@android:color/white"
-            android:gravity="center"
-            android:textSize="@dimen/ma_tab_text_size"
-            android:paddingTop="@dimen/default_object_padding"
-            android:drawableTop="@drawable/icon_rules"
-            style="@style/NormalText"/>
+            android:orientation="vertical"
+            android:gravity="center">
 
-        <io.relayr.commons.widget.CustomTextView
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_rules"/>
+
+            <io.relayr.commons.widget.CustomTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_tab_rules"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/tab_text_size"
+                style="@style/NormalText"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/tab_notifications"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/title_tab_notifications"
-            android:textColor="@android:color/white"
-            android:gravity="center"
-            android:textSize="@dimen/ma_tab_text_size"
-            android:paddingTop="@dimen/default_object_padding"
-            android:drawableTop="@drawable/icon_notifications"
-            style="@style/NormalText"/>
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_notifications"/>
+
+            <io.relayr.commons.widget.CustomTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_tab_notifications"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/tab_text_size"
+                style="@style/NormalText"/>
+        </LinearLayout>
+
     </LinearLayout>
 </RelativeLayout>

@@ -48,4 +48,16 @@ public class WhenEvents {
             return frag;
         }
     }
+
+    public static class TitleChangeEvent {
+        private int title;
+
+        public TitleChangeEvent(int title) {
+            this.title = title;
+        }
+
+        public int getTitle() {
+            return title;
+        }
+    }
 }
