@@ -34,6 +34,7 @@ import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
 import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.gcm.GcmUtils;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.WhenEvents;
 import rx.Subscriber;
@@ -44,7 +45,6 @@ import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends Activity implements LoginEventListener {
 
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String SENDER_ID = "731084512451";
 
     public enum FragNames {
@@ -74,9 +74,9 @@ public class MainActivity extends Activity implements LoginEventListener {
 
         ButterKnife.inject(this);
 
-        if (checkPlayServices()) {
+        if (GcmUtils.checkPlayServices(this)) {
             mGoogleCloudMessaging = GoogleCloudMessaging.getInstance(this);
-            mRegId = getRegistrationId();
+            mRegId = GcmUtils.getRegistrationId(getApplicationContext());
 
             if (mRegId.isEmpty()) {
                 registerInBackground();
@@ -91,7 +91,8 @@ public class MainActivity extends Activity implements LoginEventListener {
         super.onResume();
 
         checkWiFi();
-        checkPlayServices();
+
+        if(!GcmUtils.checkPlayServices(this)) finish();
 
         EventBus.getDefault().register(this);
     }
@@ -283,88 +284,6 @@ public class MainActivity extends Activity implements LoginEventListener {
     }
 
     /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else {
-                Log.i("MainActivity", "This device is not supported.");
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
-
-//    public void sendEcho() {
-//        new AsyncTask<Void, Void, String>() {
-//            @Override
-//            protected String doInBackground(Void... params) {
-//                String msg;
-//                try {
-//                    Bundle data = new Bundle();
-//                    data.putString("my_message", "Hello World");
-//                    data.putString("my_action", "com.google.android.gcm.demo.app.ECHO_NOW");
-//                    String id = Integer.toString(msgId.incrementAndGet());
-//                    mGoogleCloudMessaging.send(SENDER_ID + "@gcm.googleapis.com", id, data);
-//                    msg = "Sent message";
-//                } catch (IOException ex) {
-//                    msg = "Error :" + ex.getMessage();
-//                }
-//
-//                return msg;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(String msg) {
-//                Log.e("MA", msg + "\n");
-//            }
-//        }.execute(null, null, null);
-//    }
-
-    /**
-     * Stores the registration ID and the app versionCode in the application's
-     * {@code SharedPreferences}.
-     *
-     * @param regId registration ID
-     */
-    private void storeRegistrationId(String regId) {
-        Storage.saveGmsRegId(regId);
-        Storage.saveGmsAppVersion(getAppVersion(getApplicationContext()));
-    }
-
-    /**
-     * Gets the current registration ID for application on GCM service, if there is one.
-     *
-     * @return registration ID, or empty string if there is no existing registration ID.
-     */
-    private String getRegistrationId() {
-        String registrationId = Storage.loadGmsRegistrationId();
-
-        if (registrationId.isEmpty()) {
-            return "";
-        }
-
-        // Check if app was updated; if so, it must clear the registration ID
-        // since the existing regID is not guaranteed to work with the new
-        // app version.
-        int registeredVersion = Storage.loadGmsAppVersion();
-        int currentVersion = getAppVersion(getApplicationContext());
-        if (registeredVersion != currentVersion) {
-            Log.i("MainActivity", "App version changed.");
-            return "";
-        }
-        return registrationId;
-    }
-
-    /**
      * Registers the application with GCM servers asynchronously.
      * <p/>
      * Stores the registration ID and the app versionCode in the application's
@@ -384,9 +303,10 @@ public class MainActivity extends Activity implements LoginEventListener {
 
                     // You should send the registration ID to your server over HTTP, so it
                     // can use GCM/HTTP or CCS to send messages to your app.
-                    sendRegistrationIdToBackend();
+                    GcmUtils.sendRegistrationIdToBackend();
 
-                    storeRegistrationId(mRegId);
+                    GcmUtils.storeRegistrationId(MainActivity.this
+                            .getApplicationContext(), mRegId);
                 } catch (IOException ex) {
                     msg = "Error :" + ex.getMessage();
                 }
@@ -398,24 +318,5 @@ public class MainActivity extends Activity implements LoginEventListener {
                 Log.w("MainActivity", msg);
             }
         }.execute(null, null, null);
-    }
-
-    private static int getAppVersion(Context context) {
-        try {
-            PackageInfo packageInfo = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0);
-            return packageInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException("Could not get package name: " + e);
-        }
-    }
-
-    /**
-     * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP or CCS to send
-     * messages to your app. Not needed for this demo since the device sends upstream messages
-     * to a server that echoes back the message using the 'from' address in the message.
-     */
-    private void sendRegistrationIdToBackend() {
-        // Your implementation here.
     }
 }
