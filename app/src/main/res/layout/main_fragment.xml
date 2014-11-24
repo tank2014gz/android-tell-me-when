@@ -47,7 +47,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/title_tab_rules"
-                android:textColor="@android:color/white"
                 android:textSize="@dimen/tab_text_size"
                 style="@style/NormalText"/>
         </LinearLayout>
@@ -69,7 +68,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/title_tab_notifications"
-                android:textColor="@android:color/white"
                 android:textSize="@dimen/tab_text_size"
                 style="@style/NormalText"/>
         </LinearLayout>

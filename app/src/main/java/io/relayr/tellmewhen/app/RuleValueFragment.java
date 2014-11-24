@@ -1,6 +1,6 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,8 +32,8 @@ public class RuleValueFragment extends Fragment {
     @InjectView(R.id.vf_rule_value_seek) SeekBar mValueSeek;
     @InjectView(R.id.vf_rule_value_indicator) TextView mValueIndicator;
 
-    private OperatorType mCurrentOperator;
     private SensorType mSensorType;
+    private OperatorType mCurrentOperator;
 
     public static RuleValueFragment newInstance() {
         return new RuleValueFragment();
@@ -44,8 +44,8 @@ public class RuleValueFragment extends Fragment {
         View view = inflater.inflate(R.layout.rule_value_fragment, container, false);
 
         ButterKnife.inject(this, view);
-        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(R.string
-                .title_select_sensor));
+        getActivity().setTitle(R.string
+                .title_rule_value);
 
         ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 
@@ -60,16 +60,13 @@ public class RuleValueFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        showSavedData();
-
         int maxValue = SensorUtil.getMaxValue(mSensorType) - SensorUtil.getMinValue(mSensorType);
 
         mValueSeek.setMax(maxValue);
-        mValueSeek.setProgress(maxValue / 2);
         mValueSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mValueIndicator.setText("" + (progress - Math.abs(SensorUtil.getMinValue
+                mValueIndicator.setText((progress - Math.abs(SensorUtil.getMinValue
                         (mSensorType))) + mSensorType.getUnit());
             }
 
@@ -82,7 +79,7 @@ public class RuleValueFragment extends Fragment {
             }
         });
 
-        mValueIndicator.setText("" + maxValue / 2);
+        showSavedData(maxValue);
     }
 
     @Override
@@ -91,15 +88,19 @@ public class RuleValueFragment extends Fragment {
         ButterKnife.reset(this);
     }
 
-    private void showSavedData() {
+    private void showSavedData(int maxValue) {
         mObjectIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.loadRuleSensor()));
         mObjectInfo.setText(SensorUtil.getTitle(Storage.loadRuleSensor()));
         mObjectName.setText(Storage.loadRuleTransName());
 
         if (Storage.isRuleEditing()) {
-            mValueSeek.setProgress(Storage.loadRuleValue());
-            mValueIndicator.setText("" + Storage.loadRuleValue());
+            int storedValue = Storage.loadRuleValue();
+            mValueSeek.setProgress(storedValue);
+            mValueIndicator.setText(storedValue + mSensorType.getUnit());
             toggleOperator(Storage.loadRuleOperator());
+        } else {
+            mValueSeek.setProgress(maxValue / 2);
+            mValueIndicator.setText((maxValue / 2) + mSensorType.getUnit());
         }
     }
 

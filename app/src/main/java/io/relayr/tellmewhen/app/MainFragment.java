@@ -1,11 +1,14 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -43,13 +46,17 @@ public class MainFragment extends Fragment {
     @InjectView(R.id.tab_rules) View mTabRules;
     @InjectView(R.id.tab_notifications) View mTabNotifications;
 
-    private View mNewRuleBtn;
-    private View mClearNotificationsBtn;
-
     private RulesAdapter mRulesAdapter;
     private NotificationsAdapter mNotificationsAdapter;
 
     private Subscription mTransmitterSubscription = Subscriptions.empty();
+
+    private MenuItem mMenuNewRule;
+    private MenuItem mMenuClearItem;
+
+    private boolean isOnBoarded = true;
+    private boolean isNotificationsEmpty = true;
+    private boolean isRules = true;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -61,24 +68,10 @@ public class MainFragment extends Fragment {
 
         ButterKnife.inject(this, view);
 
-        mNewRuleBtn = getActivity().findViewById(R.id.navigation_new_rule);
-        mNewRuleBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EventBus.getDefault().post(new WhenEvents.DoneEvent());
-            }
-        });
-
-        mClearNotificationsBtn = getActivity().findViewById(R.id.navigation_clear_notif);
-        mClearNotificationsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mNotificationsAdapter.clear();
-                mNotificationsAdapter.notifyDataSetChanged();
-            }
-        });
+        setHasOptionsMenu(true);
 
         initiateAdapters();
+
         toggleTabs(true);
 
         return view;
@@ -116,31 +109,61 @@ public class MainFragment extends Fragment {
         showNotifications();
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_rules, menu);
+
+        mMenuNewRule = menu.findItem(R.id.action_new_rule);
+        mMenuClearItem = menu.findItem(R.id.action_clear_notifications);
+
+        toggleMenuItems();
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_new_rule) {
+            EventBus.getDefault().post(new WhenEvents.DoneEvent());
+        }
+
+        if (item.getItemId() == R.id.action_clear_notifications) {
+            mNotificationsAdapter.clear();
+            mNotificationsAdapter.notifyDataSetChanged();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private void checkOnBoarding() {
-            mTransmitterSubscription = RelayrSdk.getRelayrApi()
-                    .getTransmitters(Storage.loadUserId())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Subscriber<List<Transmitter>>() {
-                        @Override
-                        public void onCompleted() {
-                        }
+        mTransmitterSubscription = RelayrSdk.getRelayrApi()
+                .getTransmitters(Storage.loadUserId())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Transmitter>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
 
-                        @Override
-                        public void onError(Throwable e) {
-                        }
+                    @Override
+                    public void onError(Throwable e) {
+                    }
 
-                        @Override
-                        public void onNext(List<Transmitter> transmitters) {
-                            Storage.saveTransmiterState(!transmitters.isEmpty());
+                    @Override
+                    public void onNext(List<Transmitter> transmitters) {
+                        Storage.saveTransmiterState(!transmitters.isEmpty());
 
-                            if (transmitters.isEmpty()) showOnBoardWarning();
-                            else checkRules();
-                        }
-                    });
+                        isOnBoarded = !transmitters.isEmpty();
+
+                        if (transmitters.isEmpty()) showOnBoardWarning();
+                        else checkRules();
+                    }
+                });
     }
 
     private void showOnBoardWarning() {
+        toggleMenuItems();
+
         LayoutInflater inflater = (LayoutInflater) getActivity()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -159,7 +182,7 @@ public class MainFragment extends Fragment {
             }
         });
 
-        toggleWarningLayout(view, false);
+        toggleWarningLayout(view);
     }
 
     private void checkRules() {
@@ -182,17 +205,15 @@ public class MainFragment extends Fragment {
             }
         });
 
-        toggleWarningLayout(view, true);
+        toggleWarningLayout(view);
     }
 
-    private void toggleWarningLayout(View view, boolean onBoardDone) {
+    private void toggleWarningLayout(View view) {
         mWarningLayout.removeAllViews();
         mWarningLayout.addView(view);
 
         mWarningLayout.setVisibility(View.VISIBLE);
         mListView.setVisibility(View.GONE);
-
-        mNewRuleBtn.setVisibility(onBoardDone ? View.VISIBLE : View.GONE);
     }
 
     private void initiateAdapters() {
@@ -227,16 +248,22 @@ public class MainFragment extends Fragment {
 
     private void loadNotifications() {
         mNotificationsAdapter.add(new Notification());
+        isNotificationsEmpty = mNotificationsAdapter.isEmpty();
     }
 
     private void toggleTabs(boolean isRules) {
-        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(isRules ? R.string.title_tab_rules :
-                R.string.title_tab_notifications));
+        this.isRules = isRules;
+
+        getActivity().setTitle(isRules ? R.string.title_tab_rules : R.string.title_tab_notifications);
 
         mTabRules.setBackgroundResource(isRules ? R.drawable.tab_active : R.color.tab_inactive);
-        mNewRuleBtn.setVisibility(isRules ? View.VISIBLE : View.GONE);
-
         mTabNotifications.setBackgroundResource(isRules ? R.color.tab_inactive : R.drawable.tab_active);
-        mClearNotificationsBtn.setVisibility(isRules ? View.GONE : View.VISIBLE);
+
+        toggleMenuItems();
+    }
+
+    private void toggleMenuItems() {
+        if (mMenuNewRule != null) mMenuNewRule.setVisible(isRules && isOnBoarded);
+        if (mMenuClearItem != null) mMenuClearItem.setVisible(!isRules && !isNotificationsEmpty);
     }
 }

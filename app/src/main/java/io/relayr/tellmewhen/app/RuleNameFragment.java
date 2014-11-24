@@ -1,6 +1,6 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -35,8 +35,8 @@ public class RuleNameFragment extends Fragment {
         View view = inflater.inflate(R.layout.rule_name_fragment, container, false);
 
         ButterKnife.inject(this, view);
-        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(R.string
-                .title_select_sensor));
+        getActivity().setTitle(R.string
+                .title_rule_name);
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 

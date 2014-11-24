@@ -38,7 +38,6 @@
                         android:id="@+id/vf_object_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_title_text_size"
                         android:textAllCaps="true"
                         android:singleLine="true"
@@ -48,7 +47,6 @@
                         android:id="@+id/vf_object_info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_subtitle_text_size"/>
                 </LinearLayout>
             </RelativeLayout>
@@ -74,7 +72,6 @@
                         android:layout_height="wrap_content"
                         android:text="@string/operator_less"
                         android:textSize="@dimen/operator_size_large"
-                        android:textColor="@android:color/white"
                         android:layout_marginTop="@dimen/operator_size_large_padding"
                         android:gravity="center_horizontal"
                         style="@style/BoldText"/>
@@ -84,7 +81,6 @@
                         android:layout_height="wrap_content"
                         android:text="@string/operator_less_text"
                         android:textSize="@dimen/default_object_small_subtitle_text_size"
-                        android:textColor="@android:color/white"
                         android:gravity="center_horizontal"/>
                 </LinearLayout>
 
@@ -101,7 +97,6 @@
                         android:layout_height="wrap_content"
                         android:text="@string/operator_greater"
                         android:textSize="@dimen/operator_size_large"
-                        android:textColor="@android:color/white"
                         android:layout_marginTop="@dimen/operator_size_large_padding"
                         style="@style/BoldText"/>
 
@@ -110,7 +105,6 @@
                         android:layout_height="wrap_content"
                         android:text="@string/operator_greater_text"
                         android:textSize="@dimen/default_object_small_subtitle_text_size"
-                        android:textColor="@android:color/white"
                         android:gravity="center"/>
                 </LinearLayout>
             </LinearLayout>

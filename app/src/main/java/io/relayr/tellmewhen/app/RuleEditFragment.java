@@ -1,7 +1,7 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +43,8 @@ public class RuleEditFragment extends Fragment {
         View view = inflater.inflate(R.layout.rule_edit_fragment, container, false);
 
         ButterKnife.inject(this, view);
-        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(R.string
-                .title_select_sensor));
+        getActivity().setTitle(R.string
+                .title_rule_edit);
 
         ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
 

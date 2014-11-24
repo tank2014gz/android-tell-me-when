@@ -1,19 +1,16 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import butterknife.OnItemClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.RelayrSdk;
@@ -45,8 +42,8 @@ public class TransmitterFragment extends Fragment {
         View view = inflater.inflate(R.layout.transmitter_fragment, container, false);
 
         ButterKnife.inject(this, view);
-        EventBus.getDefault().post(new WhenEvents.TitleChangeEvent(R.string
-                .title_select_sensor));
+        getActivity().setTitle(R.string
+                .title_select_transmitter);
 
         mTransmitterAdapter = new TransmitterAdapter(this.getActivity());
         mListView.setAdapter(mTransmitterAdapter);

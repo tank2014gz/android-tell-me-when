@@ -25,7 +25,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/ref_get_notifications"
-                    android:textColor="@android:color/white"
                     android:layout_alignParentLeft="true"
                     android:textSize="@dimen/default_object_subtitle_text_size"
                     style="@style/BoldText"/>
@@ -34,7 +33,6 @@
                     android:id="@+id/ref_notification_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
                     android:layout_alignParentRight="true"/>
             </RelativeLayout>
 
@@ -53,7 +51,6 @@
                     android:layout_centerVertical="true"
                     android:layout_alignParentLeft="true"
                     android:text="@string/title_tab_rules"
-                    android:textColor="@android:color/white"
                     android:textSize="@dimen/default_object_title_text_size"
                     android:textAllCaps="true"
                     style="@style/BoldText"/>
@@ -84,7 +81,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/title_tab_rules"
-                        android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_title_text_size"
                         android:textAllCaps="true"
                         style="@style/BoldText"/>
@@ -95,7 +91,6 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
                         android:text="@string/title_tab_notifications"
-                        android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_subtitle_text_size"
                         android:singleLine="true"
                         style="@style/NormalText"/>
@@ -135,7 +130,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/title_tab_rules"
-                        android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_title_text_size"
                         android:textAllCaps="true"
                         android:gravity="center_vertical"
@@ -146,7 +140,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/title_tab_notifications"
-                        android:textColor="@android:color/white"
                         android:textSize="@dimen/default_object_subtitle_text_size"
                         android:gravity="center_vertical"
                         style="@style/NormalText"/>
@@ -172,7 +165,6 @@
                     android:layout_centerVertical="true"
                     android:layout_alignParentLeft="true"
                     android:text="@string/title_tab_rules"
-                    android:textColor="@android:color/white"
                     android:textSize="@dimen/operator_size_small"
                     android:textAllCaps="true"
                     style="@style/BoldText"/>

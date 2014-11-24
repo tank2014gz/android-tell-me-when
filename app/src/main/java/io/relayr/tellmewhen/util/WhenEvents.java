@@ -5,11 +5,6 @@ import io.relayr.tellmewhen.model.Rule;
 
 public class WhenEvents {
 
-    public static class BackEvent {
-        public BackEvent() {
-        }
-    }
-
     public static class DoneEvent {
         public DoneEvent() {
         }
@@ -46,18 +41,6 @@ public class WhenEvents {
 
         public MainActivity.FragNames getFrag() {
             return frag;
-        }
-    }
-
-    public static class TitleChangeEvent {
-        private int title;
-
-        public TitleChangeEvent(int title) {
-            this.title = title;
-        }
-
-        public int getTitle() {
-            return title;
         }
     }
 }

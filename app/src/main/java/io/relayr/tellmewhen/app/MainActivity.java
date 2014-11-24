@@ -1,26 +1,24 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
@@ -43,19 +41,13 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class MainActivity extends Activity implements LoginEventListener {
+public class MainActivity extends ActionBarActivity implements LoginEventListener {
 
     private static final String SENDER_ID = "731084512451";
 
     public enum FragNames {
         MAIN, TRANS, SENSOR, RULE_VALUE, RULE_NAME, RULE_EDIT
     }
-
-    @InjectView(R.id.navigation_title) TextView mNavigationTitle;
-    @InjectView(R.id.navigation_back) View mNavigationBack;
-    @InjectView(R.id.navigation_logout) TextView mNavigationLogOut;
-    @InjectView(R.id.navigation_new_rule) View mNavigationNewRule;
-    @InjectView(R.id.navigation_clear_notif) View mNavigationClear;
 
     private int mFragPosition = 0;
     private Fragment mCurrentFragment;
@@ -71,6 +63,8 @@ public class MainActivity extends Activity implements LoginEventListener {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         ButterKnife.inject(this);
 
@@ -92,7 +86,7 @@ public class MainActivity extends Activity implements LoginEventListener {
 
         checkWiFi();
 
-        if(!GcmUtils.checkPlayServices(this)) finish();
+        if (!GcmUtils.checkPlayServices(this)) finish();
 
         EventBus.getDefault().register(this);
     }
@@ -124,12 +118,6 @@ public class MainActivity extends Activity implements LoginEventListener {
         onBackClicked();
     }
 
-    @OnClick(R.id.navigation_logout)
-    public void logOutClicked() {
-        if (RelayrSdk.isUserLoggedIn()) RelayrSdk.logOut();
-    }
-
-    @OnClick(R.id.navigation_back)
     public void onBackClicked() {
         if (Storage.isRuleEditing()) {
             if (mCurrentFragment instanceof RuleEditFragment) {
@@ -142,8 +130,21 @@ public class MainActivity extends Activity implements LoginEventListener {
         }
     }
 
-    public void onEvent(WhenEvents.TitleChangeEvent tce) {
-        mNavigationTitle.setText(getString(tce.getTitle()));
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_log_out)
+            if (RelayrSdk.isUserLoggedIn()) RelayrSdk.logOut();
+
+        if (item.getItemId() == android.R.id.home) onBackClicked();
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void onEvent(WhenEvents.DoneEvent nre) {
@@ -206,21 +207,11 @@ public class MainActivity extends Activity implements LoginEventListener {
         }
 
         showFragment(mCurrentFragment);
-        toggleNavigationButtons(name.equals(FragNames.MAIN));
-    }
-
-    private void toggleNavigationButtons(boolean main) {
-        mNavigationClear.setVisibility(View.GONE);
-        mNavigationNewRule.setVisibility(main ? View.VISIBLE : View.GONE);
-        mNavigationLogOut.setVisibility(main ? View.VISIBLE : View.GONE);
-
-        mNavigationBack.setVisibility(main ? View.GONE : View.VISIBLE);
     }
 
     private void showFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.setCustomAnimations(R.anim.pop_enter, 0);
 
         fragmentTransaction.replace(R.id.container, fragment);
         fragmentTransaction.commit();
