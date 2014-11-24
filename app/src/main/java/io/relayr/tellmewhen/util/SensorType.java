@@ -4,18 +4,20 @@ import io.relayr.model.DeviceModel;
 
 public enum SensorType {
 
-    TEMP("temperature", DeviceModel.TEMPERATURE_HUMIDITY),
-    HUM("humidity", DeviceModel.TEMPERATURE_HUMIDITY),
-    NOISE("noise", DeviceModel.MICROPHONE),
-    PROX("proximity", DeviceModel.LIGHT_PROX_COLOR),
-    LIGHT("light", DeviceModel.LIGHT_PROX_COLOR),
-    ACC("acceleration", DeviceModel.ACCELEROMETER_GYROSCOPE);
+    TEMP("temperature", "°C", DeviceModel.TEMPERATURE_HUMIDITY),
+    HUM("humidity", "%", DeviceModel.TEMPERATURE_HUMIDITY),
+    NOISE("noise", "%", DeviceModel.MICROPHONE),
+    PROX("proximity", "%", DeviceModel.LIGHT_PROX_COLOR),
+    LIGHT("light", "%", DeviceModel.LIGHT_PROX_COLOR),
+    ACC("acceleration", "G", DeviceModel.ACCELEROMETER_GYROSCOPE);
 
     private final String name;
     private final DeviceModel model;
+    private final String unit;
 
-    SensorType(String name, DeviceModel model) {
+    SensorType(String name, String unit, DeviceModel model) {
         this.name = name;
+        this.unit = unit;
         this.model = model;
     }
 
@@ -33,5 +35,9 @@ public enum SensorType {
         }
 
         return null;
+    }
+
+    public String getUnit() {
+        return unit;
     }
 }
