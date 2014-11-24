@@ -8,12 +8,23 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -33,6 +44,9 @@ import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends Activity implements LoginEventListener {
 
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final String SENDER_ID = "731084512451";
+
     public enum FragNames {
         MAIN, TRANS, SENSOR, RULE_VALUE, RULE_NAME, RULE_EDIT
     }
@@ -43,10 +57,14 @@ public class MainActivity extends Activity implements LoginEventListener {
     @InjectView(R.id.navigation_new_rule) View mNavigationNewRule;
     @InjectView(R.id.navigation_clear_notif) View mNavigationClear;
 
-    private int fragmentPos = 0;
+    private int mFragPosition = 0;
     private Fragment mCurrentFragment;
     private AlertDialog mNetworkDialog;
     private Subscription mUserInfoSubscription = Subscriptions.empty();
+
+    private String mRegId;
+    private GoogleCloudMessaging mGoogleCloudMessaging;
+    private AtomicInteger msgId = new AtomicInteger();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +73,17 @@ public class MainActivity extends Activity implements LoginEventListener {
         setContentView(R.layout.activity_main);
 
         ButterKnife.inject(this);
+
+        if (checkPlayServices()) {
+            mGoogleCloudMessaging = GoogleCloudMessaging.getInstance(this);
+            mRegId = getRegistrationId();
+
+            if (mRegId.isEmpty()) {
+                registerInBackground();
+            }
+        } else {
+            Log.i("MainActivity", "No valid Google Play Services APK found.");
+        }
     }
 
     @Override
@@ -62,6 +91,7 @@ public class MainActivity extends Activity implements LoginEventListener {
         super.onResume();
 
         checkWiFi();
+        checkPlayServices();
 
         EventBus.getDefault().register(this);
     }
@@ -117,7 +147,7 @@ public class MainActivity extends Activity implements LoginEventListener {
 
     public void onEvent(WhenEvents.DoneEvent nre) {
         if (Storage.isRuleEditing()) switchFragment(FragNames.RULE_EDIT);
-        else switchFragment(FragNames.values()[++fragmentPos]);
+        else switchFragment(FragNames.values()[++mFragPosition]);
     }
 
     public void onEvent(WhenEvents.DoneCreateEvent nfd) {
@@ -141,8 +171,8 @@ public class MainActivity extends Activity implements LoginEventListener {
     }
 
     private void switchToPrevious() {
-        if (--fragmentPos >= 0) {
-            switchFragment(FragNames.values()[fragmentPos]);
+        if (--mFragPosition >= 0) {
+            switchFragment(FragNames.values()[mFragPosition]);
         } else {
             super.onBackPressed();
         }
@@ -151,7 +181,7 @@ public class MainActivity extends Activity implements LoginEventListener {
     private void switchFragment(FragNames name) {
         switch (name) {
             case MAIN:
-                fragmentPos = 0;
+                mFragPosition = 0;
                 mCurrentFragment = MainFragment.newInstance();
                 break;
             case TRANS:
@@ -170,7 +200,7 @@ public class MainActivity extends Activity implements LoginEventListener {
                 mCurrentFragment = RuleEditFragment.newInstance();
                 break;
             default:
-                fragmentPos = 0;
+                mFragPosition = 0;
                 mCurrentFragment = MainFragment.newInstance();
         }
 
@@ -179,7 +209,7 @@ public class MainActivity extends Activity implements LoginEventListener {
     }
 
     private void toggleNavigationButtons(boolean main) {
-        mNavigationClear.setVisibility(main ? View.VISIBLE : View.GONE);
+        mNavigationClear.setVisibility(View.GONE);
         mNavigationNewRule.setVisibility(main ? View.VISIBLE : View.GONE);
         mNavigationLogOut.setVisibility(main ? View.VISIBLE : View.GONE);
 
@@ -250,5 +280,142 @@ public class MainActivity extends Activity implements LoginEventListener {
                         switchFragment(FragNames.MAIN);
                     }
                 });
+    }
+
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i("MainActivity", "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+//    public void sendEcho() {
+//        new AsyncTask<Void, Void, String>() {
+//            @Override
+//            protected String doInBackground(Void... params) {
+//                String msg;
+//                try {
+//                    Bundle data = new Bundle();
+//                    data.putString("my_message", "Hello World");
+//                    data.putString("my_action", "com.google.android.gcm.demo.app.ECHO_NOW");
+//                    String id = Integer.toString(msgId.incrementAndGet());
+//                    mGoogleCloudMessaging.send(SENDER_ID + "@gcm.googleapis.com", id, data);
+//                    msg = "Sent message";
+//                } catch (IOException ex) {
+//                    msg = "Error :" + ex.getMessage();
+//                }
+//
+//                return msg;
+//            }
+//
+//            @Override
+//            protected void onPostExecute(String msg) {
+//                Log.e("MA", msg + "\n");
+//            }
+//        }.execute(null, null, null);
+//    }
+
+    /**
+     * Stores the registration ID and the app versionCode in the application's
+     * {@code SharedPreferences}.
+     *
+     * @param regId registration ID
+     */
+    private void storeRegistrationId(String regId) {
+        Storage.saveGmsRegId(regId);
+        Storage.saveGmsAppVersion(getAppVersion(getApplicationContext()));
+    }
+
+    /**
+     * Gets the current registration ID for application on GCM service, if there is one.
+     *
+     * @return registration ID, or empty string if there is no existing registration ID.
+     */
+    private String getRegistrationId() {
+        String registrationId = Storage.loadGmsRegistrationId();
+
+        if (registrationId.isEmpty()) {
+            return "";
+        }
+
+        // Check if app was updated; if so, it must clear the registration ID
+        // since the existing regID is not guaranteed to work with the new
+        // app version.
+        int registeredVersion = Storage.loadGmsAppVersion();
+        int currentVersion = getAppVersion(getApplicationContext());
+        if (registeredVersion != currentVersion) {
+            Log.i("MainActivity", "App version changed.");
+            return "";
+        }
+        return registrationId;
+    }
+
+    /**
+     * Registers the application with GCM servers asynchronously.
+     * <p/>
+     * Stores the registration ID and the app versionCode in the application's
+     * shared preferences.
+     */
+    private void registerInBackground() {
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg;
+                try {
+                    if (mGoogleCloudMessaging == null) {
+                        mGoogleCloudMessaging = GoogleCloudMessaging.getInstance(getApplicationContext());
+                    }
+                    mRegId = mGoogleCloudMessaging.register(SENDER_ID);
+                    msg = "Device registered, registration ID=" + mRegId;
+
+                    // You should send the registration ID to your server over HTTP, so it
+                    // can use GCM/HTTP or CCS to send messages to your app.
+                    sendRegistrationIdToBackend();
+
+                    storeRegistrationId(mRegId);
+                } catch (IOException ex) {
+                    msg = "Error :" + ex.getMessage();
+                }
+                return msg;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                Log.w("MainActivity", msg);
+            }
+        }.execute(null, null, null);
+    }
+
+    private static int getAppVersion(Context context) {
+        try {
+            PackageInfo packageInfo = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException("Could not get package name: " + e);
+        }
+    }
+
+    /**
+     * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP or CCS to send
+     * messages to your app. Not needed for this demo since the device sends upstream messages
+     * to a server that echoes back the message using the 'from' address in the message.
+     */
+    private void sendRegistrationIdToBackend() {
+        // Your implementation here.
     }
 }

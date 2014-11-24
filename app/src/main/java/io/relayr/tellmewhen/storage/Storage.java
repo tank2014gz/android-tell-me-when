@@ -13,6 +13,9 @@ public class Storage {
     private static final String USER_ID = "user.id";
     private static final String TRANSMITTER_CONTROL = "transmitter.control";
 
+    private static final String PROPERTY_REG_ID = "registration_id";
+    private static final String PROPERTY_APP_VERSION = "appVersion";
+
     private static final String RULE_NOTIFYING = "rule.notifying";
     private static final String RULE_NAME = "rule.name";
     private static final String RULE_TRANS_ID = "rule.trans.id";
@@ -168,6 +171,23 @@ public class Storage {
 
     public static void setRuleEditing(boolean sEditingRule) {
         Storage.sEditingRule = sEditingRule;
+    }
 
+    public static void saveGmsRegId(String regId) {
+        save(PROPERTY_REG_ID, regId);
+    }
+
+    public static void saveGmsAppVersion(int appVersion) {
+        SharedPreferences.Editor editor = sStorage.edit();
+        editor.putInt(PROPERTY_APP_VERSION, appVersion);
+        editor.apply();
+    }
+
+    public static String loadGmsRegistrationId() {
+        return sStorage.getString(PROPERTY_REG_ID, "");
+    }
+
+    public static int loadGmsAppVersion() {
+        return sStorage.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
     }
 }

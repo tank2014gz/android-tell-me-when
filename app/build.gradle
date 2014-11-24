@@ -30,5 +30,6 @@ dependencies {
     compile 'com.jakewharton:butterknife:6.0.0'
     compile 'com.android.support:appcompat-v7:21.0.2'
     compile 'io.relayr:android-sdk:0.0.4'
+    compile 'com.google.android.gms:play-services:6.1.71'
     compile project(':AndroidCommons:RelayrCommons')
 }
