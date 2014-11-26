@@ -1,7 +1,6 @@
 package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +11,12 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
-import de.greenrobot.event.EventBus;
 import io.relayr.RelayrSdk;
 import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.TransmitterAdapter;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 import rx.Subscriber;
 import rx.Subscription;
@@ -25,7 +24,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class TransmitterFragment extends Fragment {
+public class TransmitterFragment extends WhatFragment {
 
     @InjectView(R.id.list_view) ListView mListView;
 
@@ -39,11 +38,11 @@ public class TransmitterFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        onCreateView(inflater, container, savedInstanceState, R.string.title_select_transmitter);
+
         View view = inflater.inflate(R.layout.transmitter_fragment, container, false);
 
         ButterKnife.inject(this, view);
-        getActivity().setTitle(R.string
-                .title_select_transmitter);
 
         mTransmitterAdapter = new TransmitterAdapter(this.getActivity());
         mListView.setAdapter(mTransmitterAdapter);
@@ -65,20 +64,18 @@ public class TransmitterFragment extends Fragment {
         if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        ButterKnife.reset(this);
-    }
-
     @OnItemClick(R.id.list_view)
     public void onItemClick(int position) {
-        Storage.saveRuleTransId(mTransmitterAdapter.getItem(position).id);
-        Storage.saveRuleTransName(mTransmitterAdapter.getItem(position).getName());
-        Storage.saveRuleTransType("Relayr WunderBar");
+        Storage.getRule().setTransmitterId(mTransmitterAdapter.getItem(position).id);
+        Storage.getRule().setTransmitterName(mTransmitterAdapter.getItem(position).getName());
+        Storage.getRule().setTransmitterType("Relayr WunderBar");
 
-        EventBus.getDefault().post(new WhenEvents.DoneEvent());
+        switchToEdit(FragmentName.SENSOR);
+    }
+
+    @Override
+    void onBackPressed() {
+        switchToEdit(FragmentName.MAIN);
     }
 
     private void loadTransmitters() {

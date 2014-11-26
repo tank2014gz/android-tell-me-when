@@ -1,6 +1,5 @@
 package io.relayr.tellmewhen.app;
 
-import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -16,13 +15,13 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 
-public class RuleNameFragment extends Fragment {
+public class RuleNameFragment extends WhatFragment {
 
     @InjectView(R.id.nf_rule_name_et) EditText mRuleName;
 
@@ -32,15 +31,13 @@ public class RuleNameFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.rule_name_fragment, container, false);
-
-        ButterKnife.inject(this, view);
-        getActivity().setTitle(R.string
-                .title_rule_name);
+        onCreateView(inflater, container, savedInstanceState, R.string.title_rule_name);
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
+        View view = inflater.inflate(R.layout.rule_name_fragment, container, false);
+
+        ButterKnife.inject(this, view);
 
         return view;
     }
@@ -62,15 +59,9 @@ public class RuleNameFragment extends Fragment {
         });
 
         toggleKeyboard(true);
+
         mRuleName.requestFocus();
-
-        if (Storage.isRuleEditing()) mRuleName.setText(Storage.loadRuleName());
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.reset(this);
+        if (Storage.isRuleEditing()) mRuleName.setText(Storage.getRule().getName());
     }
 
     @Override
@@ -83,12 +74,17 @@ public class RuleNameFragment extends Fragment {
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
         if (isNameOk()) {
-            Storage.saveRuleName(mRuleName.getText().toString());
+            Storage.getRule().setName(mRuleName.getText().toString());
 
             RuleService.saveRule();
 
-            EventBus.getDefault().post(new WhenEvents.DoneCreateEvent());
+            switchToEdit(FragmentName.MAIN);
         }
+    }
+
+    @Override
+    void onBackPressed() {
+        switchToEdit(FragmentName.RULE_VALUE_CREATE);
     }
 
     private void toggleKeyboard(boolean show) {

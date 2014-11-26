@@ -54,5 +54,6 @@
     <string name="menu_log_out">log out</string>
     <string name="menu_clear">clear</string>
     <string name="menu_new_rule">new rule</string>
+    <string name="button_next">next</string>
 
 </resources>

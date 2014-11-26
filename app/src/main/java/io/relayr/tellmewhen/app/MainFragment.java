@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,7 +19,6 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 import io.relayr.RelayrSdk;
 import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
@@ -29,14 +27,14 @@ import io.relayr.tellmewhen.adapter.RulesAdapter;
 import io.relayr.tellmewhen.model.Notification;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.WhenEvents;
+import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends WhatFragment {
 
     private static final String ON_BOARD_APP_PACKAGE = "io.relayr.wunderbar";
 
@@ -64,6 +62,8 @@ public class MainFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        onCreateView(inflater, container, savedInstanceState, R.string.title_tab_rules);
+
         View view = inflater.inflate(R.layout.main_fragment, container, false);
 
         ButterKnife.inject(this, view);
@@ -83,13 +83,6 @@ public class MainFragment extends Fragment {
 
         if (!Storage.transmitterExists()) checkOnBoarding();
         else checkRules();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        ButterKnife.reset(this);
     }
 
     @Override
@@ -124,7 +117,8 @@ public class MainFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_new_rule) {
-            EventBus.getDefault().post(new WhenEvents.DoneEvent());
+            Storage.prepareRuleForCreate();
+            switchTo(FragmentName.TRANS);
         }
 
         if (item.getItemId() == R.id.action_clear_notifications) {
@@ -133,6 +127,11 @@ public class MainFragment extends Fragment {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    void onBackPressed() {
+        getActivity().onBackPressed();
     }
 
     private void checkOnBoarding() {
@@ -186,9 +185,7 @@ public class MainFragment extends Fragment {
     }
 
     private void checkRules() {
-        loadRules();
-
-        if (mRulesAdapter.isEmpty()) showRulesWarning();
+        if (RuleService.getsDbRules().isEmpty()) showRulesWarning();
         else showRules();
     }
 
@@ -201,7 +198,8 @@ public class MainFragment extends Fragment {
         view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventBus.getDefault().post(new WhenEvents.DoneEvent());
+                Storage.prepareRuleForCreate();
+                switchTo(FragmentName.TRANS);
             }
         });
 
@@ -223,32 +221,27 @@ public class MainFragment extends Fragment {
 
     private void showRules() {
         toggleTabs(true);
-        loadRules();
+
+        mRulesAdapter.clear();
+        mRulesAdapter.addAll(RuleService.getsDbRules());
 
         mListView.setAdapter(mRulesAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                EventBus.getDefault().post(new WhenEvents.StartEditEvent(mRulesAdapter.getItem(pos)));
+                Storage.prepareRuleForEdit(mRulesAdapter.getItem(pos));
+                switchTo(FragmentName.RULE_EDIT);
             }
         });
     }
 
-    private void loadRules() {
-        mRulesAdapter.clear();
-        mRulesAdapter.addAll(RuleService.getsDbRules());
-    }
-
     private void showNotifications() {
         toggleTabs(false);
-        loadNotifications();
 
-        mListView.setAdapter(mNotificationsAdapter);
-    }
-
-    private void loadNotifications() {
         mNotificationsAdapter.add(new Notification());
         isNotificationsEmpty = mNotificationsAdapter.isEmpty();
+
+        mListView.setAdapter(mNotificationsAdapter);
     }
 
     private void toggleTabs(boolean isRules) {

@@ -26,7 +26,7 @@ public class SensorUtil {
 
         sSensorValues.put(SensorType.TEMP, new Pair<Integer, Integer>(-20, 40));
         sSensorValues.put(SensorType.HUM, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.NOISE, new Pair<Integer, Integer>(0, 100));
+        sSensorValues.put(SensorType.NOISE, new Pair<Integer, Integer>(0, 10));
         sSensorValues.put(SensorType.PROX, new Pair<Integer, Integer>(0, 100));
         sSensorValues.put(SensorType.LIGHT, new Pair<Integer, Integer>(0, 100));
         sSensorValues.put(SensorType.ACC, new Pair<Integer, Integer>(-3, 3));

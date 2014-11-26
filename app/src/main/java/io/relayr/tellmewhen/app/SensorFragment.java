@@ -1,7 +1,6 @@
 package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +12,12 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
-import de.greenrobot.event.EventBus;
 import io.relayr.RelayrSdk;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.SensorAdapter;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import io.relayr.tellmewhen.util.WhenEvents;
@@ -28,7 +27,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class SensorFragment extends Fragment {
+public class SensorFragment extends WhatFragment {
 
     @InjectView(R.id.list_view) ListView mListView;
 
@@ -42,11 +41,11 @@ public class SensorFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        onCreateView(inflater, container, savedInstanceState, R.string.title_select_sensor);
+
         View view = inflater.inflate(R.layout.sensor_fragment, container, false);
 
         ButterKnife.inject(this, view);
-        getActivity().setTitle(R.string
-                        .title_select_sensor);
 
         mListView.setAdapter(new SensorAdapter(this.getActivity()));
 
@@ -67,22 +66,20 @@ public class SensorFragment extends Fragment {
         if (!mDevicesSubscription.isUnsubscribed()) mDevicesSubscription.unsubscribe();
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        ButterKnife.reset(this);
-    }
-
     @OnItemClick(R.id.list_view)
     public void onItemClick(int position) {
         mSensorType = SensorUtil.getSensors().get(position);
         saveSensorData();
     }
 
+    @Override
+    void onBackPressed() {
+        switchToEdit(FragmentName.TRANS);
+    }
+
     private void loadDevices() {
         mDevicesSubscription = RelayrSdk.getRelayrApi()
-                .getTransmitterDevices(Storage.loadRuleTransId())
+                .getTransmitterDevices(Storage.getRule().getTransmitterId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
@@ -108,10 +105,11 @@ public class SensorFragment extends Fragment {
         if (mSensorType != null && !mTransmitters.isEmpty()) {
             for (TransmitterDevice transmitter : mTransmitters) {
                 if (transmitter.getModel().equals(mSensorType.getModel())) {
-                    Storage.saveRuleSensor(mSensorType);
-                    Storage.saveRuleSensorId(transmitter.id);
+                    Storage.getRule().setSensorType(mSensorType);
+                    Storage.getRule().setSensorId(transmitter.id);
 
-                    EventBus.getDefault().post(new WhenEvents.DoneEvent());
+                    if (Storage.isRuleEditing()) switchTo(FragmentName.RULE_VALUE_EDIT);
+                    else switchTo(FragmentName.RULE_VALUE_CREATE);
                 }
             }
         }

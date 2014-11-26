@@ -1,9 +1,11 @@
 package io.relayr.tellmewhen.model;
 
+import java.io.Serializable;
+
 import io.relayr.tellmewhen.util.OperatorType;
 import io.relayr.tellmewhen.util.SensorType;
 
-public class Rule {
+public class Rule implements Serializable {
 
     private boolean isNotifying;
 
@@ -13,8 +15,13 @@ public class Rule {
     private String transmitterName;
     private SensorType sensorType;
     private OperatorType operatorType;
-    private int value;
+    private Integer value;
     private String sensorId;
+
+    public Rule() {
+        this.transmitterType = "Relayr WunderBar";
+        this.isNotifying = true;
+    }
 
     public Rule(String transmitterName) {
         this.transmitterName = transmitterName;
@@ -70,11 +77,11 @@ public class Rule {
         this.operatorType = operatorType;
     }
 
-    public int getValue() {
+    public Integer getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(Integer value) {
         this.value = value;
     }
 

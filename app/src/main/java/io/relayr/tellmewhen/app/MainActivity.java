@@ -1,5 +1,6 @@
 package io.relayr.tellmewhen.app;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,18 +16,16 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
@@ -34,6 +33,7 @@ import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.gcm.GcmUtils;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 import rx.Subscriber;
 import rx.Subscription;
@@ -45,18 +45,14 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     private static final String SENDER_ID = "731084512451";
 
-    public enum FragNames {
-        MAIN, TRANS, SENSOR, RULE_VALUE, RULE_NAME, RULE_EDIT
-    }
-
-    private int mFragPosition = 0;
-    private Fragment mCurrentFragment;
     private AlertDialog mNetworkDialog;
     private Subscription mUserInfoSubscription = Subscriptions.empty();
 
     private String mRegId;
     private GoogleCloudMessaging mGoogleCloudMessaging;
     private AtomicInteger msgId = new AtomicInteger();
+
+    private FragmentName mCurrentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +64,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
         ButterKnife.inject(this);
 
-        if (GcmUtils.checkPlayServices(this)) {
+        if (checkPlayServices(this)) {
             mGoogleCloudMessaging = GoogleCloudMessaging.getInstance(this);
             mRegId = GcmUtils.getRegistrationId(getApplicationContext());
 
@@ -85,8 +81,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         super.onResume();
 
         checkWiFi();
-
-        if (!GcmUtils.checkPlayServices(this)) finish();
+        checkPlayServices(this);
 
         EventBus.getDefault().register(this);
     }
@@ -119,15 +114,10 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     public void onBackClicked() {
-        if (Storage.isRuleEditing()) {
-            if (mCurrentFragment instanceof RuleEditFragment) {
-                onEvent(new WhenEvents.DoneEditEvent());
-            } else {
-                switchFragment(FragNames.RULE_EDIT);
-            }
-        } else {
-            switchToPrevious();
-        }
+        if (mCurrentFragment.equals(FragmentName.MAIN))
+            super.onBackPressed();
+        else
+            EventBus.getDefault().post(new WhenEvents.BackPressed());
     }
 
     @Override
@@ -147,66 +137,41 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         return super.onOptionsItemSelected(item);
     }
 
-    public void onEvent(WhenEvents.DoneEvent nre) {
-        if (Storage.isRuleEditing()) switchFragment(FragNames.RULE_EDIT);
-        else switchFragment(FragNames.values()[++mFragPosition]);
+    public void onEvent(WhenEvents.ShowFragment sf) {
+        switchFragment(sf.getName());
     }
 
-    public void onEvent(WhenEvents.DoneCreateEvent nfd) {
-        if (Storage.isRuleEditing()) switchFragment(FragNames.RULE_EDIT);
-        else switchFragment(FragNames.MAIN);
-    }
+    private void switchFragment(FragmentName name) {
+        mCurrentFragment = name;
 
-    public void onEvent(WhenEvents.StartEditEvent dee) {
-        Storage.setRuleEditing(true);
-        Storage.prepareRuleForEdit(dee.getRule());
-        switchFragment(FragNames.RULE_EDIT);
-    }
-
-    public void onEvent(WhenEvents.EditEvent ee) {
-        switchFragment(ee.getFrag());
-    }
-
-    public void onEvent(WhenEvents.DoneEditEvent dee) {
-        Storage.setRuleEditing(false);
-        switchFragment(FragNames.MAIN);
-    }
-
-    private void switchToPrevious() {
-        if (--mFragPosition >= 0) {
-            switchFragment(FragNames.values()[mFragPosition]);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    private void switchFragment(FragNames name) {
+        Fragment fragment;
         switch (name) {
             case MAIN:
-                mFragPosition = 0;
-                mCurrentFragment = MainFragment.newInstance();
+                fragment = MainFragment.newInstance();
                 break;
             case TRANS:
-                mCurrentFragment = TransmitterFragment.newInstance();
+                fragment = TransmitterFragment.newInstance();
                 break;
             case SENSOR:
-                mCurrentFragment = SensorFragment.newInstance();
+                fragment = SensorFragment.newInstance();
                 break;
-            case RULE_VALUE:
-                mCurrentFragment = RuleValueFragment.newInstance();
+            case RULE_VALUE_CREATE:
+                fragment = RuleValueCreateFragment.newInstance();
+                break;
+            case RULE_VALUE_EDIT:
+                fragment = RuleValueEditFragment.newInstance();
                 break;
             case RULE_NAME:
-                mCurrentFragment = RuleNameFragment.newInstance();
+                fragment = RuleNameFragment.newInstance();
                 break;
             case RULE_EDIT:
-                mCurrentFragment = RuleEditFragment.newInstance();
+                fragment = RuleEditFragment.newInstance();
                 break;
             default:
-                mFragPosition = 0;
-                mCurrentFragment = MainFragment.newInstance();
+                fragment = MainFragment.newInstance();
         }
 
-        showFragment(mCurrentFragment);
+        showFragment(fragment);
     }
 
     private void showFragment(Fragment fragment) {
@@ -251,27 +216,51 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void loadUserInfo() {
-        mUserInfoSubscription = RelayrSdk.getRelayrApi()
-                .getUserInfo()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<User>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+        if (Storage.loadUserId() == null) {
+            mUserInfoSubscription = RelayrSdk.getRelayrApi()
+                    .getUserInfo()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Subscriber<User>() {
+                        @Override
+                        public void onCompleted() {
+                        }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Toast.makeText(MainActivity.this, R.string.err_loading_user_data,
-                                Toast.LENGTH_SHORT).show();
-                    }
+                        @Override
+                        public void onError(Throwable e) {
+                            Toast.makeText(MainActivity.this, R.string.err_loading_user_data,
+                                    Toast.LENGTH_SHORT).show();
+                        }
 
-                    @Override
-                    public void onNext(User user) {
-                        Storage.saveUserId(user.id);
-                        switchFragment(FragNames.MAIN);
-                    }
-                });
+                        @Override
+                        public void onNext(User user) {
+                            Storage.saveUserId(user.id);
+                            switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
+                        }
+                    });
+        } else {
+            switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
+        }
+    }
+
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    private boolean checkPlayServices(Activity context) {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
+
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, context,
+                        GcmUtils.PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i("MainActivity", "This device is not supported.");
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -290,7 +279,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
                         mGoogleCloudMessaging = GoogleCloudMessaging.getInstance(getApplicationContext());
                     }
                     mRegId = mGoogleCloudMessaging.register(SENDER_ID);
-                    msg = "Device registered, registration ID=" + mRegId;
+                    msg = "Registration ID=" + mRegId;
 
                     // You should send the registration ID to your server over HTTP, so it
                     // can use GCM/HTTP or CCS to send messages to your app.
@@ -306,7 +295,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
             @Override
             protected void onPostExecute(String msg) {
-                Log.w("MainActivity", msg);
+                Log.e("MainActivity", msg);
             }
         }.execute(null, null, null);
     }

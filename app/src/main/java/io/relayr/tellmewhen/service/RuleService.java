@@ -11,7 +11,7 @@ public class RuleService {
     private static List<Rule> sDbRules = new ArrayList<Rule>();
 
     public static void saveRule(){
-        sDbRules.add(Storage.composeRule());
+        sDbRules.add(Storage.getRule());
     }
 
     public static List<Rule> getsDbRules() {

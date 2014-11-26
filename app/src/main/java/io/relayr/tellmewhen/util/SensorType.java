@@ -1,8 +1,10 @@
 package io.relayr.tellmewhen.util;
 
+import java.io.Serializable;
+
 import io.relayr.model.DeviceModel;
 
-public enum SensorType {
+public enum SensorType implements Serializable{
 
     TEMP("temperature", "°C", DeviceModel.TEMPERATURE_HUMIDITY),
     HUM("humidity", "%", DeviceModel.TEMPERATURE_HUMIDITY),

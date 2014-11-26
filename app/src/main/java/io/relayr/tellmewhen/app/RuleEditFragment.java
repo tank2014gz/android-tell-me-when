@@ -1,7 +1,7 @@
 package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +12,14 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.SensorUtil;
 import io.relayr.tellmewhen.util.WhenEvents;
 
-public class RuleEditFragment extends Fragment {
+public class RuleEditFragment extends WhatFragment {
 
     @InjectView(R.id.ref_notification_switch) Switch mRuleSwitch;
 
@@ -40,62 +40,62 @@ public class RuleEditFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        onCreateView(inflater, container, savedInstanceState, R.string.title_rule_edit);
+
         View view = inflater.inflate(R.layout.rule_edit_fragment, container, false);
 
         ButterKnife.inject(this, view);
-        getActivity().setTitle(R.string
-                .title_rule_edit);
-
-        ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.button_done));
-
-        populateRuleData();
 
         return view;
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.reset(this);
-    }
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-    private void populateRuleData() {
-        mRuleSwitch.setChecked(Storage.loadRuleNotifyState());
+        mRuleSwitch.setChecked(Storage.getRule().isNotifying());
 
-        mRuleName.setText(Storage.loadRuleName());
+        mRuleName.setText(Storage.getRule().getName());
 
-        mTransType.setText(Storage.loadRuleTransType());
-        mTransName.setText(Storage.loadRuleTransName());
+        mTransType.setText(Storage.getRule().getTransmitterType());
+        mTransName.setText(Storage.getRule().getTransmitterName());
 
-        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.loadRuleSensor()));
-        mSensorName.setText(SensorUtil.getTitle(Storage.loadRuleSensor()));
+        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.getRule().getSensorType()));
+        mSensorName.setText(SensorUtil.getTitle(Storage.getRule().getSensorType()));
 
-        mRuleValue.setText(Storage.loadRuleOperator().getName() + " " + Storage.loadRuleValue());
+        mRuleValue.setText(Storage.getRule().getOperatorType().getName() + " " + Storage.getRule()
+                .getValue() + " " + Storage.getRule().getSensorType().getUnit());
     }
 
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
         RuleService.saveRule();
-        EventBus.getDefault().post(new WhenEvents.DoneEditEvent());
+        Storage.setRuleEditing(false);
+        switchTo(FragmentName.MAIN);
     }
 
     @OnClick(R.id.ref_rule_name_edit)
     public void onNameEdit() {
-        EventBus.getDefault().post(new WhenEvents.EditEvent(MainActivity.FragNames.RULE_NAME));
+        switchTo(FragmentName.RULE_NAME);
     }
 
     @OnClick(R.id.ref_transmitter_edit)
     public void onTransmitterEdit() {
-        EventBus.getDefault().post(new WhenEvents.EditEvent(MainActivity.FragNames.TRANS));
+        switchTo(FragmentName.TRANS);
     }
 
     @OnClick(R.id.ref_sensor_edit)
     public void onSensorEdit() {
-        EventBus.getDefault().post(new WhenEvents.EditEvent(MainActivity.FragNames.SENSOR));
+        switchTo(FragmentName.SENSOR);
     }
 
     @OnClick(R.id.ref_rule_value_edit)
     public void onValueEdit() {
-        EventBus.getDefault().post(new WhenEvents.EditEvent(MainActivity.FragNames.RULE_VALUE));
+        switchTo(FragmentName.RULE_VALUE_EDIT);
+    }
+
+    @Override
+    void onBackPressed() {
+        switchTo(FragmentName.MAIN);
     }
 }

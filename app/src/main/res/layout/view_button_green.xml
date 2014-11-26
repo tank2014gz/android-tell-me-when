@@ -8,4 +8,5 @@
     android:padding="@dimen/button_done_padding"
     android:textSize="@dimen/button_done_text_size"
     android:gravity="center_horizontal"
+    android:text="@string/button_done"
     style="@style/BoldText" />

@@ -1,6 +1,8 @@
 package io.relayr.tellmewhen.util;
 
-public enum OperatorType {
+import java.io.Serializable;
+
+public enum OperatorType implements Serializable{
 
     EQUALS("="), GREATER(">"), LESS("<");
 

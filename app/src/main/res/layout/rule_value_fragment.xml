@@ -138,6 +138,7 @@
     </ScrollView>
 
     <include
+        android:id="@+id/button_done"
         layout="@layout/view_button_green"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

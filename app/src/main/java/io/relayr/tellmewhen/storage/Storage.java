@@ -2,6 +2,7 @@ package io.relayr.tellmewhen.storage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Pair;
 
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.util.OperatorType;
@@ -28,6 +29,9 @@ public class Storage {
 
     private static SharedPreferences sStorage = null;
     private static boolean sEditingRule = false;
+
+    private static Rule createRule = null;
+    private static Pair<String, SensorType> originalSensor = null;
 
     private Storage(Context context) {
         sStorage = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
@@ -57,112 +61,29 @@ public class Storage {
         return sStorage.getBoolean(TRANSMITTER_CONTROL, false);
     }
 
-    public static void saveRuleName(String name) {
-        save(RULE_NAME, name);
-    }
-
-    public static void saveRuleTransId(String transId) {
-        save(RULE_TRANS_ID, transId);
-    }
-
-    public static void saveRuleTransName(String name) {
-        save(RULE_TRANS_NAME, name);
-    }
-
-    public static void saveRuleTransType(String type) {
-        save(RULE_TRANS_TYPE, type);
-    }
-
-    public static void saveRuleSensor(SensorType type) {
-        save(RULE_SENSOR, type.getName());
-    }
-
-    public static void saveRuleSensorId(String sensorId) {
-        save(RULE_SENSOR_ID, sensorId);
-    }
-
-    public static void saveRuleOperator(OperatorType type) {
-        save(RULE_OPERATOR, type.getName());
-    }
-
-    public static void saveRuleNotifyState(boolean state) {
-        SharedPreferences.Editor editor = sStorage.edit();
-        editor.putBoolean(RULE_NOTIFYING, state);
-        editor.apply();
-    }
-
-    public static void saveRuleValue(int value) {
-        SharedPreferences.Editor editor = sStorage.edit();
-        editor.putInt(RULE_VALUE, value);
-        editor.apply();
-    }
-
-    public static String loadRuleName() {
-        return sStorage.getString(RULE_NAME, null);
-    }
-
-    public static String loadRuleTransId() {
-        return sStorage.getString(RULE_TRANS_ID, null);
-    }
-
-    public static String loadRuleTransName() {
-        return sStorage.getString(RULE_TRANS_NAME, null);
-    }
-
-    public static String loadRuleTransType() {
-        return sStorage.getString(RULE_TRANS_TYPE, null);
-    }
-
-    public static SensorType loadRuleSensor() {
-        return SensorType.getByName(sStorage.getString(RULE_SENSOR, null));
-    }
-
-    public static String loadRuleSensorId() {
-        return sStorage.getString(RULE_SENSOR_ID, null);
-    }
-
-    public static OperatorType loadRuleOperator() {
-        return OperatorType.getByName(sStorage.getString(RULE_OPERATOR, null));
-    }
-
-    public static int loadRuleValue() {
-        return sStorage.getInt(RULE_VALUE, 0);
-    }
-
-    public static boolean loadRuleNotifyState() {
-        return sStorage.getBoolean(RULE_NOTIFYING, true);
-    }
-
     public static void save(String path, String value) {
         SharedPreferences.Editor editor = sStorage.edit();
         editor.putString(path, value);
         editor.apply();
     }
 
-    public static Rule composeRule() {
-        Rule r = new Rule(loadRuleTransName());
-        r.setTransmitterId(loadRuleTransId());
-        r.setTransmitterType(loadRuleTransType());
-        r.setOperatorType(loadRuleOperator());
-        r.setSensorType(loadRuleSensor());
-        r.setSensorId(loadRuleSensorId());
-        r.setValue(loadRuleValue());
-        r.setName(loadRuleName());
-        r.setNotifying(loadRuleNotifyState());
+    public static void prepareRuleForCreate() {
+        createRule = new Rule();
+    }
 
-        return r;
+    public static Rule getRule() {
+        return createRule;
+    }
+
+    public static Pair<String, SensorType> getOriginalSensor() {
+        return originalSensor;
     }
 
     public static void prepareRuleForEdit(Rule rule) {
-        saveRuleName(rule.getName());
-        saveRuleNotifyState(rule.isNotifying());
-        saveRuleTransId(rule.getTransmitterId());
-        saveRuleTransType(rule.getTransmitterType());
-        saveRuleTransName(rule.getTransmitterName());
-        saveRuleSensor(rule.getSensorType());
-        saveRuleSensorId(rule.getSensorId());
-        saveRuleOperator(rule.getOperatorType());
-        saveRuleValue(rule.getValue());
+        setRuleEditing(true);
+
+        createRule = rule;
+        originalSensor = new Pair<String, SensorType>(rule.getSensorId(), rule.getSensorType());
     }
 
     public static boolean isRuleEditing() {
