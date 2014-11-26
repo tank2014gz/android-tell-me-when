@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -19,13 +18,14 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import de.timroes.android.listview.EnhancedListView;
 import io.relayr.RelayrSdk;
 import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.adapter.RulesAdapter;
 import io.relayr.tellmewhen.model.Notification;
-import io.relayr.tellmewhen.service.RuleService;
+import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
@@ -39,7 +39,7 @@ public class MainFragment extends WhatFragment {
     private static final String ON_BOARD_APP_PACKAGE = "io.relayr.wunderbar";
 
     @InjectView(R.id.warning_layout) ViewGroup mWarningLayout;
-    @InjectView(R.id.list_view) ListView mListView;
+    @InjectView(R.id.list_view) EnhancedListView mListView;
 
     @InjectView(R.id.tab_rules) View mTabRules;
     @InjectView(R.id.tab_notifications) View mTabNotifications;
@@ -48,6 +48,7 @@ public class MainFragment extends WhatFragment {
     private NotificationsAdapter mNotificationsAdapter;
 
     private Subscription mTransmitterSubscription = Subscriptions.empty();
+    private Subscription mRulesSubscription = Subscriptions.empty();
 
     private MenuItem mMenuNewRule;
     private MenuItem mMenuClearItem;
@@ -81,7 +82,7 @@ public class MainFragment extends WhatFragment {
     public void onResume() {
         super.onResume();
 
-        if (!Storage.transmitterExists()) checkOnBoarding();
+        if (!Storage.isUserOnBoarded()) checkOnBoarding();
         else checkRules();
     }
 
@@ -90,6 +91,7 @@ public class MainFragment extends WhatFragment {
         super.onDestroy();
 
         if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
+        if (!mRulesSubscription.isUnsubscribed()) mRulesSubscription.unsubscribe();
     }
 
     @OnClick(R.id.tab_rules)
@@ -150,7 +152,7 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void onNext(List<Transmitter> transmitters) {
-                        Storage.saveTransmiterState(!transmitters.isEmpty());
+                        Storage.userOnBoarded(!transmitters.isEmpty());
 
                         isOnBoarded = !transmitters.isEmpty();
 
@@ -176,7 +178,8 @@ public class MainFragment extends WhatFragment {
                             Uri.parse("market://details?id=" + ON_BOARD_APP_PACKAGE)));
                 } catch (android.content.ActivityNotFoundException anfe) {
                     startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://play.google.com/store/apps/details?id=" + ON_BOARD_APP_PACKAGE)));
+                            Uri.parse("http://play.google.com/store/apps/details?id=" +
+                                    ON_BOARD_APP_PACKAGE)));
                 }
             }
         });
@@ -185,8 +188,27 @@ public class MainFragment extends WhatFragment {
     }
 
     private void checkRules() {
-        if (RuleService.getsDbRules().isEmpty()) showRulesWarning();
-        else showRules();
+        mRulesSubscription = mRuleService.getRules()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Rule>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(List<Rule> rules) {
+                        mRulesAdapter.clear();
+                        mRulesAdapter.addAll(rules);
+
+                        if (rules.isEmpty()) showRulesWarning();
+                        else showRules();
+                    }
+                });
     }
 
     private void showRulesWarning() {
@@ -194,7 +216,7 @@ public class MainFragment extends WhatFragment {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View view = inflater.inflate(R.layout.warning_no_rules, null, false);
-        ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.warning_no_rules_btn_text));
+        ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.warn_no_rules_btn));
         view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -222,10 +244,25 @@ public class MainFragment extends WhatFragment {
     private void showRules() {
         toggleTabs(true);
 
-        mRulesAdapter.clear();
-        mRulesAdapter.addAll(RuleService.getsDbRules());
-
         mListView.setAdapter(mRulesAdapter);
+        mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
+            @Override
+            public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
+                final Rule item = mRulesAdapter.getItem(position);
+                mRulesAdapter.remove(item);
+                return new EnhancedListView.Undoable() {
+                    @Override
+                    public void undo() {
+                        mRulesAdapter.insert(item, position);
+                    }
+                };
+            }
+        });
+        mListView.setSwipingLayout(R.id.swipe_object);
+        mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
+        mListView.enableSwipeToDismiss();
+        mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
+
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {

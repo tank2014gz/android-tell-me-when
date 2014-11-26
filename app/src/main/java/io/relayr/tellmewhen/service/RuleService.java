@@ -1,20 +1,15 @@
 package io.relayr.tellmewhen.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.relayr.tellmewhen.model.Rule;
-import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.model.Status;
+import rx.Observable;
 
-public class RuleService {
+public interface RuleService {
 
-    private static List<Rule> sDbRules = new ArrayList<Rule>();
+    public Observable<Status> saveRule();
 
-    public static void saveRule(){
-        sDbRules.add(Storage.getRule());
-    }
+    public Observable<List<Rule>> getRules();
 
-    public static List<Rule> getsDbRules() {
-        return sDbRules;
-    }
 }

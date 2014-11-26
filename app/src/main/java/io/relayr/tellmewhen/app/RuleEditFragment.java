@@ -13,11 +13,9 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.SensorUtil;
-import io.relayr.tellmewhen.util.WhenEvents;
 
 public class RuleEditFragment extends WhatFragment {
 
@@ -69,8 +67,7 @@ public class RuleEditFragment extends WhatFragment {
 
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
-        RuleService.saveRule();
-        Storage.setRuleEditing(false);
+        mRuleService.saveRule();
         switchTo(FragmentName.MAIN);
     }
 

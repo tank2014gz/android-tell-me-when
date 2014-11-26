@@ -5,30 +5,18 @@ import android.content.SharedPreferences;
 import android.util.Pair;
 
 import io.relayr.tellmewhen.model.Rule;
-import io.relayr.tellmewhen.util.OperatorType;
 import io.relayr.tellmewhen.util.SensorType;
 
 public class Storage {
 
     private static final String NAME = "Storage";
     private static final String USER_ID = "user.id";
-    private static final String TRANSMITTER_CONTROL = "transmitter.control";
+    private static final String USER_ONBOADRED = "user.onboarded";
 
     private static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
 
-    private static final String RULE_NOTIFYING = "rule.notifying";
-    private static final String RULE_NAME = "rule.name";
-    private static final String RULE_TRANS_ID = "rule.trans.id";
-    private static final String RULE_TRANS_NAME = "rule.trans.name";
-    private static final String RULE_TRANS_TYPE = "rule.trans.type";
-    private static final String RULE_SENSOR = "rule.sensor";
-    private static final String RULE_SENSOR_ID = "rule.sensor.id";
-    private static final String RULE_OPERATOR = "rule.operator";
-    private static final String RULE_VALUE = "rule.value";
-
     private static SharedPreferences sStorage = null;
-    private static boolean sEditingRule = false;
 
     private static Rule createRule = null;
     private static Pair<String, SensorType> originalSensor = null;
@@ -51,14 +39,14 @@ public class Storage {
         return sStorage.getString(USER_ID, null);
     }
 
-    public static void saveTransmiterState(boolean exist) {
+    public static void userOnBoarded(boolean exist) {
         SharedPreferences.Editor editor = sStorage.edit();
-        editor.putBoolean(TRANSMITTER_CONTROL, exist);
+        editor.putBoolean(USER_ONBOADRED, exist);
         editor.apply();
     }
 
-    public static boolean transmitterExists() {
-        return sStorage.getBoolean(TRANSMITTER_CONTROL, false);
+    public static boolean isUserOnBoarded() {
+        return sStorage.getBoolean(USER_ONBOADRED, false);
     }
 
     public static void save(String path, String value) {
@@ -80,18 +68,12 @@ public class Storage {
     }
 
     public static void prepareRuleForEdit(Rule rule) {
-        setRuleEditing(true);
-
         createRule = rule;
         originalSensor = new Pair<String, SensorType>(rule.getSensorId(), rule.getSensorType());
     }
 
     public static boolean isRuleEditing() {
-        return sEditingRule;
-    }
-
-    public static void setRuleEditing(boolean sEditingRule) {
-        Storage.sEditingRule = sEditingRule;
+        return originalSensor != null;
     }
 
     public static void saveGmsRegId(String regId) {
@@ -110,5 +92,11 @@ public class Storage {
 
     public static int loadGmsAppVersion() {
         return sStorage.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
+    }
+
+    public static void clearRuleData() {
+        createRule = null;
+        originalSensor = null;
+
     }
 }

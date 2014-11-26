@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/swipe_object"
               android:layout_width="match_parent"
               android:layout_height="@dimen/default_object_height"
               android:orientation="vertical"
@@ -6,7 +8,8 @@
               android:paddingRight="@dimen/default_object_padding"
               android:layout_marginLeft="@dimen/default_object_padding"
               android:layout_marginRight="@dimen/default_object_padding"
-              android:gravity="center_vertical">
+              android:gravity="center_vertical"
+              android:descendantFocusability="blocksDescendants">
 
     <io.relayr.commons.widget.CustomTextView
         android:id="@+id/object_name"
