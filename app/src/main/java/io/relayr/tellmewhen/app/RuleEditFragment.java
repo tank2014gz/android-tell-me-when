@@ -13,8 +13,11 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
+import io.relayr.tellmewhen.util.OperatorType;
+import io.relayr.tellmewhen.util.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 
 public class RuleEditFragment extends WhatFragment {
@@ -51,18 +54,19 @@ public class RuleEditFragment extends WhatFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mRuleSwitch.setChecked(Storage.getRule().isNotifying());
+        Rule rule = Storage.getRule();
+        mRuleSwitch.setChecked(rule.isNotifying);
 
-        mRuleName.setText(Storage.getRule().getName());
+        mRuleName.setText(rule.name);
 
-        mTransType.setText(Storage.getRule().getTransmitterType());
-        mTransName.setText(Storage.getRule().getTransmitterName());
+        mTransType.setText(rule.transmitterType);
+        mTransName.setText(rule.transmitterName);
 
-        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), Storage.getRule().getSensorType()));
-        mSensorName.setText(SensorUtil.getTitle(Storage.getRule().getSensorType()));
+        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), rule.sensorType));
+        mSensorName.setText(SensorUtil.getTitle(rule.sensorType));
 
-        mRuleValue.setText(Storage.getRule().getOperatorType().getName() + " " + Storage.getRule()
-                .getValue() + " " + Storage.getRule().getSensorType().getUnit());
+        mRuleValue.setText((rule.getOperatorType().getName() + " " +
+                rule.value + " " + rule.getSensorType().getUnit()));
     }
 
     @OnClick(R.id.button_done)

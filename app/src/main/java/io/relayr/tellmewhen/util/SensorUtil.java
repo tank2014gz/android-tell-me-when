@@ -41,7 +41,11 @@ public class SensorUtil {
     }
 
     public static String getTitle(SensorType type) {
-        return sSensorMap.get(type);
+        return getTitle(type.ordinal());
+    }
+
+    public static String getTitle(int type) {
+        return sSensorMap.get(SensorType.byId(type));
     }
 
     public static int getMinValue(SensorType type) {
@@ -53,7 +57,11 @@ public class SensorUtil {
     }
 
     public static int getIcon(Context context, SensorType type) {
-        return context.getResources().getIdentifier("ms_" + type.getName(),
+        return getIcon(context, type.ordinal());
+    }
+
+    public static int getIcon(Context context, int type) {
+        return context.getResources().getIdentifier("ms_" + SensorType.byId(type).getName(),
                 "drawable", context.getPackageName());
     }
 }

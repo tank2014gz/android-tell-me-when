@@ -10,6 +10,6 @@ public interface RuleService {
 
     public Observable<Status> saveRule();
 
-    public Observable<List<Rule>> getRules();
+    public List<Rule> getRules();
 
 }

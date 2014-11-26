@@ -2,6 +2,8 @@ package io.relayr.tellmewhen.service.impl;
 
 import android.util.Base64;
 
+import com.activeandroid.query.Select;
+
 import java.util.List;
 
 import io.relayr.tellmewhen.model.Rule;
@@ -15,7 +17,7 @@ import rx.Observable;
 public class RuleCloudantService implements RuleService {
 
     public static final String API_ENDPOINT = "https://relayr.cloudant.com/bp_test";
-    private  RuleApi sRuleApi;
+    private RuleApi sRuleApi;
 
     private RuleApi getRuleApi() {
         if (sRuleApi == null) {
@@ -42,10 +44,13 @@ public class RuleCloudantService implements RuleService {
     }
 
     public Observable<Status> saveRule() {
-        return getRuleApi().createRule(Storage.loadUserId(), Storage.getRule());
+        Storage.getRule().save();
+
+        return null;
+//        return getRuleApi().createRule(Storage.loadUserId(), Storage.getRule());
     }
 
-    public Observable<List<Rule>> getRules() {
-        return getRuleApi().getRules();
+    public List<Rule> getRules() {
+        return new Select().from(Rule.class).execute();
     }
 }

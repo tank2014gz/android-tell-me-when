@@ -9,14 +9,14 @@ import android.view.ViewGroup;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.service.RuleService;
-import io.relayr.tellmewhen.service.impl.MockRuleService;
+import io.relayr.tellmewhen.service.impl.RuleCloudantService;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 
 public abstract class WhatFragment extends Fragment {
 
-    RuleService mRuleService = new MockRuleService();
+    RuleService mRuleService = new RuleCloudantService();
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, int titleId) {
         getActivity().setTitle(getString(titleId));

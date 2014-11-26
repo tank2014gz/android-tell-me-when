@@ -69,7 +69,7 @@ public class Storage {
 
     public static void prepareRuleForEdit(Rule rule) {
         createRule = rule;
-        originalSensor = new Pair<String, SensorType>(rule.getSensorId(), rule.getSensorType());
+        originalSensor = new Pair<String, SensorType>(rule.sensorId, rule.getSensorType());
     }
 
     public static boolean isRuleEditing() {
@@ -97,6 +97,5 @@ public class Storage {
     public static void clearRuleData() {
         createRule = null;
         originalSensor = null;
-
     }
 }

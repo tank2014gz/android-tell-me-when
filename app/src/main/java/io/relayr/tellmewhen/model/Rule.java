@@ -1,103 +1,32 @@
 package io.relayr.tellmewhen.model;
 
+import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+
 import java.io.Serializable;
 
 import io.relayr.tellmewhen.util.OperatorType;
 import io.relayr.tellmewhen.util.SensorType;
 
-public class Rule implements Serializable {
+@Table(name = "Rule")
+public class Rule extends Model {
 
-    private boolean isNotifying;
-
-    private String name;
-    private String transmitterId;
-    private String transmitterType;
-    private String transmitterName;
-    private SensorType sensorType;
-    private OperatorType operatorType;
-    private Integer value;
-    private String sensorId;
-
-    public Rule() {
-        this.transmitterType = "Relayr WunderBar";
-        this.isNotifying = true;
-    }
-
-    public Rule(String transmitterName) {
-        this.transmitterName = transmitterName;
-        this.transmitterType = "Relayr WunderBar";
-        this.isNotifying = true;
-    }
-
-    public boolean isNotifying() {
-        return isNotifying;
-    }
-
-    public void setNotifying(boolean isNotifying) {
-        this.isNotifying = isNotifying;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getTransmitterType() {
-        return transmitterType;
-    }
-
-    public void setTransmitterType(String transmitterType) {
-        this.transmitterType = transmitterType;
-    }
-
-    public String getTransmitterName() {
-        return transmitterName;
-    }
-
-    public void setTransmitterName(String transmitterName) {
-        this.transmitterName = transmitterName;
-    }
+    @Column(name = "isNotifying") public boolean isNotifying;
+    @Column(name = "name") public String name;
+    @Column(name = "transmitterId") public String transmitterId;
+    @Column(name = "transmitterType") public String transmitterType;
+    @Column(name = "transmitterName") public String transmitterName;
+    @Column(name = "sensorType") public int sensorType;
+    @Column(name = "operatorType") public int operatorType;
+    @Column(name = "value") public Integer value;
+    @Column(name = "sensorId") public String sensorId;
 
     public SensorType getSensorType() {
-        return sensorType;
-    }
-
-    public void setSensorType(SensorType sensorType) {
-        this.sensorType = sensorType;
+        return SensorType.byId(sensorType);
     }
 
     public OperatorType getOperatorType() {
-        return operatorType;
-    }
-
-    public void setOperatorType(OperatorType operatorType) {
-        this.operatorType = operatorType;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
-
-    public void setValue(Integer value) {
-        this.value = value;
-    }
-
-    public void setTransmitterId(String transmitterId) {
-        this.transmitterId = transmitterId;
-    }
-
-    public String getTransmitterId() {
-        return transmitterId;
-    }
-
-    public void setSensorId(String sensorId) {
-        this.sensorId = sensorId;
-    }
-
-    public String getSensorId() {
-        return sensorId;
+        return OperatorType.byId(operatorType);
     }
 }

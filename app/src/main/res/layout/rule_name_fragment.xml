@@ -12,6 +12,7 @@
         android:textSize="@dimen/default_object_title_text_size"
         android:textColor="@color/background"
         android:textColorHint="@color/button_gray_background"
+        android:textCursorDrawable="@null"
         android:background="@android:color/white"
         android:gravity="center"
         android:padding="@dimen/edit_text_padding"
@@ -19,7 +20,8 @@
         android:textStyle="bold"
         android:imeOptions="actionDone"
         android:singleLine="true"
-        android:maxLength="20" />
+        android:maxLength="20"
+        android:textAllCaps="true"/>
 
     <include
         android:id="@+id/button_done"

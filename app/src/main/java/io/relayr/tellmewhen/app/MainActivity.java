@@ -130,7 +130,10 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_log_out)
-            if (RelayrSdk.isUserLoggedIn()) RelayrSdk.logOut();
+            if (RelayrSdk.isUserLoggedIn()) {
+                RelayrSdk.logOut();
+                RelayrSdk.logIn(this, this);
+            }
 
         if (item.getItemId() == android.R.id.home) onBackClicked();
 

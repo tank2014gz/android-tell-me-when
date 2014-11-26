@@ -188,27 +188,11 @@ public class MainFragment extends WhatFragment {
     }
 
     private void checkRules() {
-        mRulesSubscription = mRuleService.getRules()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<Rule>>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+        mRulesAdapter.clear();
+        mRulesAdapter.addAll(mRuleService.getRules());
 
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onNext(List<Rule> rules) {
-                        mRulesAdapter.clear();
-                        mRulesAdapter.addAll(rules);
-
-                        if (rules.isEmpty()) showRulesWarning();
-                        else showRules();
-                    }
-                });
+        if (mRulesAdapter.isEmpty()) showRulesWarning();
+        else showRules();
     }
 
     private void showRulesWarning() {
@@ -258,10 +242,6 @@ public class MainFragment extends WhatFragment {
                 };
             }
         });
-        mListView.setSwipingLayout(R.id.swipe_object);
-        mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
-        mListView.enableSwipeToDismiss();
-        mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -270,6 +250,8 @@ public class MainFragment extends WhatFragment {
                 switchTo(FragmentName.RULE_EDIT);
             }
         });
+
+        initListView();
     }
 
     private void showNotifications() {
@@ -279,6 +261,30 @@ public class MainFragment extends WhatFragment {
         isNotificationsEmpty = mNotificationsAdapter.isEmpty();
 
         mListView.setAdapter(mNotificationsAdapter);
+        mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
+            @Override
+            public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
+                final Notification item = mNotificationsAdapter.getItem(position);
+                mNotificationsAdapter.remove(item);
+                return new EnhancedListView.Undoable() {
+                    @Override
+                    public void undo() {
+                        mNotificationsAdapter.insert(item, position);
+                    }
+                };
+            }
+        });
+
+        mListView.setOnItemClickListener(null);
+
+        initListView();
+    }
+
+    private void initListView(){
+        mListView.setSwipingLayout(R.id.swipe_object);
+        mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
+        mListView.enableSwipeToDismiss();
+        mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
     }
 
     private void toggleTabs(boolean isRules) {

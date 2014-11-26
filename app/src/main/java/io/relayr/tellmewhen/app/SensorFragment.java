@@ -79,7 +79,7 @@ public class SensorFragment extends WhatFragment {
 
     private void loadDevices() {
         mDevicesSubscription = RelayrSdk.getRelayrApi()
-                .getTransmitterDevices(Storage.getRule().getTransmitterId())
+                .getTransmitterDevices(Storage.getRule().transmitterId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
@@ -105,8 +105,8 @@ public class SensorFragment extends WhatFragment {
         if (mSensorType != null && !mTransmitters.isEmpty()) {
             for (TransmitterDevice transmitter : mTransmitters) {
                 if (transmitter.getModel().equals(mSensorType.getModel())) {
-                    Storage.getRule().setSensorType(mSensorType);
-                    Storage.getRule().setSensorId(transmitter.id);
+                    Storage.getRule().sensorType = mSensorType.ordinal();
+                    Storage.getRule().sensorId = transmitter.id;
 
                     if (Storage.isRuleEditing()) switchTo(FragmentName.RULE_VALUE_EDIT);
                     else switchTo(FragmentName.RULE_VALUE_CREATE);

@@ -23,18 +23,13 @@ public class MockRuleService implements RuleService {
         return Observable.create(new Observable.OnSubscribe<Status>() {
             @Override
             public void call(Subscriber<? super Status> subscriber) {
-                subscriber.onNext(new Status("", "", ""));
+                subscriber.onNext(new Status("", "200", ""));
             }
         });
     }
 
     @Override
-    public Observable<List<Rule>> getRules() {
-        return Observable.create(new Observable.OnSubscribe<List<Rule>>() {
-            @Override
-            public void call(Subscriber<? super List<Rule>> subscriber) {
-                subscriber.onNext(sDbRules);
-            }
-        });
+    public List<Rule> getRules() {
+       return sDbRules;
     }
 }

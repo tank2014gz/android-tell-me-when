@@ -66,9 +66,9 @@ public class TransmitterFragment extends WhatFragment {
 
     @OnItemClick(R.id.list_view)
     public void onItemClick(int position) {
-        Storage.getRule().setTransmitterId(mTransmitterAdapter.getItem(position).id);
-        Storage.getRule().setTransmitterName(mTransmitterAdapter.getItem(position).getName());
-        Storage.getRule().setTransmitterType("Relayr WunderBar");
+        Storage.getRule().transmitterId = mTransmitterAdapter.getItem(position).id;
+        Storage.getRule().transmitterName = mTransmitterAdapter.getItem(position).getName();
+        Storage.getRule().transmitterType = "Relayr WunderBar";
 
         switchToEdit(FragmentName.SENSOR);
     }

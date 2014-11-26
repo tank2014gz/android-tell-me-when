@@ -59,7 +59,7 @@ public class RuleNameFragment extends WhatFragment {
         toggleKeyboard(true);
 
         mRuleName.requestFocus();
-        if (Storage.isRuleEditing()) mRuleName.setText(Storage.getRule().getName());
+        if (Storage.isRuleEditing()) mRuleName.setText(Storage.getRule().name);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class RuleNameFragment extends WhatFragment {
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
         if (isNameOk()) {
-            Storage.getRule().setName(mRuleName.getText().toString());
+            Storage.getRule().name = (mRuleName.getText().toString());
 
             mRuleService.saveRule();
 

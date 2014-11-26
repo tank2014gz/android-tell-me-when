@@ -10,6 +10,7 @@ import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.OperatorType;
+import io.relayr.tellmewhen.util.SensorType;
 
 public class RuleValueEditFragment extends WhatFragment {
 
@@ -26,16 +27,17 @@ public class RuleValueEditFragment extends WhatFragment {
         RuleValueView view;
         if (rule.getSensorType().equals(Storage.getOriginalSensor().second))
             view = new RuleValueView(getActivity(), rule.getSensorType(),
-                    rule.getOperatorType(), rule.getValue());
+                    rule.getOperatorType(), rule.value);
         else
             view = new RuleValueView(getActivity(), rule.getSensorType(),
                     OperatorType.LESS, null);
 
+
         view.setOnDoneClickListener(new RuleValueView.OnDoneClickListener() {
             @Override
             public void onDoneClicked(int value, OperatorType mCurrentOperator) {
-                Storage.getRule().setValue(value);
-                Storage.getRule().setOperatorType(mCurrentOperator);
+                Storage.getRule().value = value;
+                Storage.getRule().operatorType = mCurrentOperator.ordinal();
 
                 switchTo(FragmentName.RULE_EDIT);
             }
@@ -48,8 +50,8 @@ public class RuleValueEditFragment extends WhatFragment {
 
     @Override
     void onBackPressed() {
-        Storage.getRule().setSensorId(Storage.getOriginalSensor().first);
-        Storage.getRule().setSensorType(Storage.getOriginalSensor().second);
+        Storage.getRule().sensorId = Storage.getOriginalSensor().first;
+        Storage.getRule().sensorType = Storage.getOriginalSensor().second.ordinal();
 
         switchTo(FragmentName.RULE_EDIT);
     }

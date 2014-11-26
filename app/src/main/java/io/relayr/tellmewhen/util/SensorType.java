@@ -42,4 +42,12 @@ public enum SensorType implements Serializable{
     public String getUnit() {
         return unit;
     }
+
+    public static SensorType byId(int pos) {
+        for (SensorType type : values()) {
+            if(type.ordinal() == pos)
+                return type;
+        }
+        return null;
+    }
 }
