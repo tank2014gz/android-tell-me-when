@@ -50,7 +50,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     private String mRegId;
     private GoogleCloudMessaging mGoogleCloudMessaging;
-    private AtomicInteger msgId = new AtomicInteger();
 
     private FragmentName mCurrentFragment;
 
@@ -268,7 +267,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     /**
      * Registers the application with GCM servers asynchronously.
-     * <p/>
      * Stores the registration ID and the app versionCode in the application's
      * shared preferences.
      */

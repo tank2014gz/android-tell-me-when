@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen.app;
+package io.relayr.tellmewhen.app.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

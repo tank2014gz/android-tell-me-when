@@ -1,8 +1,5 @@
 package io.relayr.tellmewhen.app;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.TextView;
 
 import java.util.List;
 
@@ -24,6 +20,8 @@ import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.adapter.RulesAdapter;
+import io.relayr.tellmewhen.app.views.WarningNoRulesView;
+import io.relayr.tellmewhen.app.views.WarningOnBoardView;
 import io.relayr.tellmewhen.model.Notification;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.storage.Storage;
@@ -35,8 +33,6 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
 public class MainFragment extends WhatFragment {
-
-    private static final String ON_BOARD_APP_PACKAGE = "io.relayr.wunderbar";
 
     @InjectView(R.id.warning_layout) ViewGroup mWarningLayout;
     @InjectView(R.id.list_view) EnhancedListView mListView;
@@ -53,7 +49,6 @@ public class MainFragment extends WhatFragment {
     private MenuItem mMenuNewRule;
     private MenuItem mMenuClearItem;
 
-    private boolean isOnBoarded = true;
     private boolean isNotificationsEmpty = true;
     private boolean isRules = true;
 
@@ -82,8 +77,8 @@ public class MainFragment extends WhatFragment {
     public void onResume() {
         super.onResume();
 
-        if (!Storage.isUserOnBoarded()) checkOnBoarding();
-        else checkRules();
+        if (Storage.isUserOnBoarded()) checkRules();
+        else checkOnBoarding();
     }
 
     @Override
@@ -136,6 +131,11 @@ public class MainFragment extends WhatFragment {
         getActivity().onBackPressed();
     }
 
+    private void initiateAdapters() {
+        mRulesAdapter = new RulesAdapter(this.getActivity());
+        mNotificationsAdapter = new NotificationsAdapter(this.getActivity());
+    }
+
     private void checkOnBoarding() {
         mTransmitterSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitters(Storage.loadUserId())
@@ -154,37 +154,10 @@ public class MainFragment extends WhatFragment {
                     public void onNext(List<Transmitter> transmitters) {
                         Storage.userOnBoarded(!transmitters.isEmpty());
 
-                        isOnBoarded = !transmitters.isEmpty();
-
                         if (transmitters.isEmpty()) showOnBoardWarning();
                         else checkRules();
                     }
                 });
-    }
-
-    private void showOnBoardWarning() {
-        toggleMenuItems();
-
-        LayoutInflater inflater = (LayoutInflater) getActivity()
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        View view = inflater.inflate(R.layout.warning_onboarding, null, false);
-        ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.warning_onboard_btn_text));
-        view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("market://details?id=" + ON_BOARD_APP_PACKAGE)));
-                } catch (android.content.ActivityNotFoundException anfe) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://play.google.com/store/apps/details?id=" +
-                                    ON_BOARD_APP_PACKAGE)));
-                }
-            }
-        });
-
-        toggleWarningLayout(view);
     }
 
     private void checkRules() {
@@ -195,21 +168,17 @@ public class MainFragment extends WhatFragment {
         else showRules();
     }
 
-    private void showRulesWarning() {
-        LayoutInflater inflater = (LayoutInflater) getActivity()
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    private void showOnBoardWarning() {
+        toggleMenuItems();
+        toggleWarningLayout(new WarningOnBoardView(getActivity()));
+    }
 
-        View view = inflater.inflate(R.layout.warning_no_rules, null, false);
-        ((TextView) view.findViewById(R.id.button_done)).setText(getString(R.string.warn_no_rules_btn));
-        view.findViewById(R.id.button_done).setOnClickListener(new View.OnClickListener() {
-            @Override
+    private void showRulesWarning() {
+        toggleWarningLayout(new WarningNoRulesView(getActivity(), new View.OnClickListener() {
             public void onClick(View v) {
-                Storage.prepareRuleForCreate();
                 switchTo(FragmentName.TRANS);
             }
-        });
-
-        toggleWarningLayout(view);
+        }));
     }
 
     private void toggleWarningLayout(View view) {
@@ -218,11 +187,6 @@ public class MainFragment extends WhatFragment {
 
         mWarningLayout.setVisibility(View.VISIBLE);
         mListView.setVisibility(View.GONE);
-    }
-
-    private void initiateAdapters() {
-        mRulesAdapter = new RulesAdapter(this.getActivity());
-        mNotificationsAdapter = new NotificationsAdapter(this.getActivity());
     }
 
     private void showRules() {
@@ -280,7 +244,7 @@ public class MainFragment extends WhatFragment {
         initListView();
     }
 
-    private void initListView(){
+    private void initListView() {
         mListView.setSwipingLayout(R.id.swipe_object);
         mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
         mListView.enableSwipeToDismiss();
@@ -299,7 +263,7 @@ public class MainFragment extends WhatFragment {
     }
 
     private void toggleMenuItems() {
-        if (mMenuNewRule != null) mMenuNewRule.setVisible(isRules && isOnBoarded);
+        if (mMenuNewRule != null) mMenuNewRule.setVisible(isRules && Storage.isUserOnBoarded());
         if (mMenuClearItem != null) mMenuClearItem.setVisible(!isRules && !isNotificationsEmpty);
     }
 }

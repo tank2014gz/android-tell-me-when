@@ -6,11 +6,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.app.views.RuleValueView;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.OperatorType;
-import io.relayr.tellmewhen.util.SensorType;
 
 public class RuleValueEditFragment extends WhatFragment {
 
