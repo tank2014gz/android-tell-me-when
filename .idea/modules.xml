@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/AndroidCommons/RelayrCommons/RelayrCommons.iml" filepath="$PROJECT_DIR$/AndroidCommons/RelayrCommons/RelayrCommons.iml" />
       <module fileurl="file://$PROJECT_DIR$/android-tell-me-when.iml" filepath="$PROJECT_DIR$/android-tell-me-when.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

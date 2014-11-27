@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -16,9 +17,10 @@ import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
-import io.relayr.tellmewhen.util.OperatorType;
-import io.relayr.tellmewhen.util.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class RuleEditFragment extends WhatFragment {
 
@@ -65,14 +67,32 @@ public class RuleEditFragment extends WhatFragment {
         mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), rule.sensorType));
         mSensorName.setText(SensorUtil.getTitle(rule.sensorType));
 
-        mRuleValue.setText((rule.getOperatorType().getName() + " " +
+        mRuleValue.setText((rule.getOperatorType().getValue() + " " +
                 rule.value + " " + rule.getSensorType().getUnit()));
     }
 
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
-        mRuleService.saveRule();
-        switchTo(FragmentName.MAIN);
+        getRuleService().updateRule(Storage.getRule())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Boolean>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(getActivity(), getActivity().getString(R.string.error_saving_rule),
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNext(Boolean status) {
+                        if (status) switchTo(FragmentName.MAIN);
+                        else onError(new Throwable());
+                    }
+                });
     }
 
     @OnClick(R.id.ref_rule_name_edit)

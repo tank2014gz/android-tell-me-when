@@ -47,7 +47,8 @@
                         android:id="@+id/vf_object_info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/default_object_subtitle_text_size"/>
+                        android:textSize="@dimen/default_object_subtitle_text_size"
+                        style="@style/NormalText"/>
                 </LinearLayout>
             </RelativeLayout>
 
@@ -81,7 +82,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/operator_less_text"
                         android:textSize="@dimen/default_object_small_subtitle_text_size"
-                        android:gravity="center_horizontal"/>
+                        android:gravity="center_horizontal"
+                        style="@style/NormalText"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -105,7 +107,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/operator_greater_text"
                         android:textSize="@dimen/default_object_small_subtitle_text_size"
-                        android:gravity="center"/>
+                        android:gravity="center_horizontal"
+                        style="@style/NormalText"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -118,13 +121,15 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical">
 
-                <TextView
+                <io.relayr.commons.widget.CustomTextView
                     android:id="@+id/vf_rule_value_indicator"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/operator_size_large"
+                    android:padding="@dimen/default_object_padding"
                     android:layout_centerHorizontal="true"
-                    android:gravity="center"/>
+                    android:gravity="center"
+                    style="@style/ExtraBoldText"/>
 
                 <SeekBar
                     android:id="@+id/vf_rule_value_seek"

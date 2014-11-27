@@ -16,6 +16,7 @@
 package io.relayr.tellmewhen.gcm;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -26,8 +27,11 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import java.util.Date;
+
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.MainActivity;
+import io.relayr.tellmewhen.model.RuleNotification;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -61,9 +65,10 @@ public class GcmIntentService extends IntentService {
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
                 sendNotification("MTD: " + extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+                persistNotification(extras);
                 sendNotification(extras.toString());
 
-                Log.i(TAG, "Received: " + extras.toString());
+                Log.e(TAG, "Received: " + extras.toString());
             }
         }
 
@@ -75,16 +80,28 @@ public class GcmIntentService extends IntentService {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        mNotificationManager.notify(NOTIFICATION_ID, buildNotification(msg));
+    }
+
+    private void persistNotification(Bundle msg) {
+        RuleNotification notification = new RuleNotification();
+        notification.name = "name";
+        notification.value = "value";
+        notification.timestamp = new Date().getTime();
+    }
+
+    private Notification buildNotification(String msg) {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainActivity.class), 0);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.icon_rules)
+                        .setContentIntent(contentIntent)
+                        .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle("TMW")
                         .setContentText(msg);
 
-        mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        return mBuilder.build();
     }
+
 }

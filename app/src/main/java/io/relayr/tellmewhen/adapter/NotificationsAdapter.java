@@ -11,9 +11,9 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.Notification;
+import io.relayr.tellmewhen.model.RuleNotification;
 
-public class NotificationsAdapter extends ArrayAdapter<Notification> {
+public class NotificationsAdapter extends ArrayAdapter<RuleNotification> {
 
     public NotificationsAdapter(Context context) {
         super(context, R.layout.main_notification_object);

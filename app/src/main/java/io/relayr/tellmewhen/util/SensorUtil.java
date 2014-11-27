@@ -19,17 +19,17 @@ public class SensorUtil {
     private SensorUtil(Context context) {
         sSensorMap.put(SensorType.TEMP, context.getString(R.string.measurement_temperature));
         sSensorMap.put(SensorType.HUM, context.getString(R.string.measurement_humidity));
-        sSensorMap.put(SensorType.NOISE, context.getString(R.string.measurement_noise));
+        sSensorMap.put(SensorType.SND_LEVEL, context.getString(R.string.measurement_noise));
         sSensorMap.put(SensorType.PROX, context.getString(R.string.measurement_proximity));
         sSensorMap.put(SensorType.LIGHT, context.getString(R.string.measurement_light));
-        sSensorMap.put(SensorType.ACC, context.getString(R.string.measurement_acceleration));
+        sSensorMap.put(SensorType.ACCEL, context.getString(R.string.measurement_acceleration));
 
         sSensorValues.put(SensorType.TEMP, new Pair<Integer, Integer>(-20, 40));
         sSensorValues.put(SensorType.HUM, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.NOISE, new Pair<Integer, Integer>(0, 10));
+        sSensorValues.put(SensorType.SND_LEVEL, new Pair<Integer, Integer>(0, 10));
         sSensorValues.put(SensorType.PROX, new Pair<Integer, Integer>(0, 100));
         sSensorValues.put(SensorType.LIGHT, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.ACC, new Pair<Integer, Integer>(-3, 3));
+        sSensorValues.put(SensorType.ACCEL, new Pair<Integer, Integer>(-3, 3));
     }
 
     public static void init(Context context) {

@@ -1,28 +1,19 @@
 package io.relayr.tellmewhen.util;
 
 import java.io.Serializable;
-import java.lang.reflect.TypeVariable;
 
 public enum OperatorType implements Serializable{
 
     EQUALS("="), GREATER(">"), LESS("<");
 
-    private final String name;
+    private final String value;
 
     OperatorType(String name) {
-        this.name = name;
+        this.value = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public static OperatorType getByName(String type) {
-        for (OperatorType t : values()) {
-            if (t.getName().equals(type)) return t;
-        }
-
-        return null;
+    public String getValue() {
+        return value;
     }
 
     public static OperatorType byId(int id) {

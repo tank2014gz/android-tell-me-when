@@ -22,8 +22,8 @@ import io.relayr.tellmewhen.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.adapter.RulesAdapter;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
-import io.relayr.tellmewhen.model.Notification;
 import io.relayr.tellmewhen.model.Rule;
+import io.relayr.tellmewhen.model.RuleNotification;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
@@ -33,6 +33,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
 public class MainFragment extends WhatFragment {
+
+    private final String CURRENT_TAB = "io.relayr.tmw.current.tab";
 
     @InjectView(R.id.warning_layout) ViewGroup mWarningLayout;
     @InjectView(R.id.list_view) EnhancedListView mListView;
@@ -68,7 +70,8 @@ public class MainFragment extends WhatFragment {
 
         initiateAdapters();
 
-        toggleTabs(true);
+        if (savedInstanceState != null) toggleTabs(savedInstanceState.getBoolean(CURRENT_TAB));
+        else toggleTabs(true);
 
         return view;
     }
@@ -127,6 +130,13 @@ public class MainFragment extends WhatFragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(CURRENT_TAB, isRules);
+    }
+
+    @Override
     void onBackPressed() {
         getActivity().onBackPressed();
     }
@@ -162,7 +172,7 @@ public class MainFragment extends WhatFragment {
 
     private void checkRules() {
         mRulesAdapter.clear();
-        mRulesAdapter.addAll(mRuleService.getRules());
+        mRulesAdapter.addAll(getRuleService().getLocalRules());
 
         if (mRulesAdapter.isEmpty()) showRulesWarning();
         else showRules();
@@ -183,10 +193,10 @@ public class MainFragment extends WhatFragment {
 
     private void toggleWarningLayout(View view) {
         mWarningLayout.removeAllViews();
-        mWarningLayout.addView(view);
+        if (view != null) mWarningLayout.addView(view);
 
-        mWarningLayout.setVisibility(View.VISIBLE);
-        mListView.setVisibility(View.GONE);
+        mWarningLayout.setVisibility(view != null ? View.VISIBLE : View.GONE);
+        mListView.setVisibility(view != null ? View.GONE : View.VISIBLE);
     }
 
     private void showRules() {
@@ -197,11 +207,39 @@ public class MainFragment extends WhatFragment {
             @Override
             public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
                 final Rule item = mRulesAdapter.getItem(position);
+
                 mRulesAdapter.remove(item);
+                if (mRulesAdapter.isEmpty()) showRulesWarning();
+
                 return new EnhancedListView.Undoable() {
                     @Override
                     public void undo() {
+                        toggleWarningLayout(null);
+
                         mRulesAdapter.insert(item, position);
+                        mRulesAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void discard() {
+                        getRuleService().deleteRule(item)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Subscriber<Boolean>() {
+                                    @Override
+                                    public void onCompleted() {
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        undo();
+                                    }
+
+                                    @Override
+                                    public void onNext(Boolean status) {
+                                        if (!status) undo();
+                                    }
+                                });
                     }
                 };
             }
@@ -221,19 +259,21 @@ public class MainFragment extends WhatFragment {
     private void showNotifications() {
         toggleTabs(false);
 
-        mNotificationsAdapter.add(new Notification());
+        mNotificationsAdapter.addAll(getNotifService().getLocalNotifications());
         isNotificationsEmpty = mNotificationsAdapter.isEmpty();
 
         mListView.setAdapter(mNotificationsAdapter);
         mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
             @Override
             public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
-                final Notification item = mNotificationsAdapter.getItem(position);
+                final RuleNotification item = mNotificationsAdapter.getItem(position);
                 mNotificationsAdapter.remove(item);
+
                 return new EnhancedListView.Undoable() {
                     @Override
                     public void undo() {
                         mNotificationsAdapter.insert(item, position);
+                        mNotificationsAdapter.notifyDataSetChanged();
                     }
                 };
             }
@@ -246,8 +286,10 @@ public class MainFragment extends WhatFragment {
 
     private void initListView() {
         mListView.setSwipingLayout(R.id.swipe_object);
-        mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
+        mListView.setUndoStyle(EnhancedListView.UndoStyle.COLLAPSED_POPUP);
         mListView.enableSwipeToDismiss();
+        mListView.setUndoHideDelay(5000);
+        mListView.setRequireTouchBeforeDismiss(false);
         mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
     }
 

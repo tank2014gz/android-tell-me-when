@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-
 /**
  * This {@code WakefulBroadcastReceiver} takes care of creating and managing a
  * partial wake lock for your app. It passes off the work of processing the GCM

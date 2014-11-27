@@ -12,7 +12,10 @@ import io.relayr.tellmewhen.util.SensorType;
 @Table(name = "Rule")
 public class Rule extends Model {
 
-    @Column(name = "isNotifying") public boolean isNotifying;
+    @Column(name = "dbId") public String dbId;
+    @Column(name = "dbRev") public String drRev;
+
+    @Column(name = "isNotifying") public boolean isNotifying = true;
     @Column(name = "name") public String name;
     @Column(name = "transmitterId") public String transmitterId;
     @Column(name = "transmitterType") public String transmitterType;

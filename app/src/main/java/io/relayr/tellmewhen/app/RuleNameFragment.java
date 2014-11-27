@@ -11,6 +11,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -18,6 +19,9 @@ import butterknife.OnClick;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class RuleNameFragment extends WhatFragment {
 
@@ -74,9 +78,27 @@ public class RuleNameFragment extends WhatFragment {
         if (isNameOk()) {
             Storage.getRule().name = (mRuleName.getText().toString());
 
-            mRuleService.saveRule();
+            getRuleService().createRule(Storage.getRule())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Subscriber<Boolean>() {
+                        @Override
+                        public void onCompleted() {
+                        }
 
-            switchToEdit(FragmentName.MAIN);
+                        @Override
+                        public void onError(Throwable e) {
+                            Toast.makeText(getActivity(),
+                                    getActivity().getString(R.string.error_saving_rule),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onNext(Boolean status) {
+                            if (status) switchToEdit(FragmentName.MAIN);
+                            else onError(new Throwable());
+                        }
+                    });
         }
     }
 
@@ -98,8 +120,6 @@ public class RuleNameFragment extends WhatFragment {
             mRuleName.setError(getActivity().getString(R.string.nf_rule_name_empty));
             return false;
         }
-
-        toggleKeyboard(false);
 
         return true;
     }

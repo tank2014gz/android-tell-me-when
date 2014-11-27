@@ -39,7 +39,7 @@ public class RulesAdapter extends ArrayAdapter<Rule> {
 
     private String buildRuleValue(Rule rule){
        return rule.getSensorType().getName() + " " +
-                rule.getOperatorType().getName() + " " + rule.value;
+                rule.getOperatorType().getValue() + " " + rule.value;
     }
 
     static class ViewHolder {

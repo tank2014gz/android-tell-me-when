@@ -43,7 +43,8 @@ import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends ActionBarActivity implements LoginEventListener {
 
-    private static final String SENDER_ID = "731084512451";
+    private final String SENDER_ID = "731084512451";
+    private final String CURRENT_FRAGMENT = "io.relayr.tmw.current.frag";
 
     private AlertDialog mNetworkDialog;
     private Subscription mUserInfoSubscription = Subscriptions.empty();
@@ -63,6 +64,12 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
         ButterKnife.inject(this);
 
+        if (savedInstanceState != null) {
+            String fragName = savedInstanceState.getString(CURRENT_FRAGMENT, null);
+
+            if(fragName != null ) mCurrentFragment = FragmentName.valueOf(fragName);
+        }
+
         if (checkPlayServices(this)) {
             mGoogleCloudMessaging = GoogleCloudMessaging.getInstance(this);
             mRegId = GcmUtils.getRegistrationId(getApplicationContext());
@@ -70,8 +77,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
             if (mRegId.isEmpty()) {
                 registerInBackground();
             }
-        } else {
-            Log.i("MainActivity", "No valid Google Play Services APK found.");
         }
     }
 
@@ -94,6 +99,13 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         if (!mUserInfoSubscription.isUnsubscribed()) mUserInfoSubscription.unsubscribe();
 
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (mCurrentFragment != null) outState.putString(CURRENT_FRAGMENT, mCurrentFragment.name());
     }
 
     @Override
@@ -257,8 +269,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, context,
                         GcmUtils.PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else {
-                Log.i("MainActivity", "This device is not supported.");
             }
             return false;
         }
