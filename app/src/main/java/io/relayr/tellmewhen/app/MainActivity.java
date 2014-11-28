@@ -1,13 +1,11 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,13 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 import io.relayr.LoginEventListener;
@@ -32,6 +23,8 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.gcm.GcmUtils;
+import io.relayr.tellmewhen.service.RuleService;
+import io.relayr.tellmewhen.service.rule.RuleServiceImpl;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
@@ -43,16 +36,14 @@ import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends ActionBarActivity implements LoginEventListener {
 
-    private final String SENDER_ID = "731084512451";
     private final String CURRENT_FRAGMENT = "io.relayr.tmw.current.frag";
 
     private AlertDialog mNetworkDialog;
     private Subscription mUserInfoSubscription = Subscriptions.empty();
 
-    private String mRegId;
-    private GoogleCloudMessaging mGoogleCloudMessaging;
-
     private FragmentName mCurrentFragment;
+
+    private boolean logInStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,23 +51,12 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
         setContentView(R.layout.activity_main);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         ButterKnife.inject(this);
 
         if (savedInstanceState != null) {
             String fragName = savedInstanceState.getString(CURRENT_FRAGMENT, null);
 
-            if(fragName != null ) mCurrentFragment = FragmentName.valueOf(fragName);
-        }
-
-        if (checkPlayServices(this)) {
-            mGoogleCloudMessaging = GoogleCloudMessaging.getInstance(this);
-            mRegId = GcmUtils.getRegistrationId(getApplicationContext());
-
-            if (mRegId.isEmpty()) {
-                registerInBackground();
-            }
+            if (fragName != null) mCurrentFragment = FragmentName.valueOf(fragName);
         }
     }
 
@@ -84,10 +64,28 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     public void onResume() {
         super.onResume();
 
-        checkWiFi();
-        checkPlayServices(this);
+        //PlayServices are necessary for Notifications
+        if (GcmUtils.getInstance().checkPlayServices(this)) {
+            GcmUtils.getInstance().init(this);
+
+            if (isConnected()) checkUserState();
+            else showNetworkDialog();
+        }
 
         EventBus.getDefault().register(this);
+    }
+
+    private void checkUserState() {
+        if (RelayrSdk.isUserLoggedIn()) {
+            loadUserInfo();
+        } else {
+            if (logInStarted) {
+                onBackPressed();
+            } else {
+                logInStarted = true;
+                RelayrSdk.logIn(this, this);
+            }
+        }
     }
 
     @Override
@@ -96,9 +94,14 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
         if (mNetworkDialog != null) mNetworkDialog.dismiss();
 
-        if (!mUserInfoSubscription.isUnsubscribed()) mUserInfoSubscription.unsubscribe();
-
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (!mUserInfoSubscription.isUnsubscribed()) mUserInfoSubscription.unsubscribe();
     }
 
     @Override
@@ -111,7 +114,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     @Override
     public void onSuccessUserLogIn() {
         Toast.makeText(this, R.string.successfully_logged_in, Toast.LENGTH_SHORT).show();
-        loadUserInfo();
     }
 
     @Override
@@ -121,11 +123,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     @Override
     public void onBackPressed() {
-        onBackClicked();
-    }
-
-    public void onBackClicked() {
-        if (mCurrentFragment.equals(FragmentName.MAIN))
+        if (mCurrentFragment == null || mCurrentFragment.equals(FragmentName.MAIN))
             super.onBackPressed();
         else
             EventBus.getDefault().post(new WhenEvents.BackPressed());
@@ -140,13 +138,12 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_log_out)
-            if (RelayrSdk.isUserLoggedIn()) {
-                RelayrSdk.logOut();
-                RelayrSdk.logIn(this, this);
-            }
+        if (item.getItemId() == R.id.action_log_out) {
+            RelayrSdk.logOut();
+            checkUserState();
+        }
 
-        if (item.getItemId() == android.R.id.home) onBackClicked();
+        if (item.getItemId() == android.R.id.home) onBackPressed();
 
         return super.onOptionsItemSelected(item);
     }
@@ -161,6 +158,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         Fragment fragment;
         switch (name) {
             case MAIN:
+                Storage.clearRuleData();
                 fragment = MainFragment.newInstance();
                 break;
             case TRANS:
@@ -189,20 +187,10 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void showFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        fragmentTransaction.replace(R.id.container, fragment);
-        fragmentTransaction.commit();
-    }
-
-    private void checkWiFi() {
-        if (isConnected()) {
-            if (RelayrSdk.isUserLoggedIn()) loadUserInfo();
-            else RelayrSdk.logIn(this, this);
-        } else {
-            showNetworkDialog();
-        }
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right)
+                .replace(R.id.container, fragment)
+                .commit();
     }
 
     private boolean isConnected() {
@@ -230,84 +218,58 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void loadUserInfo() {
-        if (Storage.loadUserId() == null) {
-            mUserInfoSubscription = RelayrSdk.getRelayrApi()
-                    .getUserInfo()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Subscriber<User>() {
-                        @Override
-                        public void onCompleted() {
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Toast.makeText(MainActivity.this, R.string.err_loading_user_data,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onNext(User user) {
-                            Storage.saveUserId(user.id);
-                            switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
-                        }
-                    });
-        } else {
-            switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
-        }
-    }
-
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
-    private boolean checkPlayServices(Activity context) {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, context,
-                        GcmUtils.PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Registers the application with GCM servers asynchronously.
-     * Stores the registration ID and the app versionCode in the application's
-     * shared preferences.
-     */
-    private void registerInBackground() {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String msg;
-                try {
-                    if (mGoogleCloudMessaging == null) {
-                        mGoogleCloudMessaging = GoogleCloudMessaging.getInstance(getApplicationContext());
+        mUserInfoSubscription = RelayrSdk.getRelayrApi()
+                .getUserInfo()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<User>() {
+                    @Override
+                    public void onCompleted() {
                     }
-                    mRegId = mGoogleCloudMessaging.register(SENDER_ID);
-                    msg = "Registration ID=" + mRegId;
 
-                    // You should send the registration ID to your server over HTTP, so it
-                    // can use GCM/HTTP or CCS to send messages to your app.
-                    GcmUtils.sendRegistrationIdToBackend();
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("MA", e.toString());
+                        Toast.makeText(MainActivity.this, R.string.err_loading_user_data,
+                                Toast.LENGTH_SHORT).show();
+                    }
 
-                    GcmUtils.storeRegistrationId(MainActivity.this
-                            .getApplicationContext(), mRegId);
-                } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
-                }
-                return msg;
-            }
+                    @Override
+                    public void onNext(User user) {
+                         switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
+//                        if (Storage.loadUserId() == null) createUserData(user.id);
+//                        else checkUserData(user.id);
+                    }
+                });
+    }
 
-            @Override
-            protected void onPostExecute(String msg) {
-                Log.e("MainActivity", msg);
-            }
-        }.execute(null, null, null);
+    private void createUserData(String id) {
+        Storage.saveUserId(id);
+
+        RuleService mRuleService = new RuleServiceImpl();
+        mRuleService.loadRemoteRules()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Boolean>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("MA loading all rules", e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Boolean o) {
+                        Log.e("MA", o.toString());
+                        switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
+                    }
+                });
+    }
+
+    private void checkUserData(String id) {
+        if (!Storage.loadUserId().equals(id)) createUserData(id);
+        else switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
     }
 }

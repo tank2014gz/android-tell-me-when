@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen.service.notif;
+package io.relayr.tellmewhen.service;
 
 import java.util.List;
 

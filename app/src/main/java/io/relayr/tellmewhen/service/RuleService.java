@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen.service.rule;
+package io.relayr.tellmewhen.service;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +15,7 @@ public interface RuleService {
 
     public Observable<Boolean> deleteRule(Rule rule);
 
-    public Observable<Object> getAllRules();
+    public Observable<Boolean> loadRemoteRules();
 
     public List<Rule> getLocalRules();
 }

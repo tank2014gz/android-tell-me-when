@@ -8,10 +8,10 @@ public enum SensorType implements Serializable{
 
     TEMP("temperature", "°C", DeviceModel.TEMPERATURE_HUMIDITY),
     HUM("humidity", "%", DeviceModel.TEMPERATURE_HUMIDITY),
-    SND_LEVEL("noise", "%", DeviceModel.MICROPHONE),
+    SND_LEVEL("noise", "", DeviceModel.MICROPHONE),
     PROX("proximity", "%", DeviceModel.LIGHT_PROX_COLOR),
     LIGHT("light", "%", DeviceModel.LIGHT_PROX_COLOR),
-    ACCEL("acceleration", "G", DeviceModel.ACCELEROMETER_GYROSCOPE);
+    ACCEL("acceleration", "", DeviceModel.ACCELEROMETER_GYROSCOPE);
 
     private final String name;
     private final DeviceModel model;

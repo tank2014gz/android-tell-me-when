@@ -38,7 +38,7 @@ public class TransmitterFragment extends WhatFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        onCreateView(inflater, container, savedInstanceState, R.string.title_select_transmitter);
+        onCreateView(inflater, container, savedInstanceState, R.string.title_select_transmitter, true);
 
         View view = inflater.inflate(R.layout.transmitter_fragment, container, false);
 
@@ -90,6 +90,7 @@ public class TransmitterFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
+                        showToast(R.string.error_loading_transmitters);
                     }
 
                     @Override

@@ -87,7 +87,7 @@ public class Storage {
     }
 
     public static String loadGmsRegistrationId() {
-        return sStorage.getString(PROPERTY_REG_ID, "");
+        return sStorage.getString(PROPERTY_REG_ID, null);
     }
 
     public static int loadGmsAppVersion() {

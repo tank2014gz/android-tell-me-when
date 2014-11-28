@@ -6,6 +6,7 @@ import java.util.List;
 
 import io.relayr.tellmewhen.model.RuleNotification;
 import io.relayr.tellmewhen.model.Status;
+import io.relayr.tellmewhen.service.NotificationService;
 import rx.Observable;
 
 public class NotificationServiceImpl implements NotificationService {

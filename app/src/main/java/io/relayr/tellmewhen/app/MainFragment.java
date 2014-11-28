@@ -34,8 +34,6 @@ import rx.subscriptions.Subscriptions;
 
 public class MainFragment extends WhatFragment {
 
-    private final String CURRENT_TAB = "io.relayr.tmw.current.tab";
-
     @InjectView(R.id.warning_layout) ViewGroup mWarningLayout;
     @InjectView(R.id.list_view) EnhancedListView mListView;
 
@@ -60,7 +58,7 @@ public class MainFragment extends WhatFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        onCreateView(inflater, container, savedInstanceState, R.string.title_tab_rules);
+        onCreateView(inflater, container, savedInstanceState, R.string.title_tab_rules, false);
 
         View view = inflater.inflate(R.layout.main_fragment, container, false);
 
@@ -70,8 +68,7 @@ public class MainFragment extends WhatFragment {
 
         initiateAdapters();
 
-        if (savedInstanceState != null) toggleTabs(savedInstanceState.getBoolean(CURRENT_TAB));
-        else toggleTabs(true);
+        toggleTabs(isRules);
 
         return view;
     }
@@ -109,7 +106,7 @@ public class MainFragment extends WhatFragment {
         mMenuNewRule = menu.findItem(R.id.action_new_rule);
         mMenuClearItem = menu.findItem(R.id.action_clear_notifications);
 
-        toggleMenuItems();
+        refreshMenuItems();
 
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -127,13 +124,6 @@ public class MainFragment extends WhatFragment {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean(CURRENT_TAB, isRules);
     }
 
     @Override
@@ -158,6 +148,7 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
+                        showToast(R.string.error_loading_transmitters);
                     }
 
                     @Override
@@ -179,7 +170,7 @@ public class MainFragment extends WhatFragment {
     }
 
     private void showOnBoardWarning() {
-        toggleMenuItems();
+        refreshMenuItems();
         toggleWarningLayout(new WarningOnBoardView(getActivity()));
     }
 
@@ -301,10 +292,10 @@ public class MainFragment extends WhatFragment {
         mTabRules.setBackgroundResource(isRules ? R.drawable.tab_active : R.color.tab_inactive);
         mTabNotifications.setBackgroundResource(isRules ? R.color.tab_inactive : R.drawable.tab_active);
 
-        toggleMenuItems();
+        refreshMenuItems();
     }
 
-    private void toggleMenuItems() {
+    private void refreshMenuItems() {
         if (mMenuNewRule != null) mMenuNewRule.setVisible(isRules && Storage.isUserOnBoarded());
         if (mMenuClearItem != null) mMenuClearItem.setVisible(!isRules && !isNotificationsEmpty);
     }

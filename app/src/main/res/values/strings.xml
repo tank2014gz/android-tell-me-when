@@ -55,6 +55,9 @@
     <string name="menu_clear">clear</string>
     <string name="menu_new_rule">new rule</string>
     <string name="button_next">next</string>
+
     <string name="error_saving_rule">Rule can\'t be saved. Please try again.</string>
+    <string name="error_loading_transmitters">Error loading transmitters</string>
+    <string name="error_loading_devices">Error loading sensor devices</string>
 
 </resources>

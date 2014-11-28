@@ -20,7 +20,7 @@ public class RuleValueEditFragment extends WhatFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        onCreateView(inflater, container, savedInstanceState, R.string.title_rule_value);
+        onCreateView(inflater, container, savedInstanceState, R.string.title_rule_value, true);
 
         Rule rule = Storage.getRule();
 

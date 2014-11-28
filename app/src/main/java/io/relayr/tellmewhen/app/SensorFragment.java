@@ -41,7 +41,7 @@ public class SensorFragment extends WhatFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        onCreateView(inflater, container, savedInstanceState, R.string.title_select_sensor);
+        onCreateView(inflater, container, savedInstanceState, R.string.title_select_sensor, true);
 
         View view = inflater.inflate(R.layout.sensor_fragment, container, false);
 
@@ -90,7 +90,7 @@ public class SensorFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
-
+                        showToast(R.string.error_loading_devices);
                     }
 
                     @Override

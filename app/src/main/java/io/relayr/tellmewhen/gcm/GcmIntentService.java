@@ -85,9 +85,10 @@ public class GcmIntentService extends IntentService {
 
     private void persistNotification(Bundle msg) {
         RuleNotification notification = new RuleNotification();
-        notification.name = "name";
-        notification.value = "value";
+        notification.name = (String) msg.get("message");
+        notification.value = (String) msg.get("title");
         notification.timestamp = new Date().getTime();
+        notification.save();
     }
 
     private Notification buildNotification(String msg) {

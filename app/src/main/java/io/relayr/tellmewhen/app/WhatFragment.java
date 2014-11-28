@@ -2,15 +2,18 @@ package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
-import io.relayr.tellmewhen.service.notif.NotificationService;
+import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.service.notif.NotificationServiceImpl;
-import io.relayr.tellmewhen.service.rule.RuleService;
+import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.service.rule.RuleServiceImpl;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
@@ -29,8 +32,11 @@ public abstract class WhatFragment extends Fragment {
         mNotificationService = new NotificationServiceImpl();
     }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, int titleId) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState, int titleId, boolean showBack) {
         getActivity().setTitle(getString(titleId));
+
+        ((ActionBarActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(showBack);
 
         EventBus.getDefault().register(this);
 
@@ -55,6 +61,11 @@ public abstract class WhatFragment extends Fragment {
             switchTo(FragmentName.RULE_EDIT);
         else
             switchTo(name);
+    }
+
+    protected void showToast(int stringId) {
+        Toast.makeText(getActivity(), getActivity().getString(stringId),
+                Toast.LENGTH_SHORT).show();
     }
 
     protected RuleService getRuleService() {

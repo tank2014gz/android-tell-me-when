@@ -43,7 +43,7 @@ public class RuleEditFragment extends WhatFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        onCreateView(inflater, container, savedInstanceState, R.string.title_rule_edit);
+        onCreateView(inflater, container, savedInstanceState, R.string.title_rule_edit, true);
 
         View view = inflater.inflate(R.layout.rule_edit_fragment, container, false);
 
@@ -64,15 +64,17 @@ public class RuleEditFragment extends WhatFragment {
         mTransType.setText(rule.transmitterType);
         mTransName.setText(rule.transmitterName);
 
-        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), rule.sensorType));
-        mSensorName.setText(SensorUtil.getTitle(rule.sensorType));
+        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), rule.getSensorType()));
+        mSensorName.setText(SensorUtil.getTitle(rule.getSensorType()));
 
         mRuleValue.setText((rule.getOperatorType().getValue() + " " +
                 rule.value + " " + rule.getSensorType().getUnit()));
     }
 
     @OnClick(R.id.button_done)
-    public void onDoneClicked() {
+    public void onDoneClicked(final View button) {
+        button.setEnabled(false);
+
         getRuleService().updateRule(Storage.getRule())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -83,14 +85,20 @@ public class RuleEditFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
-                        Toast.makeText(getActivity(), getActivity().getString(R.string.error_saving_rule),
-                                Toast.LENGTH_SHORT).show();
+                        button.setEnabled(true);
+                        showToast(R.string.error_saving_rule);
                     }
 
                     @Override
                     public void onNext(Boolean status) {
-                        if (status) switchTo(FragmentName.MAIN);
-                        else onError(new Throwable());
+                        if (status) {
+                            Storage.clearRuleData();
+                            switchTo(FragmentName.MAIN);
+                        } else {
+                            onError(new Throwable());
+                        }
+
+                        button.setEnabled(true);
                     }
                 });
     }

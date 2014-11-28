@@ -11,7 +11,7 @@ import rx.Observable;
 
 public interface RuleApi {
 
-    public static final String API_DB = "/bp_test";
+    public static final String API_DB = "/bp_tmw_rules";
 
     @POST(API_DB)
     Observable<Status> createRule(@Body DbRule rule);

@@ -138,7 +138,7 @@ public class RuleValueView extends RelativeLayout {
 
     private void showSavedData() {
         mObjectIcon.setImageResource(SensorUtil.getIcon(getContext(), mSensor));
-        mObjectInfo.setText(SensorUtil.getTitle(mSensor.ordinal()));
+        mObjectInfo.setText(SensorUtil.getTitle(mSensor));
         mObjectName.setText(Storage.getRule().transmitterName);
 
         if (mValue != null) setValue(mValue + Math.abs(min), mValue, mOperator);

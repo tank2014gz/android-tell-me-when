@@ -33,7 +33,7 @@ public class RuleNameFragment extends WhatFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        onCreateView(inflater, container, savedInstanceState, R.string.title_rule_name);
+        onCreateView(inflater, container, savedInstanceState, R.string.title_rule_name, true);
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
@@ -52,7 +52,7 @@ public class RuleNameFragment extends WhatFragment {
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    onDoneClicked();
+                    onDoneClicked(view);
                     return true;
                 } else {
                     return false;
@@ -74,9 +74,11 @@ public class RuleNameFragment extends WhatFragment {
     }
 
     @OnClick(R.id.button_done)
-    public void onDoneClicked() {
+    public void onDoneClicked(final View button) {
+        button.setEnabled(false);
+
         if (isNameOk()) {
-            Storage.getRule().name = (mRuleName.getText().toString());
+            Storage.getRule().name = mRuleName.getText().toString();
 
             getRuleService().createRule(Storage.getRule())
                     .subscribeOn(Schedulers.io())
@@ -88,15 +90,16 @@ public class RuleNameFragment extends WhatFragment {
 
                         @Override
                         public void onError(Throwable e) {
-                            Toast.makeText(getActivity(),
-                                    getActivity().getString(R.string.error_saving_rule),
-                                    Toast.LENGTH_SHORT).show();
+                            button.setEnabled(true);
+                            showToast(R.string.error_saving_rule);
                         }
 
                         @Override
                         public void onNext(Boolean status) {
                             if (status) switchToEdit(FragmentName.MAIN);
                             else onError(new Throwable());
+
+                            button.setEnabled(true);
                         }
                     });
         }

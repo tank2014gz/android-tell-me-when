@@ -2,12 +2,15 @@ package io.relayr.tellmewhen.service.rule;
 
 import android.util.Base64;
 
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
 import java.util.List;
 
 import io.relayr.tellmewhen.model.Rule;
+import io.relayr.tellmewhen.model.RuleNotification;
 import io.relayr.tellmewhen.model.Status;
+import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
@@ -35,7 +38,7 @@ public class RuleServiceImpl implements RuleService {
                         }
 
                         private String encodeCredentialsForBasicAuthorization() {
-                            final String userAndPassword = "therfectaredurprederferi:cPGohDvGOlO1Ifg7aCQLkhPP";
+                            final String userAndPassword = "ckdatencenewhormenuldson:MPKNgKi2wus7emvrh2OKAUoL";
                             return "Basic " + Base64.encodeToString(userAndPassword.getBytes(), Base64.NO_WRAP);
                         }
                     })
@@ -115,7 +118,19 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
-    public Observable<Object> getAllRules() {
-        return getRuleApi().getAllRules(new Search(Storage.loadUserId()));
+    public Observable<Boolean> loadRemoteRules() {
+        new Delete().from(Rule.class).execute();
+        new Delete().from(RuleNotification.class).execute();
+
+        return getRuleApi().getAllRules(new Search(Storage.loadUserId()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Func1<Object, Boolean>() {
+                    @Override
+                    public Boolean call(Object rules) {
+                        //TODO if there is some rules persist the to local DB
+                        return true;
+                    }
+                });
     }
 }
