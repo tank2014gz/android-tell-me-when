@@ -3,30 +3,32 @@ package io.relayr.tellmewhen.service.rule;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class DbRule implements Serializable {
 
     @SerializedName("user_id") private String userId;
     @SerializedName("tx_id") private String transmitterId;
     @SerializedName("dev_id") private String deviceId;
+    @SerializedName("active") private boolean active;
     @SerializedName("details") private Details details;
     @SerializedName("condition") private Condition condition;
-    @SerializedName("notification") private Notification notification;
+    @SerializedName("notifications") private List<Notification> notifications;
 
-    static class Details implements Serializable{
+    static class Details implements Serializable {
 
-        @SerializedName("active")  private  boolean active;
+        @SerializedName("name") private String name;
 
-        public Details(boolean active){
-            this.active = active;
+        public Details(String name) {
+            this.name = name;
         }
     }
 
-    static class Condition implements Serializable{
+    static class Condition implements Serializable {
 
-        @SerializedName("sensor")  private  String sensor;
-        @SerializedName("op")  private  String operator;
-        @SerializedName("val")  private  int value;
+        @SerializedName("meaning") private String sensor;
+        @SerializedName("op") private String operator;
+        @SerializedName("val") private int value;
 
         Condition(String sensor, String operator, int value) {
             this.sensor = sensor;
@@ -46,10 +48,11 @@ public class DbRule implements Serializable {
         }
     }
 
-    public DbRule(String userId, String transmitterId, String deviceId) {
+    public DbRule(String userId, String transmitterId, String deviceId, boolean active) {
         this.userId = userId;
         this.transmitterId = transmitterId;
         this.deviceId = deviceId;
+        this.active = active;
     }
 
     public void setDetails(Details details) {
@@ -60,7 +63,7 @@ public class DbRule implements Serializable {
         this.condition = condition;
     }
 
-    public void setNotification(Notification notification) {
-        this.notification = notification;
+    public void addNotification(Notification notification) {
+        this.notifications.add(notification);
     }
 }

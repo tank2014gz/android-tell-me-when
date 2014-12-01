@@ -16,12 +16,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
+import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
 import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
 import io.relayr.model.User;
+import io.relayr.tellmewhen.AppModule;
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.gcm.GcmUtils;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.service.rule.RuleServiceImpl;
@@ -45,6 +50,8 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     private boolean logInStarted = false;
 
+    @Inject RuleService ruleService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +59,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         setContentView(R.layout.activity_main);
 
         ButterKnife.inject(this);
+        TellMeWhenApplication.objectGraph.inject(this);
 
         if (savedInstanceState != null) {
             String fragName = savedInstanceState.getString(CURRENT_FRAGMENT, null);
@@ -246,8 +254,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     private void createUserData(String id) {
         Storage.saveUserId(id);
 
-        RuleService mRuleService = new RuleServiceImpl();
-        mRuleService.loadRemoteRules()
+        ruleService.loadRemoteRules()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Boolean>() {

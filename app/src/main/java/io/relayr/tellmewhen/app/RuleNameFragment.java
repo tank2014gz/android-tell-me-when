@@ -11,7 +11,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -40,6 +39,7 @@ public class RuleNameFragment extends WhatFragment {
         View view = inflater.inflate(R.layout.rule_name_fragment, container, false);
 
         ButterKnife.inject(this, view);
+        inject(this);
 
         return view;
     }
@@ -80,7 +80,7 @@ public class RuleNameFragment extends WhatFragment {
         if (isNameOk()) {
             Storage.getRule().name = mRuleName.getText().toString();
 
-            getRuleService().createRule(Storage.getRule())
+            ruleService.createRule(Storage.getRule())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Subscriber<Boolean>() {

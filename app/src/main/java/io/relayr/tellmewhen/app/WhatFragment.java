@@ -8,29 +8,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
-import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.service.NotificationService;
-import io.relayr.tellmewhen.service.notif.NotificationServiceImpl;
 import io.relayr.tellmewhen.service.RuleService;
-import io.relayr.tellmewhen.service.rule.RuleServiceImpl;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 
 public abstract class WhatFragment extends Fragment {
 
-    private RuleService mRuleService;
-    private NotificationService mNotificationService;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mRuleService = new RuleServiceImpl();
-        mNotificationService = new NotificationServiceImpl();
-    }
+    @Inject RuleService ruleService;
+    @Inject NotificationService notificationService;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState, int titleId, boolean showBack) {
@@ -39,6 +31,8 @@ public abstract class WhatFragment extends Fragment {
         ((ActionBarActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(showBack);
 
         EventBus.getDefault().register(this);
+
+        inject(this);
 
         return super.onCreateView(inflater, container, savedInstanceState);
     }
@@ -68,12 +62,8 @@ public abstract class WhatFragment extends Fragment {
                 Toast.LENGTH_SHORT).show();
     }
 
-    protected RuleService getRuleService() {
-        return mRuleService;
-    }
-
-    protected NotificationService getNotifService() {
-        return mNotificationService;
+    protected void inject(Object o){
+        TellMeWhenApplication.objectGraph.inject(o);
     }
 
     public void onEvent(WhenEvents.BackPressed back) {

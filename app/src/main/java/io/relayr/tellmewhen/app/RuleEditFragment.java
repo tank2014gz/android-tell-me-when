@@ -48,6 +48,7 @@ public class RuleEditFragment extends WhatFragment {
         View view = inflater.inflate(R.layout.rule_edit_fragment, container, false);
 
         ButterKnife.inject(this, view);
+        inject(this);
 
         return view;
     }
@@ -75,7 +76,7 @@ public class RuleEditFragment extends WhatFragment {
     public void onDoneClicked(final View button) {
         button.setEnabled(false);
 
-        getRuleService().updateRule(Storage.getRule())
+        ruleService.updateRule(Storage.getRule())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Boolean>() {

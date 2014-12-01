@@ -63,6 +63,7 @@ public class MainFragment extends WhatFragment {
         View view = inflater.inflate(R.layout.main_fragment, container, false);
 
         ButterKnife.inject(this, view);
+        inject(this);
 
         setHasOptionsMenu(true);
 
@@ -163,7 +164,7 @@ public class MainFragment extends WhatFragment {
 
     private void checkRules() {
         mRulesAdapter.clear();
-        mRulesAdapter.addAll(getRuleService().getLocalRules());
+        mRulesAdapter.addAll(ruleService.getLocalRules());
 
         if (mRulesAdapter.isEmpty()) showRulesWarning();
         else showRules();
@@ -213,7 +214,7 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void discard() {
-                        getRuleService().deleteRule(item)
+                        ruleService.deleteRule(item)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Subscriber<Boolean>() {
@@ -250,7 +251,7 @@ public class MainFragment extends WhatFragment {
     private void showNotifications() {
         toggleTabs(false);
 
-        mNotificationsAdapter.addAll(getNotifService().getLocalNotifications());
+        mNotificationsAdapter.addAll(notificationService.getLocalNotifications());
         isNotificationsEmpty = mNotificationsAdapter.isEmpty();
 
         mListView.setAdapter(mNotificationsAdapter);

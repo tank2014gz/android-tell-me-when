@@ -1,19 +1,19 @@
 package io.relayr.tellmewhen.service.rule;
 
-import android.util.Base64;
-
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.model.RuleNotification;
 import io.relayr.tellmewhen.model.Status;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
-import retrofit.RequestInterceptor;
-import retrofit.RestAdapter;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
@@ -21,37 +21,15 @@ import rx.schedulers.Schedulers;
 
 public class RuleServiceImpl implements RuleService {
 
-    public static final String API_ENDPOINT = "https://relayr.cloudant.com";
+    @Inject @Named("ruleApi") RuleApi ruleApi;
 
-    private RuleApi sRuleApi;
-
-    private RuleApi getRuleApi() {
-        if (sRuleApi == null) {
-            sRuleApi = new RestAdapter.Builder()
-                    .setEndpoint(API_ENDPOINT)
-                    .setRequestInterceptor(new RequestInterceptor() {
-                        @Override
-                        public void intercept(RequestFacade request) {
-                            final String authorizationValue = encodeCredentialsForBasicAuthorization();
-                            request.addHeader("Authorization", authorizationValue);
-                            request.addHeader("Content-Type", "application/json");
-                        }
-
-                        private String encodeCredentialsForBasicAuthorization() {
-                            final String userAndPassword = "ckdatencenewhormenuldson:MPKNgKi2wus7emvrh2OKAUoL";
-                            return "Basic " + Base64.encodeToString(userAndPassword.getBytes(), Base64.NO_WRAP);
-                        }
-                    })
-                    .build()
-                    .create(RuleApi.class);
-        }
-
-        return sRuleApi;
+    public RuleServiceImpl(){
+        TellMeWhenApplication.objectGraph.inject(this);
     }
 
     @Override
     public Observable<Boolean> createRule(final Rule rule) {
-        return getRuleApi()
+        return ruleApi
                 .createRule(RuleMapper.toDbRule(rule))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -73,7 +51,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public Observable<Boolean> updateRule(final Rule rule) {
-        return getRuleApi()
+        return ruleApi
                 .updateRule(rule.dbId, rule.drRev, RuleMapper.toDbRule(rule))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -94,7 +72,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public Observable<Boolean> deleteRule(final Rule rule) {
-        return getRuleApi()
+        return ruleApi
                 .deleteRule(rule.dbId, rule.drRev)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -122,7 +100,7 @@ public class RuleServiceImpl implements RuleService {
         new Delete().from(Rule.class).execute();
         new Delete().from(RuleNotification.class).execute();
 
-        return getRuleApi().getAllRules(new Search(Storage.loadUserId()))
+        return ruleApi.getAllRules(new Search(Storage.loadUserId()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<Object, Boolean>() {
