@@ -1,25 +1,26 @@
 package io.relayr.tellmewhen.service.rule;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Search implements Serializable {
 
-    private List<String> fields;
-    private Map<String, String> selector;
+    @SerializedName("selector")
+    private Selector selector;
 
     public Search(String userId) {
-        this.fields = Arrays.asList("user_id");
-        this.selector = new HashMap<String, String>();
-        selector.put("user_id", userId);
+        selector = new Selector(userId);
     }
 
-    public void addField(String fieldId, String fieldValue) {
-        this.fields.add(fieldId);
-        this.selector.put(fieldId, fieldValue);
+    static class Selector implements Serializable {
+
+        @SerializedName("user_id") private String userId;
+
+        public Selector(String userId) {
+            this.userId = userId;
+        }
+
     }
 
 }

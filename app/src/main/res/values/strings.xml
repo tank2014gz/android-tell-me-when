@@ -59,5 +59,7 @@
     <string name="error_saving_rule">Rule can\'t be saved. Please try again.</string>
     <string name="error_loading_transmitters">Error loading transmitters</string>
     <string name="error_loading_devices">Error loading sensor devices</string>
+    <string name="error_loading_rules">Error while loading rules</string>
+    <string name="error_loading_notifications">Error loading notifications</string>
 
 </resources>

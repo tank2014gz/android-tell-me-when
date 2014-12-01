@@ -30,8 +30,6 @@ public class TransmitterFragment extends WhatFragment {
 
     private static TransmitterAdapter mTransmitterAdapter;
 
-    private Subscription mTransmitterSubscription = Subscriptions.empty();
-
     public static TransmitterFragment newInstance() {
         return new TransmitterFragment();
     }
@@ -54,14 +52,15 @@ public class TransmitterFragment extends WhatFragment {
     public void onResume() {
         super.onResume();
 
-        loadTransmitters();
+        mTransmitterAdapter.clear();
+        mTransmitterAdapter.addAll(Storage.loadTransmitters());
+        mTransmitterAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
     }
 
     @OnItemClick(R.id.list_view)
@@ -78,27 +77,4 @@ public class TransmitterFragment extends WhatFragment {
         switchToEdit(FragmentName.MAIN);
     }
 
-    private void loadTransmitters() {
-        mTransmitterSubscription = RelayrSdk.getRelayrApi()
-                .getTransmitters(Storage.loadUserId())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<Transmitter>>() {
-                    @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        showToast(R.string.error_loading_transmitters);
-                    }
-
-                    @Override
-                    public void onNext(List<Transmitter> transmitters) {
-                        mTransmitterAdapter.clear();
-                        mTransmitterAdapter.addAll(transmitters);
-                        mTransmitterAdapter.notifyDataSetChanged();
-                    }
-                });
-    }
 }

@@ -1,5 +1,6 @@
 package io.relayr.tellmewhen.app;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -8,8 +9,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Toast;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -24,6 +28,7 @@ import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.model.RuleNotification;
+import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
@@ -52,6 +57,8 @@ public class MainFragment extends WhatFragment {
     private boolean isNotificationsEmpty = true;
     private boolean isRules = true;
 
+    private ProgressDialog mProgress;
+
     public static MainFragment newInstance() {
         return new MainFragment();
     }
@@ -71,6 +78,10 @@ public class MainFragment extends WhatFragment {
 
         toggleTabs(isRules);
 
+        mProgress = new ProgressDialog(getActivity());
+        mProgress.setTitle("Synchronizing");
+        mProgress.setMessage("Loading rules");
+
         return view;
     }
 
@@ -78,8 +89,15 @@ public class MainFragment extends WhatFragment {
     public void onResume() {
         super.onResume();
 
-        if (Storage.isUserOnBoarded()) checkRules();
-        else checkOnBoarding();
+        if (Storage.isUserOnBoarded()) loadRulesData();
+        else showOnBoardWarning();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (mProgress != null) mProgress.dismiss();
     }
 
     @Override
@@ -135,39 +153,6 @@ public class MainFragment extends WhatFragment {
     private void initiateAdapters() {
         mRulesAdapter = new RulesAdapter(this.getActivity());
         mNotificationsAdapter = new NotificationsAdapter(this.getActivity());
-    }
-
-    private void checkOnBoarding() {
-        mTransmitterSubscription = RelayrSdk.getRelayrApi()
-                .getTransmitters(Storage.loadUserId())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<Transmitter>>() {
-                    @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        showToast(R.string.error_loading_transmitters);
-                    }
-
-                    @Override
-                    public void onNext(List<Transmitter> transmitters) {
-                        Storage.userOnBoarded(!transmitters.isEmpty());
-
-                        if (transmitters.isEmpty()) showOnBoardWarning();
-                        else checkRules();
-                    }
-                });
-    }
-
-    private void checkRules() {
-        mRulesAdapter.clear();
-        mRulesAdapter.addAll(ruleService.getLocalRules());
-
-        if (mRulesAdapter.isEmpty()) showRulesWarning();
-        else showRules();
     }
 
     private void showOnBoardWarning() {
@@ -278,7 +263,7 @@ public class MainFragment extends WhatFragment {
 
     private void initListView() {
         mListView.setSwipingLayout(R.id.swipe_object);
-        mListView.setUndoStyle(EnhancedListView.UndoStyle.COLLAPSED_POPUP);
+        mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
         mListView.enableSwipeToDismiss();
         mListView.setUndoHideDelay(5000);
         mListView.setRequireTouchBeforeDismiss(false);
@@ -299,5 +284,39 @@ public class MainFragment extends WhatFragment {
     private void refreshMenuItems() {
         if (mMenuNewRule != null) mMenuNewRule.setVisible(isRules && Storage.isUserOnBoarded());
         if (mMenuClearItem != null) mMenuClearItem.setVisible(!isRules && !isNotificationsEmpty);
+    }
+
+    private void loadRulesData() {
+        mProgress.show();
+        ruleService.loadRemoteRules()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Rule>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        mProgress.dismiss();
+                        Toast.makeText(getActivity(), R.string.error_loading_rules,
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNext(List<Rule> rules) {
+                        mProgress.dismiss();
+
+                        mRulesAdapter.clear();
+                        mRulesAdapter.addAll(rules);
+
+                        if (rules.isEmpty()) showRulesWarning();
+                        else showRules();
+                    }
+                });
+    }
+
+    private void loadNotificationData() {
+        notificationService.populateLocalDatabase();
     }
 }

@@ -13,18 +13,18 @@ public enum SensorType implements Serializable{
     LIGHT("light", "%", DeviceModel.LIGHT_PROX_COLOR),
     ACCEL("acceleration", "", DeviceModel.ACCELEROMETER_GYROSCOPE);
 
-    private final String name;
+    private final String title;
     private final DeviceModel model;
     private final String unit;
 
-    SensorType(String name, String unit, DeviceModel model) {
-        this.name = name;
+    SensorType(String title, String unit, DeviceModel model) {
+        this.title = title;
         this.unit = unit;
         this.model = model;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
     public DeviceModel getModel() {
@@ -32,8 +32,11 @@ public enum SensorType implements Serializable{
     }
 
     public static SensorType getByName(String name) {
+        if(name == null)
+            return null;
+
         for (SensorType sensorType : values()) {
-            if (sensorType.getName().equals(name)) return sensorType;
+            if (sensorType.name().toLowerCase().equals(name.toLowerCase())) return sensorType;
         }
 
         return null;

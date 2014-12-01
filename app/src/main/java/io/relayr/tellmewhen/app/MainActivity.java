@@ -1,6 +1,7 @@
 package io.relayr.tellmewhen.app;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,28 +9,29 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
+import fr.castorflex.android.circularprogressbar.CircularProgressDrawable;
 import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
+import io.relayr.model.Transmitter;
 import io.relayr.model.User;
-import io.relayr.tellmewhen.AppModule;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.gcm.GcmUtils;
+import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.service.RuleService;
-import io.relayr.tellmewhen.service.rule.RuleServiceImpl;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
@@ -44,13 +46,12 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     private final String CURRENT_FRAGMENT = "io.relayr.tmw.current.frag";
 
     private AlertDialog mNetworkDialog;
+
     private Subscription mUserInfoSubscription = Subscriptions.empty();
+    private Subscription mTransmitterSubscription = Subscriptions.empty();
 
     private FragmentName mCurrentFragment;
-
     private boolean logInStarted = false;
-
-    @Inject RuleService ruleService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +111,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         super.onDestroy();
 
         if (!mUserInfoSubscription.isUnsubscribed()) mUserInfoSubscription.unsubscribe();
+        if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
     }
 
     @Override
@@ -226,8 +228,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void loadUserInfo() {
-        mUserInfoSubscription = RelayrSdk.getRelayrApi()
-                .getUserInfo()
+        mUserInfoSubscription = RelayrSdk.getRelayrApi().getUserInfo()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<User>() {
@@ -237,46 +238,38 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("MA", e.toString());
                         Toast.makeText(MainActivity.this, R.string.err_loading_user_data,
                                 Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onNext(User user) {
-                         switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
-//                        if (Storage.loadUserId() == null) createUserData(user.id);
-//                        else checkUserData(user.id);
+                        Storage.saveUserId(user.id);
+                        loadTransmitters();
                     }
                 });
     }
 
-    private void createUserData(String id) {
-        Storage.saveUserId(id);
-
-        ruleService.loadRemoteRules()
+    private void loadTransmitters() {
+        mTransmitterSubscription = RelayrSdk.getRelayrApi()
+                .getTransmitters(Storage.loadUserId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Boolean>() {
+                .subscribe(new Subscriber<List<Transmitter>>() {
                     @Override
                     public void onCompleted() {
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("MA loading all rules", e.toString());
+                        Toast.makeText(MainActivity.this, R.string.error_loading_transmitters, Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
-                    public void onNext(Boolean o) {
-                        Log.e("MA", o.toString());
+                    public void onNext(List<Transmitter> transmitters) {
+                        Storage.saveTransmitters(transmitters);
                         switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
                     }
                 });
-    }
-
-    private void checkUserData(String id) {
-        if (!Storage.loadUserId().equals(id)) createUserData(id);
-        else switchFragment(mCurrentFragment != null ? mCurrentFragment : FragmentName.MAIN);
     }
 }

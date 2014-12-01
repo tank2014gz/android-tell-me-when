@@ -26,5 +26,5 @@ public interface RuleApi {
                                   @Body DbRule rule);
 
     @POST(API_DB + "/_find")
-    Observable<Object> getAllRules(@Body Search search);
+    Observable<Documents> getAllRules(@Body Search search);
 }

@@ -100,6 +100,7 @@
     <orderEntry type="library" exported="" name="rxandroid-0.21.0" level="project" />
     <orderEntry type="library" exported="" name="activeandroid-3.0" level="project" />
     <orderEntry type="library" exported="" name="eventbus-2.4.0" level="project" />
+    <orderEntry type="library" exported="" name="library-circular-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="slf4j-api-1.7.5" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.2" level="project" />
     <orderEntry type="library" exported="" name="javax.inject-1" level="project" />

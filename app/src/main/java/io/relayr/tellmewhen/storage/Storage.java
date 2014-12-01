@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.util.SensorType;
 
@@ -20,6 +24,7 @@ public class Storage {
 
     private static Rule createRule = null;
     private static Pair<String, SensorType> originalSensor = null;
+    private static List<Transmitter> sTransmitters = new ArrayList<Transmitter>();
 
     private Storage(Context context) {
         sStorage = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
@@ -37,12 +42,6 @@ public class Storage {
 
     public static String loadUserId() {
         return sStorage.getString(USER_ID, null);
-    }
-
-    public static void userOnBoarded(boolean exist) {
-        SharedPreferences.Editor editor = sStorage.edit();
-        editor.putBoolean(USER_ONBOADRED, exist);
-        editor.apply();
     }
 
     public static boolean isUserOnBoarded() {
@@ -97,5 +96,17 @@ public class Storage {
     public static void clearRuleData() {
         createRule = null;
         originalSensor = null;
+    }
+
+    public static void saveTransmitters(List<Transmitter> transmitters) {
+        SharedPreferences.Editor editor = sStorage.edit();
+        editor.putBoolean(USER_ONBOADRED, !transmitters.isEmpty());
+        editor.apply();
+
+        sTransmitters = transmitters;
+    }
+
+    public static List<Transmitter> loadTransmitters() {
+        return sTransmitters;
     }
 }

@@ -3,6 +3,7 @@ package io.relayr.tellmewhen.service.rule;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -10,7 +11,6 @@ import javax.inject.Named;
 
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.model.Rule;
-import io.relayr.tellmewhen.model.RuleNotification;
 import io.relayr.tellmewhen.model.Status;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
@@ -23,7 +23,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Inject @Named("ruleApi") RuleApi ruleApi;
 
-    public RuleServiceImpl(){
+    public RuleServiceImpl() {
         TellMeWhenApplication.objectGraph.inject(this);
     }
 
@@ -36,15 +36,7 @@ public class RuleServiceImpl implements RuleService {
                 .map(new Func1<Status, Boolean>() {
                     @Override
                     public Boolean call(Status status) {
-                        boolean saveStatus = status.getOk().toLowerCase().equals("true");
-
-                        if (saveStatus) {
-                            rule.dbId = status.getId();
-                            rule.drRev = status.getRev();
-                            rule.save();
-                        }
-
-                        return saveStatus;
+                        return status.getOk().toLowerCase().equals("true");
                     }
                 });
     }
@@ -58,14 +50,7 @@ public class RuleServiceImpl implements RuleService {
                 .map(new Func1<Status, Boolean>() {
                     @Override
                     public Boolean call(Status status) {
-                        boolean saveStatus = status.getOk().toLowerCase().equals("true");
-
-                        if (saveStatus) {
-                            rule.drRev = status.getRev();
-                            rule.save();
-                        }
-
-                        return saveStatus;
+                        return status.getOk().toLowerCase().equals("true");
                     }
                 });
     }
@@ -79,36 +64,46 @@ public class RuleServiceImpl implements RuleService {
                 .map(new Func1<Status, Boolean>() {
                     @Override
                     public Boolean call(Status status) {
-                        boolean deleteStatus = status.getOk().toLowerCase().equals("true");
-
-                        if (deleteStatus) {
-                            rule.delete();
-                        }
-
-                        return deleteStatus;
+                        return status.getOk().toLowerCase().equals("true");
                     }
                 });
     }
 
     @Override
-    public List<Rule> getLocalRules() {
-        return new Select().from(Rule.class).execute();
-    }
-
-    @Override
-    public Observable<Boolean> loadRemoteRules() {
-        new Delete().from(Rule.class).execute();
-        new Delete().from(RuleNotification.class).execute();
-
+    public Observable<List<Rule>> loadRemoteRules() {
         return ruleApi.getAllRules(new Search(Storage.loadUserId()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Object, Boolean>() {
+                .map(new Func1<Documents, List<Rule>>() {
                     @Override
-                    public Boolean call(Object rules) {
-                        //TODO if there is some rules persist the to local DB
-                        return true;
+                    public List<Rule> call(Documents docs) {
+                        List<Rule> rules = new ArrayList<Rule>();
+
+                        for (DbRule dbRule : docs.getDocuments()) {
+                            rules.add(RuleMapper.toRule(dbRule));
+                        }
+
+                        return rules;
                     }
                 });
     }
+//
+//    @Override
+//    public Observable<Boolean> populateLocalDatabase() {
+//        new Delete().from(Rule.class).execute();
+//
+//        return loadRemoteRules()
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .map(new Func1<List<Rule>, Boolean>() {
+//                    @Override
+//                    public Boolean call(List<Rule> rules) {
+//                        for (Rule rule : rules) {
+//                            rule.save();
+//                        }
+//
+//                        return !rules.isEmpty();
+//                    }
+//                });
+//    }
 }

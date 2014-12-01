@@ -41,4 +41,9 @@ public class NotificationServiceImpl implements NotificationService {
     public List<RuleNotification> getLocalNotifications() {
         return new Select().from(RuleNotification.class).execute();
     }
+
+    @Override
+    public Observable<List<RuleNotification>> populateLocalDatabase() {
+        return null;
+    }
 }

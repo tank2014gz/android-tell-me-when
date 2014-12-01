@@ -15,4 +15,6 @@ public interface NotificationService {
      void saveNotification(RuleNotification notification);
 
      List<RuleNotification> getLocalNotifications();
+
+    Observable<List<RuleNotification>> populateLocalDatabase();
 }

@@ -15,7 +15,8 @@ public interface RuleService {
 
     public Observable<Boolean> deleteRule(Rule rule);
 
-    public Observable<Boolean> loadRemoteRules();
+    public Observable<List<Rule>> loadRemoteRules();
 
-    public List<Rule> getLocalRules();
+//    public Observable<Boolean> populateLocalDatabase();
+
 }

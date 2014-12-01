@@ -1,5 +1,6 @@
 package io.relayr.tellmewhen.service.rule;
 
+import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.model.Rule;
 import io.relayr.tellmewhen.storage.Storage;
 
@@ -22,4 +23,34 @@ public class RuleMapper {
     }
 
 
+    public static Rule toRule(DbRule dbRule) {
+        Rule rule = new Rule();
+        rule.dbId = dbRule.getId();
+        rule.drRev = dbRule.getRev();
+
+        rule.isNotifying = dbRule.isActive();
+        rule.name = dbRule.getDetails().getName();
+
+        rule.transmitterId = dbRule.getTransmitterId();
+        rule.transmitterType = getTransmitterName(dbRule.getTransmitterId());
+        rule.transmitterName = "Relayr Wunderbar";
+
+        rule.sensorId = dbRule.getSensorId();
+        rule.sensorType = dbRule.getCondition().getSensor().ordinal();
+
+        rule.operatorType = dbRule.getCondition().getOperator().ordinal();
+
+        rule.value = dbRule.getCondition().getValue();
+        return rule;
+    }
+
+    private static String getTransmitterName(String transmitterId){
+        for (Transmitter transmitter : Storage.loadTransmitters()) {
+            if(transmitter.id.equals(transmitterId)){
+                return transmitter.getName();
+            }
+        }
+
+        return "";
+    }
 }

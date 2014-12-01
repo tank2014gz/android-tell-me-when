@@ -38,7 +38,7 @@ public class RulesAdapter extends ArrayAdapter<Rule> {
     }
 
     private String buildRuleValue(Rule rule){
-       return rule.getSensorType().getName() + " " +
+       return rule.getSensorType().getTitle() + " " +
                 rule.getOperatorType().getValue() + " " + rule.value;
     }
 

@@ -53,7 +53,7 @@ public class SensorUtil {
     }
 
     public static int getIcon(Context context, SensorType type) {
-        return context.getResources().getIdentifier("ms_" + type.getName(),
+        return context.getResources().getIdentifier("ms_" + type.getTitle(),
                 "drawable", context.getPackageName());
     }
 }
