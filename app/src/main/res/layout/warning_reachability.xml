@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="@dimen/default_object_padding"
+              android:layout_gravity="center"
+              android:gravity="center"
+              android:background="@color/background"
+    >
+
+    <io.relayr.commons.widget.CustomTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/warning_reachability_title"
+        android:gravity="center"
+        android:textSize="@dimen/operator_size_large"
+        style="@style/BoldText"/>
+
+    <io.relayr.commons.widget.CustomTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/warning_reachability_text"
+        android:gravity="center"
+        android:textSize="@dimen/default_object_subtitle_text_size"
+        android:padding="@dimen/default_object_padding"
+        style="@style/NormalText"/>
+
+    <include layout="@layout/view_button_green"/>
+
+</LinearLayout>

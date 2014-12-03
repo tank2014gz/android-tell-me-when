@@ -8,7 +8,9 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Table(name = "Notifications")
 public class TMWNotification extends Model implements Serializable {
@@ -18,7 +20,7 @@ public class TMWNotification extends Model implements Serializable {
 
     @Column(name = "userId") @SerializedName("user_id") public String userId;
     @Column(name = "ruleId") @SerializedName("rule_id") public String ruleId;
-    @Column(name = "value") @SerializedName("value") public int value;
+    @Column(name = "value") @SerializedName("val") public int value;
     @Column(name = "timestamp") @SerializedName("timestamp") public String timestamp;
 
     public TMWNotification() {
@@ -65,21 +67,13 @@ public class TMWNotification extends Model implements Serializable {
     }
 
     public Date getTimestamp() throws ParseException {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+        int gmtOffset = TimeZone.getDefault().getRawOffset();
 
-        if (timestamp.endsWith("Z")) {
-            timestamp = timestamp.substring(0, timestamp.length() - 1) + "GMT-00:00";
-        } else {
-            int inset = 6;
+        long serverTimestamp = Long.parseLong(timestamp);
 
-            String s0 = timestamp.substring(0, timestamp.length() - inset);
-            String s1 = timestamp.substring(timestamp.length() - inset, timestamp.length());
+        long localTimestamp = serverTimestamp + gmtOffset;
 
-            timestamp = s0 + "GMT" + s1;
-        }
-
-        return df.parse(timestamp);
-
+        return new Date(localTimestamp);
     }
 
     public void setTimestamp(String timestamp) {

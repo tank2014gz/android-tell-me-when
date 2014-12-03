@@ -6,6 +6,7 @@ import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.service.model.DbNotification;
 import io.relayr.tellmewhen.service.model.DbRule;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.SensorUtil;
 
 import static io.relayr.tellmewhen.service.model.DbRule.Condition;
 import static io.relayr.tellmewhen.service.model.DbRule.Notification;
@@ -19,7 +20,8 @@ public class DataMapper {
         dbRule.setDetails(details);
 
         Condition condition = new Condition(rule.getSensorType().name().toLowerCase(),
-                rule.getOperatorType().getValue(), rule.value);
+                rule.getOperatorType().getValue(),
+                SensorUtil.scaleToServerData(rule.getSensorType(), rule.value));
         dbRule.setCondition(condition);
 
         Notification notif = new Notification("gcm", Storage.loadGmsRegistrationId());
@@ -28,7 +30,7 @@ public class DataMapper {
         return dbRule;
     }
 
-    public static TMWNotification toRuleNotification(DbNotification dbNotif){
+    public static TMWNotification toRuleNotification(DbNotification dbNotif) {
         TMWNotification ruleNotif = new TMWNotification();
         ruleNotif.ruleId = dbNotif.getRuleId();
         ruleNotif.dbId = dbNotif.getDbId();
@@ -56,13 +58,13 @@ public class DataMapper {
 
         rule.operatorType = dbRule.getCondition().getOperator().ordinal();
 
-        rule.value = dbRule.getCondition().getValue();
+        rule.value = SensorUtil.scaleToUiData(rule.getSensorType(), dbRule.getCondition().getValue());
         return rule;
     }
 
-    private static String getTransmitterName(String transmitterId){
+    private static String getTransmitterName(String transmitterId) {
         for (Transmitter transmitter : Storage.loadTransmitters()) {
-            if(transmitter.id.equals(transmitterId)){
+            if (transmitter.id.equals(transmitterId)) {
                 return transmitter.getName();
             }
         }

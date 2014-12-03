@@ -22,10 +22,11 @@ import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.app.adapter.RulesAdapter;
+import io.relayr.tellmewhen.app.views.WarningNoNotificationsView;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
-import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.model.TMWNotification;
+import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
@@ -53,8 +54,6 @@ public class MainFragment extends WhatFragment {
 
     private MenuItem mMenuNewRule;
     private MenuItem mMenuClear;
-
-    public TMWNotification mSelectedNotification;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -163,7 +162,15 @@ public class MainFragment extends WhatFragment {
         }));
     }
 
+    private void showNoNotificationsWarning() {
+        toggleTabs(false);
+        toggleWarningLayout(new WarningNoNotificationsView(getActivity()));
+    }
+
     private void toggleWarningLayout(View view) {
+        if (mWarningLayout == null)
+            return;
+
         mWarningLayout.removeAllViews();
         if (view != null) mWarningLayout.addView(view);
 
@@ -172,6 +179,8 @@ public class MainFragment extends WhatFragment {
     }
 
     private void showRules() {
+        toggleWarningLayout(null);
+
         mListView.setAdapter(mRulesAdapter);
         mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
             @Override
@@ -231,6 +240,9 @@ public class MainFragment extends WhatFragment {
         mNotificationsAdapter.clear();
         mNotificationsAdapter.addAll(notificationService.getLocalNotifications());
 
+        if (mNotificationsAdapter.isEmpty()) showNoNotificationsWarning();
+        else toggleWarningLayout(null);
+
         mListView.setAdapter(mNotificationsAdapter);
         mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
             @Override
@@ -238,9 +250,13 @@ public class MainFragment extends WhatFragment {
                 final TMWNotification item = mNotificationsAdapter.getItem(position);
                 mNotificationsAdapter.remove(item);
 
+                if (mNotificationsAdapter.isEmpty()) showNoNotificationsWarning();
+
                 return new EnhancedListView.Undoable() {
                     @Override
                     public void undo() {
+                        toggleWarningLayout(null);
+
                         mNotificationsAdapter.insert(item, position);
                         mNotificationsAdapter.notifyDataSetChanged();
                     }
@@ -303,8 +319,8 @@ public class MainFragment extends WhatFragment {
     }
 
     private void loadRulesData() {
-        mProgress.progressiveStart();
         toggleTabs(true);
+        mProgress.progressiveStart();
 
         ruleService.loadRemoteRules()
                 .subscribeOn(Schedulers.io())
@@ -335,8 +351,8 @@ public class MainFragment extends WhatFragment {
     }
 
     private void loadNotificationsData() {
-        mProgress.progressiveStart();
         toggleTabs(false);
+        mProgress.progressiveStart();
 
         notificationService.loadRemoteNotifications()
                 .subscribeOn(Schedulers.io())

@@ -22,7 +22,7 @@ public class NotificationUtil {
         Calendar today = Calendar.getInstance();
         today.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         return calendar.getTimeInMillis() > today.getTimeInMillis() ? context
                 .getString(R.string.today) : sdf.format(calendar.getTime());
@@ -36,6 +36,12 @@ public class NotificationUtil {
             e.printStackTrace();
         }
 
-        return calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minutes = calendar.get(Calendar.MINUTE);
+        int seconds = calendar.get(Calendar.SECOND);
+
+        return (hour < 10 ? "0" + hour : hour) + ":" +
+                (minutes < 10 ? "0" + minutes : minutes) + ":" +
+                (seconds < 10 ? "0" + seconds : seconds);
     }
 }

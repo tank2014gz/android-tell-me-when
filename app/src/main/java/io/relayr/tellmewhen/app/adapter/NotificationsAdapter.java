@@ -20,6 +20,7 @@ import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.util.NotificationUtil;
+import io.relayr.tellmewhen.util.SensorUtil;
 
 public class NotificationsAdapter extends ArrayAdapter<TMWNotification> {
 
@@ -42,9 +43,10 @@ public class NotificationsAdapter extends ArrayAdapter<TMWNotification> {
         TMWNotification item = getItem(position);
         TMWRule rule = new Select().from(TMWRule.class).where("dbId = ?", item.getRuleId()).executeSingle();
 
-        holder.name.setText(rule.name);
-        holder.info.setText(rule.getSensorType().getTitle() + " " + rule.getOperatorType()
-                .getValue() + " " + rule.value);
+        if (rule != null) {
+            holder.name.setText(rule.name);
+            holder.info.setText(SensorUtil.buildRuleValue(rule));
+        }
 
         holder.date.setText(NotificationUtil.getDate(getContext(), item));
         holder.time.setText(NotificationUtil.getTime(item));

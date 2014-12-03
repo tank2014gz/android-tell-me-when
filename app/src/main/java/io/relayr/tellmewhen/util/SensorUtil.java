@@ -27,7 +27,7 @@ public class SensorUtil {
 
         sSensorValues.put(SensorType.TEMP, new Pair<Integer, Integer>(-40, 100));
         sSensorValues.put(SensorType.HUM, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.SND_LEVEL, new Pair<Integer, Integer>(0, 10));
+        sSensorValues.put(SensorType.SND_LEVEL, new Pair<Integer, Integer>(0, 100));
         sSensorValues.put(SensorType.PROX, new Pair<Integer, Integer>(0, 100));
         sSensorValues.put(SensorType.LIGHT, new Pair<Integer, Integer>(0, 100));
         sSensorValues.put(SensorType.ACCEL, new Pair<Integer, Integer>(0, 10));
@@ -60,10 +60,32 @@ public class SensorUtil {
 
     public static String buildRuleValue(TMWRule rule) {
         return rule.getSensorType().getTitle() + " " +
-                rule.getOperatorType().getValue() + " " + rule.value;
+                rule.getOperatorType().getValue() + " " + rule.value + rule.getSensorType().getUnit();
     }
 
-    public static void scaleToUiData(SensorType type, float data){
+    public static int scaleToUiData(SensorType type, float data) {
+        switch (type) {
+            case PROX:
+                return (int) (data / 2048 * getMaxValue(type));
+            case LIGHT:
+                return (int) (data / 4096 * getMaxValue(type));
+            case SND_LEVEL:
+                return (int) (data / 1024 * getMaxValue(type));
+        }
 
+        return (int) data;
+    }
+
+    public static int scaleToServerData(SensorType type, int data) {
+        switch (type) {
+            case PROX:
+                return (int) (((float) data / getMaxValue(type)) * 2048);
+            case LIGHT:
+                return (int) (((float) data / getMaxValue(type)) * 4096);
+            case SND_LEVEL:
+                return (int) (((float) data / getMaxValue(type)) * 1024);
+        }
+
+        return data;
     }
 }

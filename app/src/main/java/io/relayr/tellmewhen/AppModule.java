@@ -9,7 +9,7 @@ import dagger.Module;
 import dagger.Provides;
 import io.relayr.tellmewhen.app.MainActivity;
 import io.relayr.tellmewhen.app.MainFragment;
-import io.relayr.tellmewhen.app.NotificationDetailFragment;
+import io.relayr.tellmewhen.app.NotificationDetailsFragment;
 import io.relayr.tellmewhen.app.RuleEditFragment;
 import io.relayr.tellmewhen.app.RuleNameFragment;
 import io.relayr.tellmewhen.app.RuleValueCreateFragment;
@@ -41,7 +41,7 @@ import retrofit.RestAdapter;
                 RuleValueEditFragment.class,
                 RuleEditFragment.class,
                 RuleNameFragment.class,
-                NotificationDetailFragment.class,
+                NotificationDetailsFragment.class,
                 RuleServiceImpl.class,
                 NotificationServiceImpl.class
         }

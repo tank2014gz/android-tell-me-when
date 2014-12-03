@@ -239,28 +239,27 @@ public class RuleValueView extends RelativeLayout {
                     public void onNext(Object o) {
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        float value = 0f;
+                        int value = 0;
                         switch (mSensor) {
                             case TEMP:
-                                value = reading.temp;
+                                value = (int) reading.temp;
                                 break;
                             case HUM:
-                                value = reading.hum;
+                                value = (int) reading.hum;
                                 break;
                             case PROX:
-                                value = reading.prox;
+                                value = SensorUtil.scaleToUiData(SensorType.PROX, reading.prox);
                                 break;
                             case SND_LEVEL:
-                                value = reading.snd_level;
+                                value = SensorUtil.scaleToUiData(SensorType.SND_LEVEL, reading.snd_level);
                                 break;
                             case LIGHT:
-                                value = reading.light;
+                                value = SensorUtil.scaleToUiData(SensorType.LIGHT, reading.light);
                                 break;
                         }
 
-                        Log.e("VALUE", "" + value);
                         mSensorValue.setText(getContext().getString(R.string
-                                .current_reading) + ": " + value);
+                                .current_reading) + ": " + value + mSensor.getUnit());
                     }
                 });
     }

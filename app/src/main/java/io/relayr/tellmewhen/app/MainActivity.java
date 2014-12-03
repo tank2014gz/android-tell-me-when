@@ -1,11 +1,8 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -38,14 +35,13 @@ import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends ActionBarActivity implements LoginEventListener {
 
+    private static final int ACTION_REACHABILITY = 100;
     private final String CURRENT_FRAGMENT = "io.relayr.tmw.current.frag";
 
     private Subscription mUserInfoSubscription = Subscriptions.empty();
     private Subscription mTransmitterSubscription = Subscriptions.empty();
 
     private FragmentName mCurrentFragment;
-
-    private AlertDialog mNetworkDialog;
 
     private boolean logInStarted = false;
 
@@ -73,11 +69,20 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         if (GcmUtils.getInstance().checkPlayServices(this)) {
             GcmUtils.getInstance().init(this);
 
-            if (isConnected()) checkUserState();
-            else showNetworkDialog();
+            if (isConnected())
+                checkUserState();
+            else
+                startActivityForResult(new Intent(this, ReachabilityActivity.class), ACTION_REACHABILITY);
         }
 
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ACTION_REACHABILITY && !isConnected()) super.onBackPressed();
     }
 
     private void checkUserState() {
@@ -97,7 +102,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     public void onPause() {
         super.onPause();
 
-        if (mNetworkDialog != null) mNetworkDialog.dismiss();
+        logInStarted = false;
 
         EventBus.getDefault().unregister(this);
     }
@@ -189,7 +194,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
                 fragment = RuleEditFragment.newInstance();
                 break;
             case NOTIFICATION_DETAILS:
-                fragment = NotificationDetailFragment.newInstance();
+                fragment = NotificationDetailsFragment.newInstance();
                 break;
             default:
                 fragment = MainFragment.newInstance();
@@ -210,25 +215,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     private boolean isConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null;
-    }
-
-    private void showNetworkDialog() {
-        mNetworkDialog = new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.please_connect_to_wifi))
-                .setPositiveButton(getString(R.string.connect), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
-                    }
-                })
-                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        finish();
-                    }
-                }).show();
     }
 
     private void loadUserInfo() {

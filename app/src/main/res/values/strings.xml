@@ -69,5 +69,9 @@
     <string name="notif_details_value">Notification value</string>
     <string name="notif_details_current_value">Current sensor value</string>
     <string name="title_notif_details">notification details</string>
+    <string name="warning_reachability_text">Couldn\'t reach relayr cloud. PLease make sure you are connected to the Internet.</string>
+    <string name="warning_reachability_title">relayr</string>
+    <string name="warning_no_notif_text">Notifications will be listed here</string>
+    <string name="warning_no_notif_title">No new notifications</string>
 
 </resources>

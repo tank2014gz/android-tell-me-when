@@ -1,8 +1,6 @@
 package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +31,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class NotificationDetailFragment extends WhatFragment {
+public class NotificationDetailsFragment extends WhatFragment {
 
     @InjectView(R.id.notif_details_rule_name) TextView mRuleName;
     @InjectView(R.id.notif_details_rule_value) TextView mRuleValue;
@@ -44,8 +42,8 @@ public class NotificationDetailFragment extends WhatFragment {
     private Subscription mWebSocketSubscription = Subscriptions.empty();
     private String mSensorDeviceId;
 
-    public static NotificationDetailFragment newInstance() {
-        return new NotificationDetailFragment();
+    public static NotificationDetailsFragment newInstance() {
+        return new NotificationDetailsFragment();
     }
 
     @Override
@@ -151,17 +149,17 @@ public class NotificationDetailFragment extends WhatFragment {
                                 value = reading.hum;
                                 break;
                             case PROX:
-                                value = reading.prox;
+                                value = SensorUtil.scaleToUiData(SensorType.PROX, reading.prox);
                                 break;
                             case SND_LEVEL:
-                                value = reading.snd_level;
+                                value = SensorUtil.scaleToUiData(SensorType.SND_LEVEL, reading.snd_level);
                                 break;
                             case LIGHT:
-                                value = reading.light;
+                                value = SensorUtil.scaleToUiData(SensorType.LIGHT, reading.light);
                                 break;
                         }
 
-                        mCurrentSensor.setText("" + value);
+                        mCurrentSensor.setText(value + sensor.getUnit());
                     }
                 });
     }
