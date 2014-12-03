@@ -3,7 +3,7 @@
     android:id="@+id/button_done"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/button_green"
+    android:background="@drawable/button_green_selector"
     android:layout_margin="@dimen/button_done_margin"
     android:padding="@dimen/button_done_padding"
     android:textSize="@dimen/button_done_text_size"

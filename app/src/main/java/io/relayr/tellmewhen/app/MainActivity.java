@@ -1,7 +1,6 @@
 package io.relayr.tellmewhen.app;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,20 +8,18 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
-import fr.castorflex.android.circularprogressbar.CircularProgressDrawable;
 import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
 import io.relayr.model.Transmitter;
@@ -30,8 +27,6 @@ import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.gcm.GcmUtils;
-import io.relayr.tellmewhen.model.Rule;
-import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
@@ -45,12 +40,13 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     private final String CURRENT_FRAGMENT = "io.relayr.tmw.current.frag";
 
-    private AlertDialog mNetworkDialog;
-
     private Subscription mUserInfoSubscription = Subscriptions.empty();
     private Subscription mTransmitterSubscription = Subscriptions.empty();
 
     private FragmentName mCurrentFragment;
+
+    private AlertDialog mNetworkDialog;
+
     private boolean logInStarted = false;
 
     @Override
@@ -123,11 +119,13 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     @Override
     public void onSuccessUserLogIn() {
+        logInStarted = false;
         Toast.makeText(this, R.string.successfully_logged_in, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onErrorLogin(Throwable e) {
+        logInStarted = false;
         Toast.makeText(this, R.string.unsuccessfully_logged_in, Toast.LENGTH_SHORT).show();
     }
 
@@ -149,6 +147,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_log_out) {
+            mCurrentFragment = null;
             RelayrSdk.logOut();
             checkUserState();
         }
@@ -189,6 +188,9 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
             case RULE_EDIT:
                 fragment = RuleEditFragment.newInstance();
                 break;
+            case NOTIFICATION_DETAILS:
+                fragment = NotificationDetailFragment.newInstance();
+                break;
             default:
                 fragment = MainFragment.newInstance();
         }
@@ -197,10 +199,12 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void showFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right)
-                .replace(R.id.container, fragment)
-                .commit();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        if (!mCurrentFragment.equals(FragmentName.MAIN))
+            transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+
+        transaction.replace(R.id.container, fragment).commit();
     }
 
     private boolean isConnected() {
@@ -244,7 +248,12 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
                     @Override
                     public void onNext(User user) {
+                        Crashlytics.setUserEmail(user.email);
+                        Crashlytics.setUserName(user.getName());
+                        Crashlytics.setUserIdentifier(user.id);
+
                         Storage.saveUserId(user.id);
+
                         loadTransmitters();
                     }
                 });

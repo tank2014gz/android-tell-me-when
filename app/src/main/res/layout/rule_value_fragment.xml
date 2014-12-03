@@ -139,6 +139,18 @@
                     android:progressDrawable="@drawable/progressbar"/>
             </RelativeLayout>
 
+            <include layout="@layout/view_divider"/>
+
+            <io.relayr.commons.widget.CustomTextView
+                android:id="@+id/sensor_value"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/default_object_height"
+                android:textSize="@dimen/default_object_title_text_size"
+                android:padding="@dimen/default_object_padding"
+                android:gravity="center"
+                android:layout_gravity="center"
+                style="@style/BoldText"/>
+
         </LinearLayout>
     </ScrollView>
 

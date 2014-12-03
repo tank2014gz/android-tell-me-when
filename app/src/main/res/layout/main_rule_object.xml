@@ -15,7 +15,6 @@
         android:id="@+id/object_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/title_tab_rules"
         android:gravity="center_vertical"
         android:textSize="@dimen/default_object_title_text_size"
         android:textAllCaps="true"
@@ -25,18 +24,17 @@
         android:id="@+id/object_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/title_tab_notifications"
         android:gravity="center_vertical"
         android:textSize="@dimen/default_object_subtitle_text_size"
         style="@style/NormalText"/>
 
-    <io.relayr.commons.widget.CustomTextView
-        android:id="@+id/object_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Current sensor value: 0.5"
-        android:gravity="center_vertical"
-        android:textSize="@dimen/default_object_small_subtitle_text_size"
-        style="@style/NormalText"/>
+    <!--<io.relayr.commons.widget.CustomTextView-->
+        <!--android:id="@+id/object_info"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Current sensor value"-->
+        <!--android:gravity="center_vertical"-->
+        <!--android:textSize="@dimen/default_object_small_subtitle_text_size"-->
+        <!--style="@style/NormalText"/>-->
 </LinearLayout>
 

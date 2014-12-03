@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.model.TMWRule;
 
 public class SensorUtil {
 
@@ -24,12 +25,12 @@ public class SensorUtil {
         sSensorMap.put(SensorType.LIGHT, context.getString(R.string.measurement_light));
         sSensorMap.put(SensorType.ACCEL, context.getString(R.string.measurement_acceleration));
 
-        sSensorValues.put(SensorType.TEMP, new Pair<Integer, Integer>(-20, 40));
+        sSensorValues.put(SensorType.TEMP, new Pair<Integer, Integer>(-40, 100));
         sSensorValues.put(SensorType.HUM, new Pair<Integer, Integer>(0, 100));
         sSensorValues.put(SensorType.SND_LEVEL, new Pair<Integer, Integer>(0, 10));
         sSensorValues.put(SensorType.PROX, new Pair<Integer, Integer>(0, 100));
         sSensorValues.put(SensorType.LIGHT, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.ACCEL, new Pair<Integer, Integer>(-3, 3));
+        sSensorValues.put(SensorType.ACCEL, new Pair<Integer, Integer>(0, 10));
     }
 
     public static void init(Context context) {
@@ -55,5 +56,14 @@ public class SensorUtil {
     public static int getIcon(Context context, SensorType type) {
         return context.getResources().getIdentifier("ms_" + type.getTitle(),
                 "drawable", context.getPackageName());
+    }
+
+    public static String buildRuleValue(TMWRule rule) {
+        return rule.getSensorType().getTitle() + " " +
+                rule.getOperatorType().getValue() + " " + rule.value;
+    }
+
+    public static void scaleToUiData(SensorType type, float data){
+
     }
 }

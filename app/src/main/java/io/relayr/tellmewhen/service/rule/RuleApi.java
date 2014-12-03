@@ -1,6 +1,9 @@
 package io.relayr.tellmewhen.service.rule;
 
-import io.relayr.tellmewhen.model.Status;
+import io.relayr.tellmewhen.service.model.DbSearch;
+import io.relayr.tellmewhen.service.model.DbStatus;
+import io.relayr.tellmewhen.service.model.DbRule;
+import io.relayr.tellmewhen.service.model.DbDocuments;
 import retrofit.http.Body;
 import retrofit.http.DELETE;
 import retrofit.http.POST;
@@ -9,22 +12,22 @@ import retrofit.http.Path;
 import retrofit.http.Query;
 import rx.Observable;
 
+import static io.relayr.tellmewhen.AppModule.RULE_API_DB;
+
 public interface RuleApi {
 
-    public static final String API_DB = "/bp_tmw_rules";
+    @POST(RULE_API_DB)
+    Observable<DbStatus> createRule(@Body DbRule rule);
 
-    @POST(API_DB)
-    Observable<Status> createRule(@Body DbRule rule);
-
-    @DELETE(API_DB + "/{document}")
-    Observable<Status> deleteRule(@Path("document") String docId,
+    @DELETE(RULE_API_DB + "/{document}")
+    Observable<DbStatus> deleteRule(@Path("document") String docId,
                                   @Query("rev") String revNum);
 
-    @PUT(API_DB + "/{document}")
-    Observable<Status> updateRule(@Path("document") String docId,
+    @PUT(RULE_API_DB + "/{document}")
+    Observable<DbStatus> updateRule(@Path("document") String docId,
                                   @Query("rev") String revNum,
                                   @Body DbRule rule);
 
-    @POST(API_DB + "/_find")
-    Observable<Documents> getAllRules(@Body Search search);
+    @POST(RULE_API_DB + "/_find")
+    Observable<DbDocuments<DbRule>> getAllRules(@Body DbSearch search);
 }

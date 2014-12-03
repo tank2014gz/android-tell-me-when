@@ -61,5 +61,13 @@
     <string name="error_loading_devices">Error loading sensor devices</string>
     <string name="error_loading_rules">Error while loading rules</string>
     <string name="error_loading_notifications">Error loading notifications</string>
+    <string name="today">Today</string>
+    <string name="please_open_app">Open application to see latest notifications</string>
+    <string name="current_reading">Current sensor value</string>
+    <string name="notif_details_rule">Rule</string>
+    <string name="notif_details_treshold_timestamp">Time when threshold met</string>
+    <string name="notif_details_value">Notification value</string>
+    <string name="notif_details_current_value">Current sensor value</string>
+    <string name="title_notif_details">notification details</string>
 
 </resources>

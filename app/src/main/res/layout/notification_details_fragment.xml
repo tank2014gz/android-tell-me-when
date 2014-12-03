@@ -1,0 +1,106 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/default_object_padding"
+        android:layout_margin="@dimen/default_object_padding">
+
+        <io.relayr.commons.widget.CustomTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/notif_details_rule"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:layout_marginTop="@dimen/default_object_padding"
+            style="@style/BoldText"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:id="@+id/notif_details_rule_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:textAllCaps="true"
+            style="@style/BoldText"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:id="@+id/notif_details_rule_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_object_subtitle_text_size"
+            android:layout_marginBottom="@dimen/default_object_padding"
+            style="@style/NormalText"/>
+
+        <include layout="@layout/view_divider"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/notif_details_treshold_timestamp"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:singleLine="true"
+            android:layout_marginTop="@dimen/default_object_padding"
+            style="@style/BoldText"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:id="@+id/notif_details_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:textAllCaps="true"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="@dimen/default_object_padding"
+            style="@style/ExtraBoldText"/>
+
+        <include layout="@layout/view_divider"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:text="@string/notif_details_value"
+            android:gravity="center_vertical"
+            android:layout_marginTop="@dimen/default_object_padding"
+            style="@style/BoldText"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:id="@+id/notif_details_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:textAllCaps="true"
+            android:layout_marginBottom="@dimen/default_object_padding"
+            style="@style/BoldText"/>
+
+        <include layout="@layout/view_divider"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:text="@string/notif_details_current_value"
+            android:gravity="center_vertical"
+            android:layout_marginTop="@dimen/default_object_padding"
+            style="@style/BoldText"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:id="@+id/notif_details_current_sensor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:textAllCaps="true"
+            android:layout_marginBottom="@dimen/default_object_padding"
+            style="@style/ExtraBoldText"/>
+
+    </LinearLayout>
+
+    <include
+        layout="@layout/view_button_green"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/button_done_margin"/>
+</RelativeLayout>

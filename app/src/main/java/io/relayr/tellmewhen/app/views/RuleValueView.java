@@ -2,22 +2,41 @@ package io.relayr.tellmewhen.app.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import io.relayr.RelayrSdk;
+import io.relayr.model.Device;
+import io.relayr.model.DeviceModel;
+import io.relayr.model.Reading;
+import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.OperatorType;
 import io.relayr.tellmewhen.util.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.Subscriptions;
 
 public class RuleValueView extends RelativeLayout {
+
+    private String mSensorDeviceId;
 
     public interface OnDoneClickListener {
         public void onDoneClicked(int progress, OperatorType mCurrentOperator);
@@ -35,6 +54,8 @@ public class RuleValueView extends RelativeLayout {
 
     @InjectView(R.id.button_done) TextView mButtonDone;
 
+    @InjectView(R.id.sensor_value) TextView mSensorValue;
+
     private int mButtonTextId;
     private OnDoneClickListener onDoneClickListener;
 
@@ -46,6 +67,8 @@ public class RuleValueView extends RelativeLayout {
     private OperatorType mOperator;
     private SensorType mSensor;
     private Integer mValue;
+
+    private Subscription mWebSocketSubscription = Subscriptions.empty();
 
     public RuleValueView(Context context, SensorType sensor, OperatorType operator, Integer value) {
         this(context, null);
@@ -81,6 +104,9 @@ public class RuleValueView extends RelativeLayout {
         super.onDetachedFromWindow();
 
         ButterKnife.reset(this);
+
+        if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
+        if (mSensorDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mSensorDeviceId);
     }
 
     @OnClick(R.id.button_done)
@@ -134,6 +160,8 @@ public class RuleValueView extends RelativeLayout {
         });
 
         showSavedData();
+
+        loadDevice();
     }
 
     private void showSavedData() {
@@ -165,5 +193,75 @@ public class RuleValueView extends RelativeLayout {
                 mOperatorGreater.setBackgroundResource(R.drawable.tab_active);
                 break;
         }
+    }
+
+    private void loadDevice() {
+        RelayrSdk.getRelayrApi()
+                .getTransmitterDevices(Storage.getRule().transmitterId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<TransmitterDevice>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(List<TransmitterDevice> transmitterDevices) {
+                        for (TransmitterDevice device : transmitterDevices) {
+                            if (device.getModel().equals(mSensor.getModel()))
+                                subscribeForDeviceReadings(device);
+                        }
+
+                    }
+                });
+    }
+
+    private void subscribeForDeviceReadings(TransmitterDevice device) {
+        mSensorDeviceId = device.id;
+        mWebSocketSubscription = RelayrSdk.getWebSocketClient()
+                .subscribe(device, new Subscriber<Object>() {
+
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(Object o) {
+                        Reading reading = new Gson().fromJson(o.toString(), Reading.class);
+
+                        float value = 0f;
+                        switch (mSensor) {
+                            case TEMP:
+                                value = reading.temp;
+                                break;
+                            case HUM:
+                                value = reading.hum;
+                                break;
+                            case PROX:
+                                value = reading.prox;
+                                break;
+                            case SND_LEVEL:
+                                value = reading.snd_level;
+                                break;
+                            case LIGHT:
+                                value = reading.light;
+                                break;
+                        }
+
+                        Log.e("VALUE", "" + value);
+                        mSensorValue.setText(getContext().getString(R.string
+                                .current_reading) + ": " + value);
+                    }
+                });
     }
 }

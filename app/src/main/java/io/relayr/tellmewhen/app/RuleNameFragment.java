@@ -80,7 +80,8 @@ public class RuleNameFragment extends WhatFragment {
         if (isNameOk()) {
             Storage.getRule().name = mRuleName.getText().toString();
 
-            ruleService.createRule(Storage.getRule())
+            if (Storage.isRuleEditing()) switchToEdit(FragmentName.MAIN);
+            else ruleService.createRule(Storage.getRule())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Subscriber<Boolean>() {

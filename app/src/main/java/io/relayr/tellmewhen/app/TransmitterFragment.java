@@ -6,23 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.util.List;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
-import io.relayr.RelayrSdk;
-import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.adapter.TransmitterAdapter;
+import io.relayr.tellmewhen.app.adapter.TransmitterAdapter;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
-import io.relayr.tellmewhen.util.WhenEvents;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.Subscriptions;
 
 public class TransmitterFragment extends WhatFragment {
 

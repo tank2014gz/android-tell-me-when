@@ -1,30 +1,46 @@
-package io.relayr.tellmewhen.service.rule;
+package io.relayr.tellmewhen.service.model;
 
 import io.relayr.model.Transmitter;
-import io.relayr.tellmewhen.model.Rule;
+import io.relayr.tellmewhen.model.TMWRule;
+import io.relayr.tellmewhen.model.TMWNotification;
+import io.relayr.tellmewhen.service.model.DbNotification;
+import io.relayr.tellmewhen.service.model.DbRule;
 import io.relayr.tellmewhen.storage.Storage;
 
-public class RuleMapper {
+import static io.relayr.tellmewhen.service.model.DbRule.Condition;
+import static io.relayr.tellmewhen.service.model.DbRule.Notification;
 
-    public static DbRule toDbRule(Rule rule) {
+public class DataMapper {
+
+    public static DbRule toDbRule(TMWRule rule) {
         DbRule dbRule = new DbRule(Storage.loadUserId(), rule.transmitterId, rule.sensorId, rule.isNotifying);
 
         DbRule.Details details = new DbRule.Details(rule.name);
         dbRule.setDetails(details);
 
-        DbRule.Condition condition = new DbRule.Condition(rule.getSensorType().name().toLowerCase(),
+        Condition condition = new Condition(rule.getSensorType().name().toLowerCase(),
                 rule.getOperatorType().getValue(), rule.value);
         dbRule.setCondition(condition);
 
-        DbRule.Notification notif = new DbRule.Notification("gcm", Storage.loadGmsRegistrationId());
+        Notification notif = new Notification("gcm", Storage.loadGmsRegistrationId());
         dbRule.addNotification(notif);
 
         return dbRule;
     }
 
+    public static TMWNotification toRuleNotification(DbNotification dbNotif){
+        TMWNotification ruleNotif = new TMWNotification();
+        ruleNotif.ruleId = dbNotif.getRuleId();
+        ruleNotif.dbId = dbNotif.getDbId();
+        ruleNotif.drRev = dbNotif.getDrRev();
+        ruleNotif.value = dbNotif.getValue();
+        ruleNotif.timestamp = dbNotif.getTimestamp();
 
-    public static Rule toRule(DbRule dbRule) {
-        Rule rule = new Rule();
+        return ruleNotif;
+    }
+
+    public static TMWRule toRule(DbRule dbRule) {
+        TMWRule rule = new TMWRule();
         rule.dbId = dbRule.getId();
         rule.drRev = dbRule.getRev();
 

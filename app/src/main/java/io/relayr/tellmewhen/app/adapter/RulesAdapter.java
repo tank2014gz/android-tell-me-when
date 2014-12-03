@@ -1,23 +1,23 @@
-package io.relayr.tellmewhen.adapter;
+package io.relayr.tellmewhen.app.adapter;
+
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.util.SensorUtil;
 
-public class SensorAdapter extends ArrayAdapter<SensorType> {
+public class RulesAdapter extends ArrayAdapter<TMWRule> {
 
-    public SensorAdapter(Context context) {
-        super(context, R.layout.sensor_object, SensorUtil.getSensors());
+    public RulesAdapter(Context context) {
+        super(context, R.layout.main_rule_object);
     }
 
     @Override
@@ -26,23 +26,22 @@ public class SensorAdapter extends ArrayAdapter<SensorType> {
         if (view != null) {
             holder = (ViewHolder) view.getTag();
         } else {
-            LayoutInflater inflater = (LayoutInflater) getContext()
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-            view = inflater.inflate(R.layout.sensor_object, parent, false);
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(R.layout.main_rule_object, parent, false);
             holder = new ViewHolder(view);
             view.setTag(holder);
         }
 
-        holder.icon.setImageResource(SensorUtil.getIcon(getContext(), getItem(position)));
-        holder.info.setText(SensorUtil.getTitle(getItem(position)));
+        holder.name.setText(getItem(position).name);
+        holder.value.setText(SensorUtil.buildRuleValue(getItem(position)));
 
         return view;
     }
 
     static class ViewHolder {
-        @InjectView(R.id.sensor_object_icon) ImageView icon;
-        @InjectView(R.id.sensor_object_name) TextView info;
+        @InjectView(R.id.object_name) TextView name;
+        @InjectView(R.id.object_value) TextView value;
+//        @InjectView(R.id.object_info) TextView info;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

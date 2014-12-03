@@ -2,19 +2,20 @@ package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.Rule;
+import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.SensorUtil;
@@ -57,8 +58,14 @@ public class RuleEditFragment extends WhatFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Rule rule = Storage.getRule();
+        TMWRule rule = Storage.getRule();
         mRuleSwitch.setChecked(rule.isNotifying);
+        mRuleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Storage.getRule().isNotifying = isChecked;
+            }
+        });
 
         mRuleName.setText(rule.name);
 

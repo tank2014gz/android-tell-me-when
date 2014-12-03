@@ -3,16 +3,19 @@ package io.relayr.tellmewhen.service.rule;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.relayr.tellmewhen.TellMeWhenApplication;
-import io.relayr.tellmewhen.model.Rule;
-import io.relayr.tellmewhen.model.Status;
+import io.relayr.tellmewhen.model.TMWRule;
+import io.relayr.tellmewhen.service.model.DataMapper;
+import io.relayr.tellmewhen.service.model.DbSearch;
+import io.relayr.tellmewhen.service.model.DbStatus;
 import io.relayr.tellmewhen.service.RuleService;
+import io.relayr.tellmewhen.service.model.DbRule;
+import io.relayr.tellmewhen.service.model.DbDocuments;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -28,82 +31,85 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
-    public Observable<Boolean> createRule(final Rule rule) {
+    public Observable<Boolean> createRule(final TMWRule rule) {
         return ruleApi
-                .createRule(RuleMapper.toDbRule(rule))
+                .createRule(DataMapper.toDbRule(rule))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Status, Boolean>() {
+                .map(new Func1<DbStatus, Boolean>() {
                     @Override
-                    public Boolean call(Status status) {
+                    public Boolean call(DbStatus status) {
                         return status.getOk().toLowerCase().equals("true");
                     }
                 });
     }
 
     @Override
-    public Observable<Boolean> updateRule(final Rule rule) {
+    public Observable<Boolean> updateRule(final TMWRule rule) {
         return ruleApi
-                .updateRule(rule.dbId, rule.drRev, RuleMapper.toDbRule(rule))
+                .updateRule(rule.dbId, rule.drRev, DataMapper.toDbRule(rule))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Status, Boolean>() {
+                .map(new Func1<DbStatus, Boolean>() {
                     @Override
-                    public Boolean call(Status status) {
+                    public Boolean call(DbStatus status) {
+                        rule.drRev = status.getRev();
+                        rule.save();
+
                         return status.getOk().toLowerCase().equals("true");
                     }
                 });
     }
 
     @Override
-    public Observable<Boolean> deleteRule(final Rule rule) {
+    public Observable<Boolean> deleteRule(final TMWRule rule) {
         return ruleApi
                 .deleteRule(rule.dbId, rule.drRev)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Status, Boolean>() {
+                .map(new Func1<DbStatus, Boolean>() {
                     @Override
-                    public Boolean call(Status status) {
+                    public Boolean call(DbStatus status) {
                         return status.getOk().toLowerCase().equals("true");
                     }
                 });
     }
 
     @Override
-    public Observable<List<Rule>> loadRemoteRules() {
-        return ruleApi.getAllRules(new Search(Storage.loadUserId()))
+    public Observable<List<TMWRule>> loadRemoteRules() {
+        return ruleApi.getAllRules(new DbSearch(Storage.loadUserId()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Documents, List<Rule>>() {
+                .map(new Func1<DbDocuments<DbRule>, List<TMWRule>>() {
                     @Override
-                    public List<Rule> call(Documents docs) {
-                        List<Rule> rules = new ArrayList<Rule>();
+                    public List<TMWRule> call(DbDocuments<DbRule> docs) {
+                        new Delete().from(TMWRule.class).execute();
 
                         for (DbRule dbRule : docs.getDocuments()) {
-                            rules.add(RuleMapper.toRule(dbRule));
+//                            checkGcmNotification(dbRule);
+
+                            TMWRule rule = DataMapper.toRule(dbRule);
+                            rule.save();
                         }
 
-                        return rules;
+                        return new Select().from(TMWRule.class).execute();
                     }
                 });
     }
-//
-//    @Override
-//    public Observable<Boolean> populateLocalDatabase() {
-//        new Delete().from(Rule.class).execute();
-//
-//        return loadRemoteRules()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .map(new Func1<List<Rule>, Boolean>() {
-//                    @Override
-//                    public Boolean call(List<Rule> rules) {
-//                        for (Rule rule : rules) {
-//                            rule.save();
-//                        }
-//
-//                        return !rules.isEmpty();
-//                    }
-//                });
-//    }
+
+//add geristrationId for this device is user have multiple devices
+    private void checkGcmNotification(DbRule dbRule) {
+        boolean registered = false;
+
+        if (Storage.checkGcmData())
+        for (DbRule.Notification notification : dbRule.getNotifications()) {
+            if (notification.getKey().equals(Storage.loadGmsRegistrationId())) {
+                registered = true;
+            }
+        }
+
+        if(!registered){
+
+        }
+    }
 }

@@ -1,15 +1,15 @@
-package io.relayr.tellmewhen.service.rule;
+package io.relayr.tellmewhen.service.model;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-public class Search implements Serializable {
+public class DbSearch implements Serializable {
 
     @SerializedName("selector")
     private Selector selector;
 
-    public Search(String userId) {
+    public DbSearch(String userId) {
         selector = new Selector(userId);
     }
 

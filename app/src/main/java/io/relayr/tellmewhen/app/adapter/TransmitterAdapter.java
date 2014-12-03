@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen.adapter;
+package io.relayr.tellmewhen.app.adapter;
 
 
 import android.content.Context;
@@ -10,13 +10,13 @@ import android.widget.TextView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.model.Rule;
 
-public class RulesAdapter extends ArrayAdapter<Rule> {
+public class TransmitterAdapter extends ArrayAdapter<Transmitter> {
 
-    public RulesAdapter(Context context) {
-        super(context, R.layout.main_rule_object);
+    public TransmitterAdapter(Context context) {
+        super(context, R.layout.transmitter_object);
     }
 
     @Override
@@ -26,25 +26,19 @@ public class RulesAdapter extends ArrayAdapter<Rule> {
             holder = (ViewHolder) view.getTag();
         } else {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.main_rule_object, parent, false);
+            view = inflater.inflate(R.layout.transmitter_object, parent, false);
             holder = new ViewHolder(view);
             view.setTag(holder);
         }
 
-        holder.name.setText(getItem(position).name);
-        holder.value.setText(buildRuleValue(getItem(position)));
+        holder.name.setText("Relayr WunderBar");
+        holder.info.setText(getItem(position).getName());
 
         return view;
     }
 
-    private String buildRuleValue(Rule rule){
-       return rule.getSensorType().getTitle() + " " +
-                rule.getOperatorType().getValue() + " " + rule.value;
-    }
-
     static class ViewHolder {
         @InjectView(R.id.object_name) TextView name;
-        @InjectView(R.id.object_value) TextView value;
         @InjectView(R.id.object_info) TextView info;
 
         public ViewHolder(View view) {

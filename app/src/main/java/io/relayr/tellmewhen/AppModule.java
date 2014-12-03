@@ -9,6 +9,7 @@ import dagger.Module;
 import dagger.Provides;
 import io.relayr.tellmewhen.app.MainActivity;
 import io.relayr.tellmewhen.app.MainFragment;
+import io.relayr.tellmewhen.app.NotificationDetailFragment;
 import io.relayr.tellmewhen.app.RuleEditFragment;
 import io.relayr.tellmewhen.app.RuleNameFragment;
 import io.relayr.tellmewhen.app.RuleValueCreateFragment;
@@ -40,6 +41,7 @@ import retrofit.RestAdapter;
                 RuleValueEditFragment.class,
                 RuleEditFragment.class,
                 RuleNameFragment.class,
+                NotificationDetailFragment.class,
                 RuleServiceImpl.class,
                 NotificationServiceImpl.class
         }
@@ -47,6 +49,9 @@ import retrofit.RestAdapter;
 public class AppModule {
 
     public static final String API_ENDPOINT = "https://relayr.cloudant.com";
+
+    public static final String RULE_API_DB = "/tellmewhen_rules";
+    public static final String NOTIFICATION_API_DB = "/tellmewhen_notifications";
 
     @Provides
     @Singleton
@@ -56,28 +61,45 @@ public class AppModule {
 
     @Provides
     @Singleton
-    RestAdapter provideRestAdapter(Endpoint endpoint) {
+    @Named("rulesAdapter")
+    RestAdapter provideRulesRestAdapter(Endpoint endpoint) {
+        return buildAdapter(endpoint, true);
+    }
+
+    @Provides
+    @Singleton
+    @Named("notificationsAdapter")
+    RestAdapter provideNotificationsRestAdapter(Endpoint endpoint) {
+        return buildAdapter(endpoint, false);
+    }
+
+    private RestAdapter buildAdapter(Endpoint endpoint, final boolean rulesCredentials){
         return new RestAdapter.Builder()
                 .setEndpoint(endpoint)
                 .setRequestInterceptor(new RequestInterceptor() {
                     @Override
                     public void intercept(RequestInterceptor.RequestFacade request) {
-                        final String authorizationValue = encodeCredentialsForBasicAuthorization();
+                        final String authorizationValue = encodeCredentialsForBasicAuth(rulesCredentials);
                         request.addHeader("Authorization", authorizationValue);
                         request.addHeader("Content-Type", "application/json");
-                    }
-
-                    private String encodeCredentialsForBasicAuthorization() {
-                        final String userAndPassword = "ckdatencenewhormenuldson:MPKNgKi2wus7emvrh2OKAUoL";
-                        return "Basic " + Base64.encodeToString(userAndPassword.getBytes(), Base64.NO_WRAP);
                     }
                 })
                 .build();
     }
 
+    private String encodeCredentialsForBasicAuth(boolean isRulesCredentials) {
+        final String userAndPassword;
+        if (isRulesCredentials)
+            userAndPassword = "araircedgentioncedingstr:mHBRD2p4fdA1Ed2bCCtmIyOU";
+        else
+            userAndPassword = "heightseandericarfentedi:2vuxBOuDcHAJukyWAG5HhheS";
+
+        return "Basic " + Base64.encodeToString(userAndPassword.getBytes(), Base64.NO_WRAP);
+    }
+
     @Provides
     @Named("ruleApi")
-    RuleApi provideRuleApi(RestAdapter adapter) {
+    RuleApi provideRuleApi(@Named("rulesAdapter") RestAdapter adapter) {
         return adapter.create(RuleApi.class);
     }
 
@@ -89,7 +111,7 @@ public class AppModule {
 
     @Provides
     @Named("notificationApi")
-    NotificationApi provideNotificationApi(RestAdapter adapter) {
+    NotificationApi provideNotificationApi(@Named("notificationsAdapter") RestAdapter adapter) {
         return adapter.create(NotificationApi.class);
     }
 

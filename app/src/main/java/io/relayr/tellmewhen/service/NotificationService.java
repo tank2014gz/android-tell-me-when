@@ -2,19 +2,14 @@ package io.relayr.tellmewhen.service;
 
 import java.util.List;
 
-import io.relayr.tellmewhen.model.RuleNotification;
-import io.relayr.tellmewhen.model.Status;
+import io.relayr.tellmewhen.model.TMWNotification;
 import rx.Observable;
 
 public interface NotificationService {
 
-     Observable<List<RuleNotification>> getNotifications();
+    void deleteNotifications();
 
-     Observable<Status> deleteNotifications();
+    Observable<Integer> loadRemoteNotifications();
 
-     void saveNotification(RuleNotification notification);
-
-     List<RuleNotification> getLocalNotifications();
-
-    Observable<List<RuleNotification>> populateLocalDatabase();
+    List<TMWNotification> getLocalNotifications();
 }

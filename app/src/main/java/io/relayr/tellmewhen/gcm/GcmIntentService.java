@@ -23,15 +23,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
+import com.activeandroid.query.Select;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import java.util.Date;
 
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.MainActivity;
-import io.relayr.tellmewhen.model.RuleNotification;
+import io.relayr.tellmewhen.model.TMWRule;
+import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.SensorUtil;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -65,15 +65,45 @@ public class GcmIntentService extends IntentService {
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
                 sendNotification("MTD: " + extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                persistNotification(extras);
-                sendNotification(extras.toString());
-
-                Log.e(TAG, "Received: " + extras.toString());
+                sendNotification(extras);
             }
         }
 
         // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);
+    }
+
+    private void sendNotification(Bundle msg) {
+        NotificationManager mNotificationManager = (NotificationManager)
+                this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        String ruleId = msg.getString("rule_id", null);
+        if (ruleId == null) {
+            sendNotification(getBaseContext().getString(R.string.please_open_app));
+            return;
+        }
+
+        TMWRule rule = new Select().from(TMWRule.class).where("dbId = ?", ruleId).executeSingle();
+        if (rule == null) {
+            sendNotification(getBaseContext().getString(R.string.please_open_app));
+            return;
+        }
+
+        Float val = msg.getFloat("val", 0f);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, MainActivity.class), 0);
+
+        Notification notification = new NotificationCompat.Builder(this)
+                .setContentIntent(contentIntent)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(rule.name)
+                .setAutoCancel(true)
+                .setContentInfo("Current value:" + val)
+                .setContentText(SensorUtil.buildRuleValue(rule))
+                .build();
+
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     private void sendNotification(String msg) {
@@ -83,15 +113,9 @@ public class GcmIntentService extends IntentService {
         mNotificationManager.notify(NOTIFICATION_ID, buildNotification(msg));
     }
 
-    private void persistNotification(Bundle msg) {
-        RuleNotification notification = new RuleNotification();
-        notification.name = (String) msg.get("message");
-        notification.value = (String) msg.get("title");
-        notification.timestamp = new Date().getTime();
-        notification.save();
-    }
-
     private Notification buildNotification(String msg) {
+        Storage.startRuleScreen(false);
+
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainActivity.class), 0);
 
@@ -100,6 +124,7 @@ public class GcmIntentService extends IntentService {
                         .setContentIntent(contentIntent)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle("TMW")
+                        .setAutoCancel(true)
                         .setContentText(msg);
 
         return mBuilder.build();

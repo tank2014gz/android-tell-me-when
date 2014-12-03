@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen.service.rule;
+package io.relayr.tellmewhen.service.model;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -106,11 +106,11 @@ public class DbRule implements Serializable {
         this.notifications.add(notification);
     }
 
-    static class Details implements Serializable {
+    public static class Details implements Serializable {
 
         @SerializedName("name") private String name;
 
-        Details(String name) {
+        public Details(String name) {
             this.name = name;
         }
 
@@ -119,13 +119,13 @@ public class DbRule implements Serializable {
         }
     }
 
-    static class Condition implements Serializable {
+    public static class Condition implements Serializable {
 
         @SerializedName("meaning") private String sensor;
         @SerializedName("op") private String operator;
         @SerializedName("val") private int value;
 
-        Condition(String sensor, String operator, int value) {
+        public Condition(String sensor, String operator, int value) {
             this.sensor = sensor;
             this.operator = operator;
             this.value = value;
@@ -144,12 +144,12 @@ public class DbRule implements Serializable {
         }
     }
 
-    static class Notification implements Serializable {
+    public static class Notification implements Serializable {
 
         @SerializedName("type") private String type;
         @SerializedName("key") private String key;
 
-        Notification(String type, String key) {
+        public Notification(String type, String key) {
             this.type = type;
             this.key = key;
         }

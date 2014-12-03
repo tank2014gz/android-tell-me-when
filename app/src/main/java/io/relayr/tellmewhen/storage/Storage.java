@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.relayr.model.Transmitter;
-import io.relayr.tellmewhen.model.Rule;
+import io.relayr.tellmewhen.model.TMWNotification;
+import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.util.SensorType;
 
 public class Storage {
@@ -16,15 +17,18 @@ public class Storage {
     private static final String NAME = "Storage";
     private static final String USER_ID = "user.id";
     private static final String USER_ONBOADRED = "user.onboarded";
+    private static final String START_SCREEN = "start.screen";
 
     private static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
 
     private static SharedPreferences sStorage = null;
 
-    private static Rule createRule = null;
+    private static TMWRule createRule = null;
     private static Pair<String, SensorType> originalSensor = null;
     private static List<Transmitter> sTransmitters = new ArrayList<Transmitter>();
+    private static boolean checkGcmData = false;
+    private static TMWNotification mNotificationDetails;
 
     private Storage(Context context) {
         sStorage = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
@@ -35,6 +39,8 @@ public class Storage {
     }
 
     public static void saveUserId(String id) {
+        checkGcmData =  (loadUserId() != null && !loadUserId().equals(id));
+
         SharedPreferences.Editor editor = sStorage.edit();
         editor.putString(USER_ID, id);
         editor.apply();
@@ -55,10 +61,10 @@ public class Storage {
     }
 
     public static void prepareRuleForCreate() {
-        createRule = new Rule();
+        createRule = new TMWRule();
     }
 
-    public static Rule getRule() {
+    public static TMWRule getRule() {
         return createRule;
     }
 
@@ -66,7 +72,7 @@ public class Storage {
         return originalSensor;
     }
 
-    public static void prepareRuleForEdit(Rule rule) {
+    public static void prepareRuleForEdit(TMWRule rule) {
         createRule = rule;
         originalSensor = new Pair<String, SensorType>(rule.sensorId, rule.getSensorType());
     }
@@ -108,5 +114,27 @@ public class Storage {
 
     public static List<Transmitter> loadTransmitters() {
         return sTransmitters;
+    }
+
+    public static void startRuleScreen(boolean rules) {
+        SharedPreferences.Editor editor = sStorage.edit();
+        editor.putBoolean(START_SCREEN, rules);
+        editor.apply();
+    }
+
+    public static boolean isStartScreenRules() {
+        return sStorage.getBoolean(START_SCREEN, true);
+    }
+
+    public static boolean checkGcmData(){
+        return checkGcmData;
+    }
+
+    public static void showNotification(TMWNotification notification) {
+        mNotificationDetails = notification;
+    }
+
+    public static TMWNotification getNotificationDetails() {
+        return mNotificationDetails;
     }
 }

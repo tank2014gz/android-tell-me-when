@@ -50,7 +50,6 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_alignParentLeft="true"
-                    android:text="@string/title_tab_rules"
                     android:textSize="@dimen/default_object_title_text_size"
                     android:textAllCaps="true"
                     style="@style/BoldText"/>
@@ -80,7 +79,6 @@
                         android:id="@+id/ref_transmitter_type"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/title_tab_rules"
                         android:textSize="@dimen/default_object_title_text_size"
                         android:textAllCaps="true"
                         style="@style/BoldText"/>
@@ -90,7 +88,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
-                        android:text="@string/title_tab_notifications"
                         android:textSize="@dimen/default_object_subtitle_text_size"
                         android:singleLine="true"
                         style="@style/NormalText"/>
@@ -129,7 +126,6 @@
                         android:id="@+id/ref_sensor_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/title_tab_rules"
                         android:textSize="@dimen/default_object_title_text_size"
                         android:textAllCaps="true"
                         android:gravity="center_vertical"
@@ -139,7 +135,6 @@
                         android:id="@+id/ref_sensor_info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/title_tab_notifications"
                         android:textSize="@dimen/default_object_subtitle_text_size"
                         android:gravity="center_vertical"
                         style="@style/NormalText"/>
@@ -164,7 +159,6 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_alignParentLeft="true"
-                    android:text="@string/title_tab_rules"
                     android:textSize="@dimen/operator_size_small"
                     android:textAllCaps="true"
                     style="@style/BoldText"/>
@@ -181,7 +175,6 @@
     </ScrollView>
 
     <include
-        android:id="@+id/button_done"
         layout="@layout/view_button_green"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

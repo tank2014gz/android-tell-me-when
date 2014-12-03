@@ -1,6 +1,5 @@
 package io.relayr.tellmewhen.app;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,24 +10,22 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Toast;
 
-import java.util.List;
+import com.activeandroid.query.Delete;
 
-import javax.inject.Inject;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.timroes.android.listview.EnhancedListView;
-import io.relayr.RelayrSdk;
-import io.relayr.model.Transmitter;
+import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.adapter.NotificationsAdapter;
-import io.relayr.tellmewhen.adapter.RulesAdapter;
+import io.relayr.tellmewhen.app.adapter.NotificationsAdapter;
+import io.relayr.tellmewhen.app.adapter.RulesAdapter;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
-import io.relayr.tellmewhen.model.Rule;
-import io.relayr.tellmewhen.model.RuleNotification;
-import io.relayr.tellmewhen.service.RuleService;
+import io.relayr.tellmewhen.model.TMWRule;
+import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
@@ -36,6 +33,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
+
 
 public class MainFragment extends WhatFragment {
 
@@ -45,6 +43,8 @@ public class MainFragment extends WhatFragment {
     @InjectView(R.id.tab_rules) View mTabRules;
     @InjectView(R.id.tab_notifications) View mTabNotifications;
 
+    @InjectView(R.id.progress_bar) SmoothProgressBar mProgress;
+
     private RulesAdapter mRulesAdapter;
     private NotificationsAdapter mNotificationsAdapter;
 
@@ -52,12 +52,9 @@ public class MainFragment extends WhatFragment {
     private Subscription mRulesSubscription = Subscriptions.empty();
 
     private MenuItem mMenuNewRule;
-    private MenuItem mMenuClearItem;
+    private MenuItem mMenuClear;
 
-    private boolean isNotificationsEmpty = true;
-    private boolean isRules = true;
-
-    private ProgressDialog mProgress;
+    public TMWNotification mSelectedNotification;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -76,12 +73,6 @@ public class MainFragment extends WhatFragment {
 
         initiateAdapters();
 
-        toggleTabs(isRules);
-
-        mProgress = new ProgressDialog(getActivity());
-        mProgress.setTitle("Synchronizing");
-        mProgress.setMessage("Loading rules");
-
         return view;
     }
 
@@ -89,7 +80,9 @@ public class MainFragment extends WhatFragment {
     public void onResume() {
         super.onResume();
 
-        if (Storage.isUserOnBoarded()) loadRulesData();
+        if (Storage.isUserOnBoarded())
+            if (Storage.isStartScreenRules()) loadRulesData();
+            else loadNotificationsData();
         else showOnBoardWarning();
     }
 
@@ -97,7 +90,7 @@ public class MainFragment extends WhatFragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        if (mProgress != null) mProgress.dismiss();
+        if (mProgress != null) mProgress.setVisibility(View.GONE);
     }
 
     @Override
@@ -110,12 +103,12 @@ public class MainFragment extends WhatFragment {
 
     @OnClick(R.id.tab_rules)
     public void onRulesClick() {
-        showRules();
+        loadRulesData();
     }
 
     @OnClick(R.id.tab_notifications)
     public void onNotificationsClick() {
-        showNotifications();
+        loadNotificationsData();
     }
 
     @Override
@@ -123,7 +116,7 @@ public class MainFragment extends WhatFragment {
         inflater.inflate(R.menu.menu_rules, menu);
 
         mMenuNewRule = menu.findItem(R.id.action_new_rule);
-        mMenuClearItem = menu.findItem(R.id.action_clear_notifications);
+        mMenuClear = menu.findItem(R.id.action_clear_notifications);
 
         refreshMenuItems();
 
@@ -140,6 +133,7 @@ public class MainFragment extends WhatFragment {
         if (item.getItemId() == R.id.action_clear_notifications) {
             mNotificationsAdapter.clear();
             mNotificationsAdapter.notifyDataSetChanged();
+            new Delete().from(TMWNotification.class).execute();
         }
 
         return super.onOptionsItemSelected(item);
@@ -156,11 +150,12 @@ public class MainFragment extends WhatFragment {
     }
 
     private void showOnBoardWarning() {
-        refreshMenuItems();
+        toggleTabs(true);
         toggleWarningLayout(new WarningOnBoardView(getActivity()));
     }
 
     private void showRulesWarning() {
+        toggleTabs(true);
         toggleWarningLayout(new WarningNoRulesView(getActivity(), new View.OnClickListener() {
             public void onClick(View v) {
                 switchTo(FragmentName.TRANS);
@@ -177,13 +172,11 @@ public class MainFragment extends WhatFragment {
     }
 
     private void showRules() {
-        toggleTabs(true);
-
         mListView.setAdapter(mRulesAdapter);
         mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
             @Override
             public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
-                final Rule item = mRulesAdapter.getItem(position);
+                final TMWRule item = mRulesAdapter.getItem(position);
 
                 mRulesAdapter.remove(item);
                 if (mRulesAdapter.isEmpty()) showRulesWarning();
@@ -215,6 +208,7 @@ public class MainFragment extends WhatFragment {
                                     @Override
                                     public void onNext(Boolean status) {
                                         if (!status) undo();
+                                        else item.delete();
                                     }
                                 });
                     }
@@ -234,16 +228,14 @@ public class MainFragment extends WhatFragment {
     }
 
     private void showNotifications() {
-        toggleTabs(false);
-
+        mNotificationsAdapter.clear();
         mNotificationsAdapter.addAll(notificationService.getLocalNotifications());
-        isNotificationsEmpty = mNotificationsAdapter.isEmpty();
 
         mListView.setAdapter(mNotificationsAdapter);
         mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
             @Override
             public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
-                final RuleNotification item = mNotificationsAdapter.getItem(position);
+                final TMWNotification item = mNotificationsAdapter.getItem(position);
                 mNotificationsAdapter.remove(item);
 
                 return new EnhancedListView.Undoable() {
@@ -252,11 +244,22 @@ public class MainFragment extends WhatFragment {
                         mNotificationsAdapter.insert(item, position);
                         mNotificationsAdapter.notifyDataSetChanged();
                     }
+
+                    @Override
+                    public void discard() {
+                        item.delete();
+                    }
                 };
             }
         });
 
-        mListView.setOnItemClickListener(null);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                Storage.showNotification(mNotificationsAdapter.getItem(pos));
+                switchTo(FragmentName.NOTIFICATION_DETAILS);
+            }
+        });
 
         initListView();
     }
@@ -271,7 +274,7 @@ public class MainFragment extends WhatFragment {
     }
 
     private void toggleTabs(boolean isRules) {
-        this.isRules = isRules;
+        Storage.startRuleScreen(isRules);
 
         getActivity().setTitle(isRules ? R.string.title_tab_rules : R.string.title_tab_notifications);
 
@@ -282,33 +285,48 @@ public class MainFragment extends WhatFragment {
     }
 
     private void refreshMenuItems() {
-        if (mMenuNewRule != null) mMenuNewRule.setVisible(isRules && Storage.isUserOnBoarded());
-        if (mMenuClearItem != null) mMenuClearItem.setVisible(!isRules && !isNotificationsEmpty);
+        if (mMenuNewRule != null)
+            mMenuNewRule.setVisible(Storage.isStartScreenRules() && Storage.isUserOnBoarded());
+        if (mMenuClear != null)
+            mMenuClear.setVisible(!Storage.isStartScreenRules() && !mNotificationsAdapter.isEmpty());
+    }
+
+    private void stopProgressBar() {
+        if (mProgress != null)
+            mProgress.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (mProgress != null)
+                        mProgress.progressiveStop();
+                }
+            }, 100);
     }
 
     private void loadRulesData() {
-        mProgress.show();
+        mProgress.progressiveStart();
+        toggleTabs(true);
+
         ruleService.loadRemoteRules()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<Rule>>() {
+                .subscribe(new Subscriber<List<TMWRule>>() {
                     @Override
                     public void onCompleted() {
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        mProgress.dismiss();
+                        stopProgressBar();
                         Toast.makeText(getActivity(), R.string.error_loading_rules,
                                 Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
-                    public void onNext(List<Rule> rules) {
-                        mProgress.dismiss();
-
+                    public void onNext(List<TMWRule> rules) {
                         mRulesAdapter.clear();
                         mRulesAdapter.addAll(rules);
+
+                        stopProgressBar();
 
                         if (rules.isEmpty()) showRulesWarning();
                         else showRules();
@@ -316,7 +334,35 @@ public class MainFragment extends WhatFragment {
                 });
     }
 
-    private void loadNotificationData() {
-        notificationService.populateLocalDatabase();
+    private void loadNotificationsData() {
+        mProgress.progressiveStart();
+        toggleTabs(false);
+
+        notificationService.loadRemoteNotifications()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Integer>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+
+                        stopProgressBar();
+
+                        showNotifications();
+
+                        showToast(R.string.error_loading_notifications);
+                    }
+
+                    @Override
+                    public void onNext(Integer totalNotifications) {
+                        stopProgressBar();
+
+                        showNotifications();
+                    }
+                });
     }
 }

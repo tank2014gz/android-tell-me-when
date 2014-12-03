@@ -1,4 +1,19 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/repo' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/repo' }
+}
+
 
 android {
     compileSdkVersion 21
@@ -10,6 +25,12 @@ android {
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
+    }
+
+    sourceSets {
+        production {
+            java.srcDirs = ['src/release/java']
+        }
     }
 
     buildTypes {
@@ -34,7 +55,10 @@ dependencies {
     compile 'com.google.android.gms:play-services:6.1.71'
     compile 'de.timroes.android:EnhancedListView:0.3.4'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
-    compile 'com.github.castorflex.smoothprogressbar:library-circular:1.0.0'
+    compile 'com.github.castorflex.smoothprogressbar:library:0.5.2'
     compile files('libs/activeandroid-3.0.jar')
+    compile('com.crashlytics.sdk.android:crashlytics:2.1.0@aar') {
+        transitive = true;
+    }
 
 }

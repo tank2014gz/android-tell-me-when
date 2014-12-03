@@ -14,7 +14,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:text="@string/title_tab_rules"
         android:textSize="@dimen/default_object_title_text_size"
         android:gravity="center_vertical"
         android:textAllCaps="true"
@@ -26,28 +25,26 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/notification_object_name"
-        android:text="@string/title_tab_rules"
         android:textSize="@dimen/default_object_subtitle_text_size"
         android:gravity="center_vertical"
         style="@style/NormalText"/>
 
-    <io.relayr.commons.widget.CustomTextView
-        android:id="@+id/notification_object_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/notification_object_value"
-        android:text="Current sensor value: 0.5"
-        android:textSize="@dimen/default_object_small_subtitle_text_size"
-        android:gravity="center_vertical"
-        style="@style/NormalText"/>
+    <!--<io.relayr.commons.widget.CustomTextView-->
+        <!--android:id="@+id/notification_object_info"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_below="@id/notification_object_value"-->
+        <!--android:text="Current sensor value: 0.5"-->
+        <!--android:textSize="@dimen/default_object_small_subtitle_text_size"-->
+        <!--android:gravity="center_vertical"-->
+        <!--style="@style/NormalText"/>-->
 
     <io.relayr.commons.widget.CustomTextView
         android:id="@+id/notification_object_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:text="today"
         android:textSize="@dimen/notification_date_text_size"
         android:gravity="center_vertical"
         android:textAllCaps="true"
@@ -59,7 +56,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/notification_object_date"
-        android:text="13:40"
         android:textSize="@dimen/notification_time_text_size"
         android:gravity="center_vertical"
         style="@style/BoldText"/>

@@ -10,7 +10,7 @@ import io.relayr.tellmewhen.util.OperatorType;
 import io.relayr.tellmewhen.util.SensorType;
 
 @Table(name = "Rule")
-public class Rule extends Model {
+public class TMWRule extends Model {
 
     @Column(name = "dbId") public String dbId;
     @Column(name = "dbRev") public String drRev;
