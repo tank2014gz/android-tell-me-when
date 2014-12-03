@@ -1,10 +1,8 @@
 package io.relayr.tellmewhen.service.model;
 
 import io.relayr.model.Transmitter;
-import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.model.TMWNotification;
-import io.relayr.tellmewhen.service.model.DbNotification;
-import io.relayr.tellmewhen.service.model.DbRule;
+import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.SensorUtil;
 

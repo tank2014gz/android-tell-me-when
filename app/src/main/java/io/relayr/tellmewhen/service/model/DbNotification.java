@@ -12,7 +12,7 @@ public class DbNotification implements Serializable {
 
     @SerializedName("user_id") private String userId;
     @SerializedName("rule_id") private String ruleId;
-    @SerializedName("value") private int value;
+    @SerializedName("val") private int value;
     @SerializedName("timestamp") private String timestamp;
 
     public DbNotification() {

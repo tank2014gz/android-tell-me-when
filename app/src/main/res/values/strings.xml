@@ -17,8 +17,13 @@
     <string name="warning_onboard_text_bottom">Please do so, with the relayr Wunderbar onboarding app.</string>
     <string name="warning_onboard_btn_text">onboarding app</string>
     <string name="warning_no_rules_title">no rules yet</string>
-    <string name="warning_no_rules_text">Create rules to get notifications from your WunderBar sensors</string>
+    <string name="warning_no_rules_text">Create rules to get notifications from your WunderBar sensor</string>
     <string name="warn_no_rules_btn">create rule</string>
+    <string name="warning_reachability_text">Couldn\'t reach relayr cloud. Please make sure you are connected to the Internet.</string>
+    <string name="warning_reachability_title">relayr</string>
+    <string name="warning_no_notif_text">Notifications will be listed here</string>
+    <string name="warning_no_notif_title">No new notifications</string>
+
 
     <string name="rf_clear">clear</string>
     <string name="rf_logout">logout</string>
@@ -46,6 +51,7 @@
     <string name="title_select_sensor">select sensor</string>
     <string name="title_rule_value">value</string>
     <string name="title_rule_edit">rule</string>
+    <string name="title_notif_details">notification details</string>
 
     <string name="button_done">done</string>
     <string name="operator_less_text">less than</string>
@@ -64,14 +70,10 @@
     <string name="today">Today</string>
     <string name="please_open_app">Open application to see latest notifications</string>
     <string name="current_reading">Current sensor value</string>
+
     <string name="notif_details_rule">Rule</string>
     <string name="notif_details_treshold_timestamp">Time when threshold met</string>
     <string name="notif_details_value">Notification value</string>
     <string name="notif_details_current_value">Current sensor value</string>
-    <string name="title_notif_details">notification details</string>
-    <string name="warning_reachability_text">Couldn\'t reach relayr cloud. PLease make sure you are connected to the Internet.</string>
-    <string name="warning_reachability_title">relayr</string>
-    <string name="warning_no_notif_text">Notifications will be listed here</string>
-    <string name="warning_no_notif_title">No new notifications</string>
 
 </resources>

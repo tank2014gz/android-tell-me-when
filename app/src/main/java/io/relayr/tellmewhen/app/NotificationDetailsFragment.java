@@ -63,17 +63,18 @@ public class NotificationDetailsFragment extends WhatFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TMWNotification notification = Storage.getNotificationDetails();
+        TMWNotification notif = Storage.getNotificationDetails();
         TMWRule rule = new Select().from(TMWRule.class)
-                .where("dbId = ?", notification.getRuleId()).executeSingle();
+                .where("dbId = ?", notif.getRuleId()).executeSingle();
 
         mRuleName.setText(rule.name);
         mRuleValue.setText(SensorUtil.buildRuleValue(rule));
 
         mTimestamp.setText(NotificationUtil.getDate(getActivity(),
-                notification) + " " + NotificationUtil.getTime(notification));
+                notif) + " " + NotificationUtil.getTime(notif));
 
-        mValue.setText("" + notification.getValue());
+        mValue.setText(SensorUtil.scaleToUiData(rule.getSensorType(),
+                notif.getValue()) + rule.getSensorType().getUnit());
 
         loadDevice(rule.transmitterId, rule.getSensorType());
     }
