@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 
 public class SensorUtil {
@@ -59,31 +60,38 @@ public class SensorUtil {
     }
 
     public static String buildRuleValue(TMWRule rule) {
+        if (rule == null) return "null";
         return rule.getSensorType().getTitle() + " " +
                 rule.getOperatorType().getValue() + " " + rule.value + rule.getSensorType().getUnit();
+    }
+
+    public static String buildNotificationValue(TMWRule rule, TMWNotification notif) {
+        if (rule == null || notif == null) return "null";
+        return SensorUtil.scaleToUiData(rule.getSensorType(),
+                notif.getValue()) + rule.getSensorType().getUnit();
     }
 
     public static int scaleToUiData(SensorType type, float data) {
         switch (type) {
             case PROX:
-                return (int) (data / 2048 * getMaxValue(type));
+                return Math.round(data / 2048 * getMaxValue(type));
             case LIGHT:
-                return (int) (data / 4096 * getMaxValue(type));
+                return Math.round(data / 4096 * getMaxValue(type));
             case SND_LEVEL:
-                return (int) (data / 1024 * getMaxValue(type));
+                return Math.round(data / 1024 * getMaxValue(type));
         }
 
         return (int) data;
     }
 
-    public static int scaleToServerData(SensorType type, int data) {
+    public static float scaleToServerData(SensorType type, int data) {
         switch (type) {
             case PROX:
-                return (int) (((float) data / getMaxValue(type)) * 2048);
+                return (((float) data / getMaxValue(type)) * 2048);
             case LIGHT:
-                return (int) (((float) data / getMaxValue(type)) * 4096);
+                return (((float) data / getMaxValue(type)) * 4096);
             case SND_LEVEL:
-                return (int) (((float) data / getMaxValue(type)) * 1024);
+                return (((float) data / getMaxValue(type)) * 1024);
         }
 
         return data;

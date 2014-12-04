@@ -234,6 +234,7 @@ public class MainFragment extends WhatFragment {
         });
 
         initListView();
+        refreshMenuItems();
     }
 
     private void showNotifications() {
@@ -257,7 +258,7 @@ public class MainFragment extends WhatFragment {
                     public void undo() {
                         toggleWarningLayout(null);
 
-                        mNotificationsAdapter.insert(item, position);
+                        mNotificationsAdapter.add(item);
                         mNotificationsAdapter.notifyDataSetChanged();
                     }
 
@@ -278,10 +279,11 @@ public class MainFragment extends WhatFragment {
         });
 
         initListView();
+        refreshMenuItems();
     }
 
     private void initListView() {
-        mListView.setSwipingLayout(R.id.swipe_object);
+        mListView.setSwipingLayout(R.id.main_list_object);
         mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
         mListView.enableSwipeToDismiss();
         mListView.setUndoHideDelay(5000);

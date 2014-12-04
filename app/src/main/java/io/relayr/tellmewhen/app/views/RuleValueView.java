@@ -170,7 +170,7 @@ public class RuleValueView extends RelativeLayout {
         mObjectName.setText(Storage.getRule().transmitterName);
 
         if (mValue != null) setValue(mValue + Math.abs(min), mValue, mOperator);
-        else setValue(total / 2, (max - Math.abs(min)) / 2, OperatorType.LESS);
+        else setValue(total / 2, (max - Math.abs(min)) / 2, OperatorType.GREATER);
     }
 
     private void setValue(int seekValue, int indicatorValue, OperatorType type) {

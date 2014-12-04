@@ -20,7 +20,7 @@ public class TMWNotification extends Model implements Serializable {
 
     @Column(name = "userId") @SerializedName("user_id") public String userId;
     @Column(name = "ruleId") @SerializedName("rule_id") public String ruleId;
-    @Column(name = "value") @SerializedName("val") public int value;
+    @Column(name = "value") @SerializedName("val") public float value;
     @Column(name = "timestamp") @SerializedName("timestamp") public String timestamp;
 
     public TMWNotification() {
@@ -58,22 +58,16 @@ public class TMWNotification extends Model implements Serializable {
         this.ruleId = ruleId;
     }
 
-    public int getValue() {
+    public float getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(float value) {
         this.value = value;
     }
 
-    public Date getTimestamp() throws ParseException {
-        int gmtOffset = TimeZone.getDefault().getRawOffset();
-
-        long serverTimestamp = Long.parseLong(timestamp);
-
-        long localTimestamp = serverTimestamp + gmtOffset;
-
-        return new Date(localTimestamp);
+    public long getTimestamp() throws ParseException {
+        return Long.parseLong(timestamp);
     }
 
     public void setTimestamp(String timestamp) {

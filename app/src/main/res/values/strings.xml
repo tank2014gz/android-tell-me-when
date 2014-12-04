@@ -13,8 +13,8 @@
     <string name="cancel">Cancel</string>
 
     <string name="warning_onboard_title">onboard wunderbar</string>
-    <string name="warning_onboard_text_top">Looks like you haven\'t registered a WunderBar to your account yet.</string>
-    <string name="warning_onboard_text_bottom">Please do so, with the relayr Wunderbar onboarding app.</string>
+    <string name="warning_onboard_text_top">Looks like you have no WunderBars on your account.</string>
+    <string name="warning_onboard_text_bottom">Please onboard one using the onboarding/manager app</string>
     <string name="warning_onboard_btn_text">onboarding app</string>
     <string name="warning_no_rules_title">no rules yet</string>
     <string name="warning_no_rules_text">Create rules to get notifications from your WunderBar sensor</string>
@@ -23,7 +23,6 @@
     <string name="warning_reachability_title">relayr</string>
     <string name="warning_no_notif_text">Notifications will be listed here</string>
     <string name="warning_no_notif_title">No new notifications</string>
-
 
     <string name="rf_clear">clear</string>
     <string name="rf_logout">logout</string>
@@ -75,5 +74,8 @@
     <string name="notif_details_treshold_timestamp">Time when threshold met</string>
     <string name="notif_details_value">Notification value</string>
     <string name="notif_details_current_value">Current sensor value</string>
+    <string name="notif_triggering_value">triggering value</string>
+    <string name="notif_rule">rule</string>
+    <string name="notification_date_format">dd.MM.yyyy</string>
 
 </resources>

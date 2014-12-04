@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.relayr.tellmewhen.TellMeWhenApplication;
+import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.service.model.DataMapper;
 import io.relayr.tellmewhen.service.model.DbSearch;
@@ -70,6 +71,7 @@ public class RuleServiceImpl implements RuleService {
                 .map(new Func1<DbStatus, Boolean>() {
                     @Override
                     public Boolean call(DbStatus status) {
+                        new Delete().from(TMWNotification.class).where("ruleId = ?", rule.dbId).execute();
                         return status.getOk().toLowerCase().equals("true");
                     }
                 });

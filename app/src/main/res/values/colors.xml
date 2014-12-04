@@ -8,10 +8,9 @@
     <color name="tab_active_bottom">#FF145C</color>
     <color name="tab_inactive">#00282D</color>
 
-    <color name="button_gray_background">#33000000</color>
-    <color name="button_pink_background">#FF4071</color>
+    <color name="inactive_rule_background">#11000000</color>
     <color name="button_green_background">#769e00</color>
-    <color name="button_green_pressed_background">#55769e00</color>
+    <color name="button_green_pressed_background">#33000000</color>
 
     <color name="divider_top_color">#40000000</color>
     <color name="divider_bottom_color">#26FFFFFF</color>
@@ -20,11 +19,11 @@
     <color name="rounded_container_border">#3b3f44</color>
     <color name="light_gray_header_color">#646663</color>
 
-    <color name="blue">#003957</color>
-    <color name="blue1">#dd003957</color>
-    <color name="blue2">#aa003957</color>
-    <color name="blue3">#66003957</color>
-    <color name="blue4">#33003957</color>
+    <color name="blue">#2FB3BE</color>
+    <color name="blue1">#dd2FB3BE</color>
+    <color name="blue2">#aa2FB3BE</color>
+    <color name="blue3">#662FB3BE</color>
+    <color name="blue4">#332FB3BE</color>
 
     <integer-array name="blue_colors">
         <item>@color/blue</item>

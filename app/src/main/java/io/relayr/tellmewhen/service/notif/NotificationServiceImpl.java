@@ -12,6 +12,7 @@ import javax.inject.Named;
 
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.model.TMWNotification;
+import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.service.model.DataMapper;
 import io.relayr.tellmewhen.service.model.DbBulkDelete;
 import io.relayr.tellmewhen.service.model.DbSearch;
@@ -35,13 +36,11 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void deleteNotifications() {
+    public void deleteNotifications(List<DbNotification> notifications) {
         List<DbBulkDelete> deleteItems = new ArrayList<DbBulkDelete>();
-        ArrayList<TMWNotification> notifications = new Select().from(TMWNotification.class)
-                .execute();
 
-        for (TMWNotification notif : notifications) {
-            deleteItems.add(new DbBulkDelete(notif.dbId, notif.drRev));
+        for (DbNotification notif : notifications) {
+            deleteItems.add(new DbBulkDelete(notif.getDbId(), notif.getDrRev()));
         }
 
         notificationApi.deleteNotifications(new DbDocuments<DbBulkDelete>(deleteItems))
@@ -59,13 +58,19 @@ public class NotificationServiceImpl implements NotificationService {
 
                     @Override
                     public void onNext(DbStatus status) {
-                        Log.e("NotifService", status.getOk());
+                        Log.e("NotificationServiceImpl", status.getOk());
                     }
                 });
     }
 
     @Override
     public Observable<Integer> loadRemoteNotifications() {
+        final List<String> existingRules = new ArrayList<String>();
+        List<TMWRule> rules = new Select().from(TMWRule.class).execute();
+        for (TMWRule rule : rules) {
+            existingRules.add(rule.dbId);
+        }
+
         return notificationApi.getAllNotifications(new DbSearch(Storage.loadUserId()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -74,10 +79,11 @@ public class NotificationServiceImpl implements NotificationService {
                     public Integer call(DbDocuments<DbNotification> docs) {
                         if (!docs.getDocuments().isEmpty()) {
                             for (DbNotification notif : docs.getDocuments()) {
-                                DataMapper.toRuleNotification(notif).save();
+                                if (existingRules.contains(notif.getRuleId()))
+                                    DataMapper.toRuleNotification(notif).save();
                             }
 
-                            deleteNotifications();
+                            deleteNotifications(docs.getDocuments());
                         }
 
                         return docs.getDocuments().size();

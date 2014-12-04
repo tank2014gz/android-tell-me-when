@@ -10,10 +10,6 @@ import android.widget.TextView;
 
 import com.activeandroid.query.Select;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
@@ -45,18 +41,25 @@ public class NotificationsAdapter extends ArrayAdapter<TMWNotification> {
 
         if (rule != null) {
             holder.name.setText(rule.name);
-            holder.info.setText(SensorUtil.buildRuleValue(rule));
-        }
+            holder.value.setText(getContext().getString(R.string.notif_rule) + ": " +
+                    SensorUtil.buildRuleValue(rule));
+            holder.info.setText(getContext().getString(R.string.notif_triggering_value) + ": " +
+                    SensorUtil.buildNotificationValue(rule, item));
 
-        holder.date.setText(NotificationUtil.getDate(getContext(), item));
-        holder.time.setText(NotificationUtil.getTime(item));
+            holder.date.setText(NotificationUtil.getDate(getContext(), item));
+            holder.time.setText(NotificationUtil.getTime(item));
+        } else {
+            item.delete();
+            notifyDataSetChanged();
+        }
 
         return view;
     }
 
     static class ViewHolder {
         @InjectView(R.id.notification_object_name) TextView name;
-        @InjectView(R.id.notification_object_value) TextView info;
+        @InjectView(R.id.notification_object_value) TextView value;
+        @InjectView(R.id.notification_object_info) TextView info;
         @InjectView(R.id.notification_object_date) TextView date;
         @InjectView(R.id.notification_object_time) TextView time;
 

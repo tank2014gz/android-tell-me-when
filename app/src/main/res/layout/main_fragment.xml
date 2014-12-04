@@ -13,6 +13,7 @@
         android:padding="0dp"
         android:indeterminate="true"
         android:layout_alignParentTop="true"
+        android:background="@color/navigation_background"
         app:spb_colors="@array/blue_colors"
         style="@style/WunderBarProgressBar"
         />

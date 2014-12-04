@@ -30,7 +30,7 @@ public class RuleValueEditFragment extends WhatFragment {
                     rule.getOperatorType(), rule.value);
         else
             view = new RuleValueView(getActivity(), rule.getSensorType(),
-                    OperatorType.LESS, null);
+                    OperatorType.GREATER, null);
 
 
         view.setOnDoneClickListener(new RuleValueView.OnDoneClickListener() {

@@ -21,14 +21,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.activeandroid.query.Select;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.MainActivity;
+import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.SensorUtil;
@@ -43,7 +46,6 @@ import io.relayr.tellmewhen.util.SensorUtil;
 public class GcmIntentService extends IntentService {
 
     public static final int NOTIFICATION_ID = 1;
-    public static final String TAG = GcmIntentService.class.getSimpleName();
 
     public GcmIntentService() {
         super(GcmIntentService.class.getSimpleName());
@@ -77,7 +79,7 @@ public class GcmIntentService extends IntentService {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        String ruleId = msg.getString("rule_id", null);
+        String ruleId = msg.getString("rule_id", "null");
         if (ruleId == null) {
             sendNotification(getBaseContext().getString(R.string.please_open_app));
             return;
@@ -89,17 +91,17 @@ public class GcmIntentService extends IntentService {
             return;
         }
 
-        Float val = msg.getFloat("val", 0f);
+        Float val = Float.parseFloat(msg.getString("val", "0f"));
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainActivity.class), 0);
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setContentIntent(contentIntent)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.icon_notifications)
                 .setContentTitle(rule.name)
                 .setAutoCancel(true)
-                .setContentInfo("Current value:" + val)
+                .setContentInfo(getString(R.string.notif_triggering_value) + ": " + val)
                 .setContentText(SensorUtil.buildRuleValue(rule))
                 .build();
 
@@ -122,7 +124,7 @@ public class GcmIntentService extends IntentService {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setContentIntent(contentIntent)
-                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setSmallIcon(R.drawable.icon_notifications)
                         .setContentTitle("TMW")
                         .setAutoCancel(true)
                         .setContentText(msg);

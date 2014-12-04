@@ -73,8 +73,7 @@ public class NotificationDetailsFragment extends WhatFragment {
         mTimestamp.setText(NotificationUtil.getDate(getActivity(),
                 notif) + " " + NotificationUtil.getTime(notif));
 
-        mValue.setText(SensorUtil.scaleToUiData(rule.getSensorType(),
-                notif.getValue()) + rule.getSensorType().getUnit());
+        mValue.setText(SensorUtil.buildNotificationValue(rule, notif));
 
         loadDevice(rule.transmitterId, rule.getSensorType());
     }

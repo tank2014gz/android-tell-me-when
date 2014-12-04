@@ -123,9 +123,9 @@ public class DbRule implements Serializable {
 
         @SerializedName("meaning") private String sensor;
         @SerializedName("op") private String operator;
-        @SerializedName("val") private int value;
+        @SerializedName("val") private float value;
 
-        public Condition(String sensor, String operator, int value) {
+        public Condition(String sensor, String operator, float value) {
             this.sensor = sensor;
             this.operator = operator;
             this.value = value;
@@ -139,7 +139,7 @@ public class DbRule implements Serializable {
             return OperatorType.getByValue(operator);
         }
 
-        public int getValue() {
+        public float getValue() {
             return value;
         }
     }

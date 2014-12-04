@@ -61,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/default_object_title_text_size"
-            android:text="@string/notif_details_value"
+            android:text="@string/notif_triggering_value"
             android:gravity="center_vertical"
             android:layout_marginTop="@dimen/default_object_padding"
             style="@style/BoldText"/>
