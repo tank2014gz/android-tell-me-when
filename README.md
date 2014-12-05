@@ -1,6 +1,6 @@
 # TellMeWhen	
 
-TellMeWhen is a fun and easy to use application which notifies you when a certain threshold has been reached or passed, based on rules you create yourself. It utilizes the relayr [WunderBar](https://relayr.io/wunderbar) sensors which gather information about temperature, humidity, light, proximity, noise and acceleration levels. Just choose the measurement types you wish to be notified about, set a respective threshold and get notified whenever a threshold is exceeded. It's as simple as that!
+TellMeWhen is a fun and easy to use application which notifies you when a certain threshold has been reached or passed, based on rules you create yourself. It utilizes the relayr [WunderBar](https://relayr.io/wunderbar) sensors which gather information about temperature, humidity, light, proximity and noise levels. Just choose the measurement types you wish to be notified about, set a respective threshold and get notified whenever a threshold is exceeded. It's as simple as that!
 
 TellMeWhen is an open source application, so you are more than welcome to download this repository and implement the code in your own Android or iOS / OSX projects.
 
