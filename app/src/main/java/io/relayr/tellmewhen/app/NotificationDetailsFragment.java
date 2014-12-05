@@ -142,20 +142,20 @@ public class NotificationDetailsFragment extends WhatFragment {
 
                         float value = 0f;
                         switch (sensor) {
-                            case TEMP:
+                            case TEMPERATURE:
                                 value = reading.temp;
                                 break;
-                            case HUM:
+                            case HUMIDITY:
                                 value = reading.hum;
                                 break;
-                            case PROX:
-                                value = SensorUtil.scaleToUiData(SensorType.PROX, reading.prox);
+                            case PROXIMITY:
+                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
                                 break;
-                            case SND_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.SND_LEVEL, reading.snd_level);
+                            case NOISE_LEVEL:
+                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
                                 break;
-                            case LIGHT:
-                                value = SensorUtil.scaleToUiData(SensorType.LIGHT, reading.light);
+                            case LUMINOSITY:
+                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
                                 break;
                         }
 

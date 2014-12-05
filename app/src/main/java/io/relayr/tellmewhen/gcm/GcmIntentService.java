@@ -125,7 +125,7 @@ public class GcmIntentService extends IntentService {
                 new NotificationCompat.Builder(this)
                         .setContentIntent(contentIntent)
                         .setSmallIcon(R.drawable.icon_notifications)
-                        .setContentTitle("TMW")
+                        .setContentTitle("Tell me when")
                         .setAutoCancel(true)
                         .setContentText(msg);
 

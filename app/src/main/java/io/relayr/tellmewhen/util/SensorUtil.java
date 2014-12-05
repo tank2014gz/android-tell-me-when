@@ -19,19 +19,19 @@ public class SensorUtil {
             new HashMap<SensorType, Pair<Integer, Integer>>();
 
     private SensorUtil(Context context) {
-        sSensorMap.put(SensorType.TEMP, context.getString(R.string.measurement_temperature));
-        sSensorMap.put(SensorType.HUM, context.getString(R.string.measurement_humidity));
-        sSensorMap.put(SensorType.SND_LEVEL, context.getString(R.string.measurement_noise));
-        sSensorMap.put(SensorType.PROX, context.getString(R.string.measurement_proximity));
-        sSensorMap.put(SensorType.LIGHT, context.getString(R.string.measurement_light));
-        sSensorMap.put(SensorType.ACCEL, context.getString(R.string.measurement_acceleration));
+        sSensorMap.put(SensorType.TEMPERATURE, context.getString(R.string.measurement_temperature));
+        sSensorMap.put(SensorType.HUMIDITY, context.getString(R.string.measurement_humidity));
+        sSensorMap.put(SensorType.NOISE_LEVEL, context.getString(R.string.measurement_noise));
+        sSensorMap.put(SensorType.PROXIMITY, context.getString(R.string.measurement_proximity));
+        sSensorMap.put(SensorType.LUMINOSITY, context.getString(R.string.measurement_light));
+//        sSensorMap.put(SensorType.ACCELERATION, context.getString(R.string.measurement_acceleration));
 
-        sSensorValues.put(SensorType.TEMP, new Pair<Integer, Integer>(-40, 100));
-        sSensorValues.put(SensorType.HUM, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.SND_LEVEL, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.PROX, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.LIGHT, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.ACCEL, new Pair<Integer, Integer>(0, 10));
+        sSensorValues.put(SensorType.TEMPERATURE, new Pair<Integer, Integer>(-40, 100));
+        sSensorValues.put(SensorType.HUMIDITY, new Pair<Integer, Integer>(0, 100));
+        sSensorValues.put(SensorType.NOISE_LEVEL, new Pair<Integer, Integer>(0, 100));
+        sSensorValues.put(SensorType.PROXIMITY, new Pair<Integer, Integer>(0, 100));
+        sSensorValues.put(SensorType.LUMINOSITY, new Pair<Integer, Integer>(0, 100));
+//        sSensorValues.put(SensorType.ACCELERATION, new Pair<Integer, Integer>(0, 10));
     }
 
     public static void init(Context context) {
@@ -55,13 +55,13 @@ public class SensorUtil {
     }
 
     public static int getIcon(Context context, SensorType type) {
-        return context.getResources().getIdentifier("ms_" + type.getTitle(),
+        return context.getResources().getIdentifier("ms_" + SensorUtil.getTitle(type),
                 "drawable", context.getPackageName());
     }
 
     public static String buildRuleValue(TMWRule rule) {
         if (rule == null) return "null";
-        return rule.getSensorType().getTitle() + " " +
+        return SensorUtil.getTitle(rule.getSensorType()) + " " +
                 rule.getOperatorType().getValue() + " " + rule.value + rule.getSensorType().getUnit();
     }
 
@@ -73,11 +73,11 @@ public class SensorUtil {
 
     public static int scaleToUiData(SensorType type, float data) {
         switch (type) {
-            case PROX:
+            case PROXIMITY:
                 return Math.round(data / 2048 * getMaxValue(type));
-            case LIGHT:
+            case LUMINOSITY:
                 return Math.round(data / 4096 * getMaxValue(type));
-            case SND_LEVEL:
+            case NOISE_LEVEL:
                 return Math.round(data / 1024 * getMaxValue(type));
         }
 
@@ -86,11 +86,11 @@ public class SensorUtil {
 
     public static float scaleToServerData(SensorType type, int data) {
         switch (type) {
-            case PROX:
+            case PROXIMITY:
                 return (((float) data / getMaxValue(type)) * 2048);
-            case LIGHT:
+            case LUMINOSITY:
                 return (((float) data / getMaxValue(type)) * 4096);
-            case SND_LEVEL:
+            case NOISE_LEVEL:
                 return (((float) data / getMaxValue(type)) * 1024);
         }
 

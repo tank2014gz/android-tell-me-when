@@ -77,5 +77,8 @@
     <string name="notif_triggering_value">triggering value</string>
     <string name="notif_rule">rule</string>
     <string name="notification_date_format">dd.MM.yyyy</string>
+    <string name="on">on</string>
+    <string name="off">off</string>
+    <string name="list_error">Error listing items</string>
 
 </resources>

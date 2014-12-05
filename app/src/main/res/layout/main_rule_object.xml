@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/main_list_object"
-              android:layout_width="match_parent"
-              android:layout_height="@dimen/default_object_height"
-              android:orientation="horizontal"
-              android:paddingLeft="@dimen/default_object_padding"
-              android:paddingRight="@dimen/default_object_padding"
-              android:layout_marginLeft="@dimen/default_object_padding"
-              android:layout_marginRight="@dimen/default_object_padding"
-              android:gravity="center_vertical"
-              android:descendantFocusability="blocksDescendants">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/main_list_object"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_object_height"
+                android:paddingLeft="@dimen/default_object_padding"
+                android:paddingRight="@dimen/default_object_padding"
+                android:layout_marginLeft="@dimen/default_object_padding"
+                android:layout_marginRight="@dimen/default_object_padding"
+                android:gravity="center_vertical"
+                android:layout_gravity="center_horizontal"
+                android:descendantFocusability="blocksDescendants">
 
     <ImageView
         android:id="@+id/object_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_alignParentLeft="true"
         android:layout_marginRight="@dimen/default_object_padding"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_toRightOf="@id/object_image">
 
         <io.relayr.commons.widget.CustomTextView
             android:id="@+id/object_name"
@@ -40,5 +43,15 @@
             android:textSize="@dimen/default_object_subtitle_text_size"
             style="@style/NormalText"/>
     </LinearLayout>
-</LinearLayout>
+
+    <io.relayr.commons.widget.CustomTextView
+        android:id="@+id/object_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_alignParentRight="true"
+        android:textSize="@dimen/default_object_subtitle_text_size"
+        style="@style/NormalText"/>
+
+</RelativeLayout>
 

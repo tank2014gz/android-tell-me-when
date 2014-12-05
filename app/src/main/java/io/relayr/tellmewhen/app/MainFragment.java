@@ -1,6 +1,7 @@
 package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -76,6 +77,13 @@ public class MainFragment extends WhatFragment {
     }
 
     @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mProgress.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -83,13 +91,6 @@ public class MainFragment extends WhatFragment {
             if (Storage.isStartScreenRules()) loadRulesData();
             else loadNotificationsData();
         else showOnBoardWarning();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        if (mProgress != null) mProgress.setVisibility(View.GONE);
     }
 
     @Override
@@ -179,7 +180,17 @@ public class MainFragment extends WhatFragment {
     }
 
     private void showRules() {
-        toggleWarningLayout(null);
+        if (mRulesAdapter.isEmpty()) {
+            showRulesWarning();
+            return;
+        } else {
+            toggleWarningLayout(null);
+        }
+
+        if(mListView == null){
+            showToast(R.string.list_error);
+            return;
+        }
 
         mListView.setAdapter(mRulesAdapter);
         mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
@@ -241,8 +252,17 @@ public class MainFragment extends WhatFragment {
         mNotificationsAdapter.clear();
         mNotificationsAdapter.addAll(notificationService.getLocalNotifications());
 
-        if (mNotificationsAdapter.isEmpty()) showNoNotificationsWarning();
-        else toggleWarningLayout(null);
+        if (mNotificationsAdapter.isEmpty()) {
+            showNoNotificationsWarning();
+            return;
+        } else {
+            toggleWarningLayout(null);
+        }
+
+        if(mListView == null){
+            showToast(R.string.list_error);
+            return;
+        }
 
         mListView.setAdapter(mNotificationsAdapter);
         mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
@@ -292,6 +312,8 @@ public class MainFragment extends WhatFragment {
     }
 
     private void toggleTabs(boolean isRules) {
+        if (!Storage.isUserOnBoarded()) return;
+
         Storage.startRuleScreen(isRules);
 
         getActivity().setTitle(isRules ? R.string.title_tab_rules : R.string.title_tab_notifications);
@@ -321,7 +343,11 @@ public class MainFragment extends WhatFragment {
     }
 
     private void loadRulesData() {
+        if (!Storage.isUserOnBoarded()) return;
+
         toggleTabs(true);
+
+        mProgress.setVisibility(View.VISIBLE);
         mProgress.progressiveStart();
 
         ruleService.loadRemoteRules()
@@ -335,8 +361,7 @@ public class MainFragment extends WhatFragment {
                     @Override
                     public void onError(Throwable e) {
                         stopProgressBar();
-                        Toast.makeText(getActivity(), R.string.error_loading_rules,
-                                Toast.LENGTH_SHORT).show();
+                        showToast(R.string.error_loading_rules);
                     }
 
                     @Override
@@ -346,14 +371,17 @@ public class MainFragment extends WhatFragment {
 
                         stopProgressBar();
 
-                        if (rules.isEmpty()) showRulesWarning();
-                        else showRules();
+                        showRules();
                     }
                 });
     }
 
     private void loadNotificationsData() {
+        if (!Storage.isUserOnBoarded()) return;
+
         toggleTabs(false);
+
+        mProgress.setVisibility(View.VISIBLE);
         mProgress.progressiveStart();
 
         notificationService.loadRemoteNotifications()
@@ -366,12 +394,7 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
-
                         stopProgressBar();
-
-                        showNotifications();
-
                         showToast(R.string.error_loading_notifications);
                     }
 

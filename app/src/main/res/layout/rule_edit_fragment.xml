@@ -39,6 +39,7 @@
             <include layout="@layout/view_divider"/>
 
             <RelativeLayout
+                android:id="@+id/ref_rule_name_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_object_height"
                 android:paddingLeft="@dimen/default_object_padding"
@@ -55,7 +56,6 @@
                     style="@style/BoldText"/>
 
                 <include
-                    android:id="@+id/ref_rule_name_edit"
                     layout="@layout/view_edit_button"/>
 
             </RelativeLayout>
@@ -63,6 +63,7 @@
             <include layout="@layout/view_divider"/>
 
             <RelativeLayout
+                android:id="@+id/ref_transmitter_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_object_height"
                 android:paddingLeft="@dimen/default_object_padding"
@@ -94,7 +95,6 @@
                 </LinearLayout>
 
                 <include
-                    android:id="@+id/ref_transmitter_edit"
                     layout="@layout/view_edit_button"/>
 
             </RelativeLayout>
@@ -102,6 +102,7 @@
             <include layout="@layout/view_divider"/>
 
             <RelativeLayout
+                android:id="@+id/ref_sensor_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_object_height"
                 android:paddingLeft="@dimen/default_object_padding"
@@ -141,13 +142,13 @@
                 </LinearLayout>
 
                 <include
-                    android:id="@+id/ref_sensor_edit"
                     layout="@layout/view_edit_button"/>
             </RelativeLayout>
 
             <include layout="@layout/view_divider"/>
 
             <RelativeLayout
+                android:id="@+id/ref_rule_value_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_object_height"
                 android:paddingLeft="@dimen/default_object_padding"
@@ -164,7 +165,6 @@
                     style="@style/BoldText"/>
 
                 <include
-                    android:id="@+id/ref_rule_value_edit"
                     layout="@layout/view_edit_button"/>
 
             </RelativeLayout>

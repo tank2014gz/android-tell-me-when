@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.14.4'
     }
 }
 apply plugin: 'com.android.application'
@@ -23,8 +23,8 @@ android {
         applicationId "io.relayr.tellmewhen"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 2
-        versionName "1.0.2"
+        versionCode 3
+        versionName "1.0.3"
     }
 
     sourceSets {

@@ -34,8 +34,7 @@ public class RulesAdapter extends ArrayAdapter<TMWRule> {
         }
 
         TMWRule rule = getItem(position);
-        if(!rule.isNotifying)
-            holder.container.setBackgroundResource(R.color.inactive_rule_background);
+        holder.status.setText(getContext().getString(rule.isNotifying ? R.string.on : R.string.off));
 
         holder.image.setImageResource(SensorUtil.getIcon(getContext(), rule.getSensorType()));
 
@@ -46,10 +45,10 @@ public class RulesAdapter extends ArrayAdapter<TMWRule> {
     }
 
     static class ViewHolder {
-        @InjectView(R.id.main_list_object) View container;
         @InjectView(R.id.object_image) ImageView image;
         @InjectView(R.id.object_name) TextView name;
         @InjectView(R.id.object_value) TextView value;
+        @InjectView(R.id.object_status) TextView status;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

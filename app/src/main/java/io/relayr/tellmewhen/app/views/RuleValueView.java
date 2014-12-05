@@ -2,13 +2,11 @@ package io.relayr.tellmewhen.app.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -18,8 +16,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import io.relayr.RelayrSdk;
-import io.relayr.model.Device;
-import io.relayr.model.DeviceModel;
 import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
@@ -30,7 +26,6 @@ import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
@@ -97,6 +92,8 @@ public class RuleValueView extends RelativeLayout {
         ButterKnife.inject(this, this);
 
         initData();
+
+        loadDevice();
     }
 
     @Override
@@ -160,8 +157,6 @@ public class RuleValueView extends RelativeLayout {
         });
 
         showSavedData();
-
-        loadDevice();
     }
 
     private void showSavedData() {
@@ -241,20 +236,20 @@ public class RuleValueView extends RelativeLayout {
 
                         int value = 0;
                         switch (mSensor) {
-                            case TEMP:
+                            case TEMPERATURE:
                                 value = (int) reading.temp;
                                 break;
-                            case HUM:
+                            case HUMIDITY:
                                 value = (int) reading.hum;
                                 break;
-                            case PROX:
-                                value = SensorUtil.scaleToUiData(SensorType.PROX, reading.prox);
+                            case PROXIMITY:
+                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
                                 break;
-                            case SND_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.SND_LEVEL, reading.snd_level);
+                            case NOISE_LEVEL:
+                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
                                 break;
-                            case LIGHT:
-                                value = SensorUtil.scaleToUiData(SensorType.LIGHT, reading.light);
+                            case LUMINOSITY:
+                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
                                 break;
                         }
 

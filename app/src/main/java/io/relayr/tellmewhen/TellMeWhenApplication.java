@@ -16,7 +16,6 @@ public class TellMeWhenApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
 
         ActiveAndroid.initialize(this);
 
@@ -25,7 +24,7 @@ public class TellMeWhenApplication extends Application {
         Storage.init(getApplicationContext());
         SensorUtil.init(getApplicationContext());
 
-        objectGraph = ObjectGraph.create(new AppModule());
+        objectGraph = ObjectGraph.create(new AppModule(getApplicationContext()));
         objectGraph.injectStatics();
     }
 }

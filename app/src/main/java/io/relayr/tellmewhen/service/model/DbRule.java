@@ -21,7 +21,7 @@ public class DbRule implements Serializable {
     @SerializedName("details") private Details details;
     @SerializedName("condition") private Condition condition;
     @SerializedName("notifications") private List<Notification> notifications = new ArrayList<Notification>();
-    ;
+    @SerializedName("sns_topic_arn") private String snsTopic;
 
     public String getId() {
         return id;
@@ -104,6 +104,14 @@ public class DbRule implements Serializable {
 
     public void addNotification(Notification notification) {
         this.notifications.add(notification);
+    }
+
+    public String getSnsTopic() {
+        return snsTopic;
+    }
+
+    public void setSnsTopic(String snsTopic) {
+        this.snsTopic = snsTopic;
     }
 
     public static class Details implements Serializable {

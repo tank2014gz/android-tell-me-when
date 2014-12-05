@@ -25,6 +25,8 @@ public class TMWRule extends Model {
     @Column(name = "value") public Integer value;
     @Column(name = "sensorId") public String sensorId;
 
+    @Column(name = "snsTopic") public String snsTopic;
+
     public SensorType getSensorType() {
         return SensorType.byId(sensorType);
     }

@@ -25,6 +25,7 @@ public class DataMapper {
         Notification notif = new Notification("gcm", Storage.loadGmsRegistrationId());
         dbRule.addNotification(notif);
 
+        dbRule.setSnsTopic(rule.snsTopic);
         return dbRule;
     }
 
@@ -57,6 +58,9 @@ public class DataMapper {
         rule.operatorType = dbRule.getCondition().getOperator().ordinal();
 
         rule.value = SensorUtil.scaleToUiData(rule.getSensorType(), dbRule.getCondition().getValue());
+
+        rule.snsTopic = dbRule.getSnsTopic();
+
         return rule;
     }
 
