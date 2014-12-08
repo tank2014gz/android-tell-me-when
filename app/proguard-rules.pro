@@ -15,8 +15,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--keep public class *$$ViewInjector{}
--keep public class **$$ViewInjector{}
+-keep public class butterknife.internal.*
+#-dontwarn public class butterknife.internal.**
 
 -keep class * extends java.util.ListResourceBundle {
     protected Object[][] getContents();

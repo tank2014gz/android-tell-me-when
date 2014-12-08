@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        mavenCentral()
         maven { url 'https://maven.fabric.io/repo' }
     }
 
@@ -11,6 +12,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 repositories {
+    mavenCentral()
     maven { url 'https://maven.fabric.io/repo' }
 }
 
@@ -34,9 +36,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         production {
             debuggable true
             signingConfig signingConfigs.debug
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
             runProguard false
@@ -56,7 +64,7 @@ dependencies {
     compile 'de.timroes.android:EnhancedListView:0.3.4'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
     compile 'com.github.castorflex.smoothprogressbar:library:0.5.2'
-    compile files('libs/activeandroid-3.0.jar')
+    compile files('libs/activeandroid-3.1-beta.jar')
     compile('com.crashlytics.sdk.android:crashlytics:2.1.0@aar') {
         transitive = true;
     }

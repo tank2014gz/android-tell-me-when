@@ -72,6 +72,7 @@ public class RuleServiceImpl implements RuleService {
                     @Override
                     public Boolean call(DbStatus status) {
                         new Delete().from(TMWNotification.class).where("ruleId = ?", rule.dbId).execute();
+
                         return status.getOk().toLowerCase().equals("true");
                     }
                 });
