@@ -27,7 +27,6 @@ public class Storage {
     private static TMWRule createRule = null;
     private static Pair<String, SensorType> originalSensor = null;
     private static List<Transmitter> sTransmitters = new ArrayList<Transmitter>();
-    private static boolean checkGcmData = false;
     private static TMWNotification mNotificationDetails;
 
     private Storage(Context context) {
@@ -39,8 +38,6 @@ public class Storage {
     }
 
     public static void saveUserId(String id) {
-        checkGcmData =  (loadUserId() != null && !loadUserId().equals(id));
-
         SharedPreferences.Editor editor = sStorage.edit();
         editor.putString(USER_ID, id);
         editor.apply();
@@ -126,10 +123,6 @@ public class Storage {
         return sStorage.getBoolean(START_SCREEN, true);
     }
 
-    public static boolean checkGcmData(){
-        return checkGcmData;
-    }
-
     public static void showNotification(TMWNotification notification) {
         mNotificationDetails = notification;
     }
@@ -137,4 +130,5 @@ public class Storage {
     public static TMWNotification getNotificationDetails() {
         return mNotificationDetails;
     }
+
 }

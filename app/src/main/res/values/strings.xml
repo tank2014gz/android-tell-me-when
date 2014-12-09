@@ -74,7 +74,7 @@
     <string name="notif_details_treshold_timestamp">Time when threshold met</string>
     <string name="notif_details_value">Notification value</string>
     <string name="notif_details_current_value">Current sensor value</string>
-    <string name="notif_triggering_value">triggering value</string>
+    <string name="notif_triggering_value">value</string>
     <string name="notif_rule">rule</string>
     <string name="notification_date_format">dd.MM.yyyy</string>
     <string name="on">on</string>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -34,7 +35,7 @@ public class RuleValueView extends RelativeLayout {
     private String mSensorDeviceId;
 
     public interface OnDoneClickListener {
-        public void onDoneClicked(int progress, OperatorType mCurrentOperator);
+        public void onDoneClicked(float progress, OperatorType mCurrentOperator);
     }
 
     @InjectView(R.id.vf_object_icon) ImageView mObjectIcon;
@@ -50,6 +51,7 @@ public class RuleValueView extends RelativeLayout {
     @InjectView(R.id.button_done) TextView mButtonDone;
 
     @InjectView(R.id.sensor_value) TextView mSensorValue;
+    @InjectView(R.id.notif_details_current_sensor_loading) ProgressBar mCurrentSensorProgress;
 
     private int mButtonTextId;
     private OnDoneClickListener onDoneClickListener;
@@ -61,11 +63,11 @@ public class RuleValueView extends RelativeLayout {
 
     private OperatorType mOperator;
     private SensorType mSensor;
-    private Integer mValue;
+    private Float mValue;
 
     private Subscription mWebSocketSubscription = Subscriptions.empty();
 
-    public RuleValueView(Context context, SensorType sensor, OperatorType operator, Integer value) {
+    public RuleValueView(Context context, SensorType sensor, OperatorType operator, Float value) {
         this(context, null);
 
         this.mSensor = sensor;
@@ -168,9 +170,9 @@ public class RuleValueView extends RelativeLayout {
         else setValue(total / 2, (max - Math.abs(min)) / 2, OperatorType.GREATER);
     }
 
-    private void setValue(int seekValue, int indicatorValue, OperatorType type) {
-        mValueSeek.setProgress(seekValue);
-        mValueIndicator.setText(indicatorValue + unit);
+    private void setValue(float seekValue, float indicatorValue, OperatorType type) {
+        mValueSeek.setProgress((int) seekValue);
+        mValueIndicator.setText((int)indicatorValue + unit);
         toggleOperator(type);
     }
 
@@ -232,9 +234,12 @@ public class RuleValueView extends RelativeLayout {
 
                     @Override
                     public void onNext(Object o) {
+                        mCurrentSensorProgress.setVisibility(View.GONE);
+                        mSensorValue.setVisibility(View.VISIBLE);
+
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        int value = 0;
+                        float value = 0;
                         switch (mSensor) {
                             case TEMPERATURE:
                                 value = (int) reading.temp;

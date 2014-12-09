@@ -85,6 +85,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="okhttp-urlconnection-2.0.0" level="project" />
     <orderEntry type="library" exported="" name="guava-15.0" level="project" />
+    <orderEntry type="library" exported="" name="play-services-6.5.87" level="project" />
     <orderEntry type="library" exported="" name="EnhancedListView-0.3.4" level="project" />
     <orderEntry type="library" exported="" name="dagger-1.2.2" level="project" />
     <orderEntry type="library" exported="" name="retrofit-1.7.0" level="project" />
@@ -112,7 +113,6 @@
     <orderEntry type="library" exported="" name="butterknife-6.0.0" level="project" />
     <orderEntry type="library" exported="" name="answers-1.0.2" level="project" />
     <orderEntry type="library" exported="" name="gson-2.3" level="project" />
-    <orderEntry type="library" exported="" name="play-services-6.1.71" level="project" />
     <orderEntry type="library" exported="" name="javawriter-2.5.0" level="project" />
   </component>
 </module>

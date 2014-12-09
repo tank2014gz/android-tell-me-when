@@ -34,7 +34,7 @@ public class RuleValueCreateFragment extends WhatFragment {
 
         view.setOnDoneClickListener(new RuleValueView.OnDoneClickListener() {
             @Override
-            public void onDoneClicked(int value, OperatorType mCurrentOperator) {
+            public void onDoneClicked(float value, OperatorType mCurrentOperator) {
                 Storage.getRule().value = value;
                 Storage.getRule().operatorType = mCurrentOperator.ordinal();
 

@@ -1,5 +1,7 @@
 package io.relayr.tellmewhen.service.rule;
 
+import android.util.Log;
+
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
@@ -20,21 +22,24 @@ import io.relayr.tellmewhen.service.model.DbDocuments;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class RuleServiceImpl implements RuleService {
 
+    private final String mGcmRegistration;
+
     @Inject @Named("ruleApi") RuleApi ruleApi;
 
     public RuleServiceImpl() {
         TellMeWhenApplication.objectGraph.inject(this);
+        mGcmRegistration = Storage.loadGmsRegistrationId();
     }
 
     @Override
     public Observable<Boolean> createRule(final TMWRule rule) {
-        return ruleApi
-                .createRule(DataMapper.toDbRule(rule))
+        return ruleApi.createRule(DataMapper.toDbRule(rule))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbStatus, Boolean>() {
@@ -47,8 +52,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public Observable<Boolean> updateRule(final TMWRule rule) {
-        return ruleApi
-                .updateRule(rule.dbId, rule.drRev, DataMapper.toDbRule(rule))
+        return ruleApi.updateRule(rule.dbId, rule.drRev, DataMapper.toDbRule(rule))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbStatus, Boolean>() {
@@ -64,8 +68,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public Observable<Boolean> deleteRule(final TMWRule rule) {
-        return ruleApi
-                .deleteRule(rule.dbId, rule.drRev)
+        return ruleApi.deleteRule(rule.dbId, rule.drRev)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbStatus, Boolean>() {
@@ -89,7 +92,7 @@ public class RuleServiceImpl implements RuleService {
                         new Delete().from(TMWRule.class).execute();
 
                         for (DbRule dbRule : docs.getDocuments()) {
-//                            checkGcmNotification(dbRule);
+                            checkGcmNotification(dbRule);
 
                             TMWRule rule = DataMapper.toRule(dbRule);
                             rule.save();
@@ -100,19 +103,31 @@ public class RuleServiceImpl implements RuleService {
                 });
     }
 
-//add geristrationId for this device is user have multiple devices
     private void checkGcmNotification(DbRule dbRule) {
         boolean registered = false;
 
-        if (Storage.checkGcmData())
-        for (DbRule.Notification notification : dbRule.getNotifications()) {
-            if (notification.getKey().equals(Storage.loadGmsRegistrationId())) {
+        List<DbRule.Notification> notifications = dbRule.getNotifications();
+        for (DbRule.Notification notification : notifications) {
+            if (notification.getKey().equals(mGcmRegistration)) {
                 registered = true;
             }
         }
 
-        if(!registered){
-
+        if (!registered) {
+            notifications.add(new DbRule.Notification("gcm", Storage.loadGmsRegistrationId()));
+            updateRuleNotifications(dbRule);
         }
+    }
+
+    private void updateRuleNotifications(DbRule rule) {
+        ruleApi.updateRule(rule.getId(), rule.getRev(), rule)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<DbStatus>() {
+                    @Override
+                    public void call(DbStatus status) {
+                        Log.e("RuleServiceImpl", "Rule updated: " + status.getOk().toLowerCase().equals("true"));
+                    }
+                });
     }
 }

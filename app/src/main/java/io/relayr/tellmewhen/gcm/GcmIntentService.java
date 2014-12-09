@@ -91,6 +91,8 @@ public class GcmIntentService extends IntentService {
             return;
         }
 
+        Storage.startRuleScreen(false);
+
         Float val = Float.parseFloat(msg.getString("val", "0f"));
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
@@ -106,6 +108,8 @@ public class GcmIntentService extends IntentService {
                 .build();
 
         mNotificationManager.notify(NOTIFICATION_ID, notification);
+
+
     }
 
     private void sendNotification(String msg) {

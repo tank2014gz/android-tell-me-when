@@ -8,9 +8,11 @@ import rx.Observable;
 
 public interface NotificationService {
 
+    public  static final int MIN_LIMIT = 7;
+
     void deleteNotifications(List<DbNotification> documents);
 
     Observable<Integer> loadRemoteNotifications();
 
-    List<TMWNotification> getLocalNotifications();
+    List<TMWNotification> getLocalNotifications(int totalItemCount);
 }

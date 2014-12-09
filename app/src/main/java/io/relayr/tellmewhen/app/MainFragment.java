@@ -2,18 +2,22 @@ package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.Toast;
 
 import com.activeandroid.query.Delete;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -28,6 +32,7 @@ import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
+import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
@@ -55,6 +60,11 @@ public class MainFragment extends WhatFragment {
 
     private MenuItem mMenuNewRule;
     private MenuItem mMenuClear;
+
+    private boolean mLoadingNotifications = false;
+    private boolean mLoadingRules = false;
+
+    private ScheduledExecutorService mNotificationsScheduler;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -87,15 +97,47 @@ public class MainFragment extends WhatFragment {
     public void onResume() {
         super.onResume();
 
-        if (Storage.isUserOnBoarded())
-            if (Storage.isStartScreenRules()) loadRulesData();
-            else loadNotificationsData();
-        else showOnBoardWarning();
+        if (Storage.isUserOnBoarded()) {
+            if (Storage.isStartScreenRules()) {
+                loadRulesData();
+            } else {
+                loadNotificationsData(false);
+            }
+            startDynamicNotificationLoading();
+        } else {
+            showOnBoardWarning();
+        }
+    }
+
+    private void startDynamicNotificationLoading() {
+        if (mNotificationsScheduler != null)
+            return;
+
+        mNotificationsScheduler = Executors.newSingleThreadScheduledExecutor();
+        mNotificationsScheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if (!Storage.isStartScreenRules()) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.e("AAAAAAAAA", "BBBBBBBBBB");
+                            loadNotificationsData(true);
+                        }
+                    });
+                } else {
+                    Log.e("AAAAAAAAA", "DDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+                }
+            }
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if (mNotificationsScheduler != null)
+            mNotificationsScheduler.shutdown();
 
         if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
         if (!mRulesSubscription.isUnsubscribed()) mRulesSubscription.unsubscribe();
@@ -108,7 +150,7 @@ public class MainFragment extends WhatFragment {
 
     @OnClick(R.id.tab_notifications)
     public void onNotificationsClick() {
-        loadNotificationsData();
+        loadNotificationsData(false);
     }
 
     @Override
@@ -134,6 +176,7 @@ public class MainFragment extends WhatFragment {
             mNotificationsAdapter.clear();
             mNotificationsAdapter.notifyDataSetChanged();
             new Delete().from(TMWNotification.class).execute();
+            showNoNotificationsWarning();
         }
 
         return super.onOptionsItemSelected(item);
@@ -185,11 +228,6 @@ public class MainFragment extends WhatFragment {
             return;
         } else {
             toggleWarningLayout(null);
-        }
-
-        if(mListView == null){
-            showToast(R.string.list_error);
-            return;
         }
 
         mListView.setAdapter(mRulesAdapter);
@@ -246,22 +284,32 @@ public class MainFragment extends WhatFragment {
 
         initListView();
         refreshMenuItems();
+        disableDynamicLoading();
+    }
+
+    private void disableDynamicLoading() {
+        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+            }
+        });
     }
 
     private void showNotifications() {
         mNotificationsAdapter.clear();
-        mNotificationsAdapter.addAll(notificationService.getLocalNotifications());
+        mNotificationsAdapter.addAll(notificationService.getLocalNotifications(0));
 
         if (mNotificationsAdapter.isEmpty()) {
             showNoNotificationsWarning();
             return;
         } else {
             toggleWarningLayout(null);
-        }
-
-        if(mListView == null){
-            showToast(R.string.list_error);
-            return;
         }
 
         mListView.setAdapter(mNotificationsAdapter);
@@ -299,14 +347,45 @@ public class MainFragment extends WhatFragment {
         });
 
         initListView();
+        enableDynamicLoading();
         refreshMenuItems();
+    }
+
+    private void enableDynamicLoading() {
+        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisible, int visibleCount, int total) {
+                int lastInScreen = firstVisible + visibleCount;
+
+                if ((lastInScreen == total)) {
+                    List<TMWNotification> local = notificationService.getLocalNotifications(total);
+                    if (!local.isEmpty()) {
+                        mNotificationsAdapter.addAll(local);
+                        mNotificationsAdapter.notifyDataSetChanged();
+                    }
+                }
+
+                if (firstVisible == 0) {
+                    List<TMWNotification> local = notificationService.getLocalNotifications(total);
+                    if (!local.isEmpty()) {
+                        mNotificationsAdapter.clear();
+                        mNotificationsAdapter.addAll(local);
+                        mNotificationsAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        });
     }
 
     private void initListView() {
         mListView.setSwipingLayout(R.id.main_list_object);
         mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
         mListView.enableSwipeToDismiss();
-        mListView.setUndoHideDelay(5000);
+        mListView.setUndoHideDelay(3000);
         mListView.setRequireTouchBeforeDismiss(false);
         mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
     }
@@ -343,7 +422,10 @@ public class MainFragment extends WhatFragment {
     }
 
     private void loadRulesData() {
-        if (!Storage.isUserOnBoarded()) return;
+        if (!Storage.isUserOnBoarded() || mLoadingRules) return;
+
+        mLoadingRules = true;
+        mLoadingNotifications = false;
 
         toggleTabs(true);
 
@@ -356,12 +438,14 @@ public class MainFragment extends WhatFragment {
                 .subscribe(new Subscriber<List<TMWRule>>() {
                     @Override
                     public void onCompleted() {
+                        mLoadingRules = false;
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         stopProgressBar();
                         showToast(R.string.error_loading_rules);
+                        mLoadingRules = false;
                     }
 
                     @Override
@@ -369,15 +453,19 @@ public class MainFragment extends WhatFragment {
                         mRulesAdapter.clear();
                         mRulesAdapter.addAll(rules);
 
-                        stopProgressBar();
-
                         showRules();
+
+                        stopProgressBar();
+                        mLoadingRules = false;
                     }
                 });
     }
 
-    private void loadNotificationsData() {
-        if (!Storage.isUserOnBoarded()) return;
+    private void loadNotificationsData(final boolean dynamic) {
+        if (!Storage.isUserOnBoarded() || mLoadingNotifications) return;
+
+        mLoadingNotifications = true;
+        mLoadingRules = false;
 
         toggleTabs(false);
 
@@ -390,19 +478,25 @@ public class MainFragment extends WhatFragment {
                 .subscribe(new Subscriber<Integer>() {
                     @Override
                     public void onCompleted() {
+                        mLoadingNotifications = false;
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         stopProgressBar();
                         showToast(R.string.error_loading_notifications);
+                        mLoadingNotifications = false;
                     }
 
                     @Override
                     public void onNext(Integer totalNotifications) {
-                        stopProgressBar();
+                        if (!dynamic)
+                            showNotifications();
+                        if (dynamic && totalNotifications > 0)
+                            showNotifications();
 
-                        showNotifications();
+                        stopProgressBar();
+                        mLoadingNotifications = false;
                     }
                 });
     }

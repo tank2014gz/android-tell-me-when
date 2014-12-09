@@ -41,8 +41,7 @@ public class NotificationsAdapter extends ArrayAdapter<TMWNotification> {
 
         if (rule != null) {
             holder.name.setText(rule.name);
-            holder.value.setText(getContext().getString(R.string.notif_rule) + ": " +
-                    SensorUtil.buildRuleValue(rule));
+            holder.value.setText(SensorUtil.buildRuleValue(rule));
             holder.info.setText(getContext().getString(R.string.notif_triggering_value) + ": " +
                     SensorUtil.buildNotificationValue(rule, item));
 

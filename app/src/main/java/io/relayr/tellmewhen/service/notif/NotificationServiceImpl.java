@@ -92,7 +92,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<TMWNotification> getLocalNotifications() {
-        return new Select().from(TMWNotification.class).orderBy("timestamp DESC").execute();
+    public List<TMWNotification> getLocalNotifications(int offset) {
+        return new Select().from(TMWNotification.class).orderBy("timestamp DESC").offset(offset)
+                .limit(MIN_LIMIT).execute();
     }
 }
