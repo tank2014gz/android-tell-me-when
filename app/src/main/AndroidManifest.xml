@@ -65,7 +65,15 @@
                 <category android:name="io.relayr.tellmewhen"/>
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".gcm.NotificationBroadcastReceiver">
+            <intent-filter>
+                <action android:name="tmw_notification_canceled"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name=".gcm.GcmIntentService"/>
+
         <meta-data
             android:name="com.crashlytics.ApiKey"
             android:value="535c5d24024e7d38bb2996ddbdbef7eac59b0667"/>

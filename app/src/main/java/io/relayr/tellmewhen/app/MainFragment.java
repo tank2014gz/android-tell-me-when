@@ -1,8 +1,9 @@
 package io.relayr.tellmewhen.app;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,9 +31,9 @@ import io.relayr.tellmewhen.app.adapter.RulesAdapter;
 import io.relayr.tellmewhen.app.views.WarningNoNotificationsView;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
+import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
-import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
@@ -45,7 +46,8 @@ import rx.subscriptions.Subscriptions;
 public class MainFragment extends WhatFragment {
 
     @InjectView(R.id.warning_layout) ViewGroup mWarningLayout;
-    @InjectView(R.id.list_view) EnhancedListView mListView;
+    @InjectView(R.id.rules_list_view) EnhancedListView mRulesListView;
+    @InjectView(R.id.notifications_list_view) EnhancedListView mNotificationsListView;
 
     @InjectView(R.id.tab_rules) View mTabRules;
     @InjectView(R.id.tab_notifications) View mTabNotifications;
@@ -109,35 +111,19 @@ public class MainFragment extends WhatFragment {
         }
     }
 
-    private void startDynamicNotificationLoading() {
-        if (mNotificationsScheduler != null)
-            return;
+    @Override
+    public void onPause() {
+        super.onPause();
 
-        mNotificationsScheduler = Executors.newSingleThreadScheduledExecutor();
-        mNotificationsScheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                if (!Storage.isStartScreenRules()) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.e("AAAAAAAAA", "BBBBBBBBBB");
-                            loadNotificationsData(true);
-                        }
-                    });
-                } else {
-                    Log.e("AAAAAAAAA", "DDDDDDDDDDDDDDDDDDDDDDDDDDDD");
-                }
-            }
-        }, 5, 5, TimeUnit.SECONDS);
+        Storage.setNotificationScreeVisible(false);
+        stopDynamicNotificationLoading();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        if (mNotificationsScheduler != null)
-            mNotificationsScheduler.shutdown();
+        stopDynamicNotificationLoading();
 
         if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
         if (!mRulesSubscription.isUnsubscribed()) mRulesSubscription.unsubscribe();
@@ -190,6 +176,9 @@ public class MainFragment extends WhatFragment {
     private void initiateAdapters() {
         mRulesAdapter = new RulesAdapter(this.getActivity());
         mNotificationsAdapter = new NotificationsAdapter(this.getActivity());
+
+        initRulesList();
+        initNotificationList();
     }
 
     private void showOnBoardWarning() {
@@ -215,23 +204,43 @@ public class MainFragment extends WhatFragment {
         if (mWarningLayout == null)
             return;
 
-        mWarningLayout.removeAllViews();
-        if (view != null) mWarningLayout.addView(view);
+        mNotificationsListView.setVisibility(View.GONE);
+        mRulesListView.setVisibility(View.GONE);
 
-        mWarningLayout.setVisibility(view != null ? View.VISIBLE : View.GONE);
-        mListView.setVisibility(view != null ? View.GONE : View.VISIBLE);
+        mWarningLayout.removeAllViews();
+        mWarningLayout.setVisibility(View.VISIBLE);
+
+        if (view != null) mWarningLayout.addView(view);
     }
 
-    private void showRules() {
-        if (mRulesAdapter.isEmpty()) {
-            showRulesWarning();
-            return;
-        } else {
-            toggleWarningLayout(null);
-        }
+    private void stopDynamicNotificationLoading() {
+        if (mNotificationsScheduler != null && !mNotificationsScheduler.isShutdown())
+            mNotificationsScheduler.shutdown();
+    }
 
-        mListView.setAdapter(mRulesAdapter);
-        mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
+    private void startDynamicNotificationLoading() {
+        if (mNotificationsScheduler != null && !mNotificationsScheduler.isShutdown())
+            return;
+
+        mNotificationsScheduler = Executors.newSingleThreadScheduledExecutor();
+        mNotificationsScheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if (!Storage.isStartScreenRules()) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadNotificationsData(true);
+                        }
+                    });
+                }
+            }
+        }, 5, 5, TimeUnit.SECONDS);
+    }
+
+    private void initRulesList() {
+        mRulesListView.setAdapter(mRulesAdapter);
+        mRulesListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
             @Override
             public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
                 final TMWRule item = mRulesAdapter.getItem(position);
@@ -242,7 +251,7 @@ public class MainFragment extends WhatFragment {
                 return new EnhancedListView.Undoable() {
                     @Override
                     public void undo() {
-                        toggleWarningLayout(null);
+                        toggleList(true);
 
                         mRulesAdapter.insert(item, position);
                         mRulesAdapter.notifyDataSetChanged();
@@ -274,7 +283,7 @@ public class MainFragment extends WhatFragment {
             }
         });
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mRulesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
                 Storage.prepareRuleForEdit(mRulesAdapter.getItem(pos));
@@ -282,38 +291,20 @@ public class MainFragment extends WhatFragment {
             }
         });
 
-        initListView();
+        initList(mRulesListView);
         refreshMenuItems();
-        disableDynamicLoading();
     }
 
-    private void disableDynamicLoading() {
-        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
+    private void toggleList(boolean rules) {
+        mWarningLayout.setVisibility(View.GONE);
 
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-            }
-        });
+        mRulesListView.setVisibility(rules ? View.VISIBLE : View.GONE);
+        mNotificationsListView.setVisibility(rules ? View.GONE : View.VISIBLE);
     }
 
-    private void showNotifications() {
-        mNotificationsAdapter.clear();
-        mNotificationsAdapter.addAll(notificationService.getLocalNotifications(0));
-
-        if (mNotificationsAdapter.isEmpty()) {
-            showNoNotificationsWarning();
-            return;
-        } else {
-            toggleWarningLayout(null);
-        }
-
-        mListView.setAdapter(mNotificationsAdapter);
-        mListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
+    private void initNotificationList() {
+        mNotificationsListView.setAdapter(mNotificationsAdapter);
+        mNotificationsListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
             @Override
             public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
                 final TMWNotification item = mNotificationsAdapter.getItem(position);
@@ -324,7 +315,7 @@ public class MainFragment extends WhatFragment {
                 return new EnhancedListView.Undoable() {
                     @Override
                     public void undo() {
-                        toggleWarningLayout(null);
+                        toggleList(false);
 
                         mNotificationsAdapter.add(item);
                         mNotificationsAdapter.notifyDataSetChanged();
@@ -338,7 +329,8 @@ public class MainFragment extends WhatFragment {
             }
         });
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        mNotificationsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
                 Storage.showNotification(mNotificationsAdapter.getItem(pos));
@@ -346,13 +338,22 @@ public class MainFragment extends WhatFragment {
             }
         });
 
-        initListView();
+        initList(mNotificationsListView);
         enableDynamicLoading();
         refreshMenuItems();
     }
 
+    private void initList(EnhancedListView list) {
+        list.setSwipingLayout(R.id.main_list_object);
+        list.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
+        list.enableSwipeToDismiss();
+        list.setUndoHideDelay(3000);
+        list.setRequireTouchBeforeDismiss(false);
+        list.setSwipeDirection(EnhancedListView.SwipeDirection.START);
+    }
+
     private void enableDynamicLoading() {
-        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        mNotificationsListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
             }
@@ -381,19 +382,11 @@ public class MainFragment extends WhatFragment {
         });
     }
 
-    private void initListView() {
-        mListView.setSwipingLayout(R.id.main_list_object);
-        mListView.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
-        mListView.enableSwipeToDismiss();
-        mListView.setUndoHideDelay(3000);
-        mListView.setRequireTouchBeforeDismiss(false);
-        mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
-    }
-
     private void toggleTabs(boolean isRules) {
         if (!Storage.isUserOnBoarded()) return;
 
         Storage.startRuleScreen(isRules);
+        Storage.setNotificationScreeVisible(!isRules);
 
         getActivity().setTitle(isRules ? R.string.title_tab_rules : R.string.title_tab_notifications);
 
@@ -427,10 +420,10 @@ public class MainFragment extends WhatFragment {
         mLoadingRules = true;
         mLoadingNotifications = false;
 
-        toggleTabs(true);
-
         mProgress.setVisibility(View.VISIBLE);
         mProgress.progressiveStart();
+
+        toggleTabs(true);
 
         ruleService.loadRemoteRules()
                 .subscribeOn(Schedulers.io())
@@ -453,7 +446,13 @@ public class MainFragment extends WhatFragment {
                         mRulesAdapter.clear();
                         mRulesAdapter.addAll(rules);
 
-                        showRules();
+                        refreshMenuItems();
+
+                        if (mRulesAdapter.isEmpty()) {
+                            showRulesWarning();
+                        } else {
+                            toggleList(true);
+                        }
 
                         stopProgressBar();
                         mLoadingRules = false;
@@ -464,13 +463,14 @@ public class MainFragment extends WhatFragment {
     private void loadNotificationsData(final boolean dynamic) {
         if (!Storage.isUserOnBoarded() || mLoadingNotifications) return;
 
-        mLoadingNotifications = true;
         mLoadingRules = false;
-
-        toggleTabs(false);
+        mLoadingNotifications = true;
 
         mProgress.setVisibility(View.VISIBLE);
         mProgress.progressiveStart();
+
+        toggleTabs(false);
+        clearStatusBar();
 
         notificationService.loadRemoteNotifications()
                 .subscribeOn(Schedulers.io())
@@ -490,14 +490,34 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void onNext(Integer totalNotifications) {
-                        if (!dynamic)
-                            showNotifications();
-                        if (dynamic && totalNotifications > 0)
-                            showNotifications();
+                        if (!dynamic || totalNotifications > 0) {
+                            mNotificationsAdapter.clear();
+                            mNotificationsAdapter.addAll(notificationService.getLocalNotifications(0));
+
+                            if (mNotificationsAdapter.isEmpty()) {
+                                showNoNotificationsWarning();
+                            } else {
+                                toggleList(false);
+                            }
+                        }
+
+                        refreshMenuItems();
 
                         stopProgressBar();
                         mLoadingNotifications = false;
                     }
                 });
+    }
+
+    private void clearStatusBar() {
+        NotificationManager manager = (NotificationManager) getActivity()
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        manager.cancel(GcmIntentService.TMW_NOTIFICATION_ID);
+        manager.cancel(GcmIntentService.TMW_HUM_ID);
+        manager.cancel(GcmIntentService.TMW_LIGHT_ID);
+        manager.cancel(GcmIntentService.TMW_NOISE_ID);
+        manager.cancel(GcmIntentService.TMW_PROX_ID);
+        manager.cancel(GcmIntentService.TMW_TEMP_ID);
     }
 }

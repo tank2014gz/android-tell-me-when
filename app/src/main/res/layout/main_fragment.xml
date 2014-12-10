@@ -3,6 +3,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/background"
+                android:animateLayoutChanges="true"
                 tools:context=".MainActivity">
 
     <fr.castorflex.android.smoothprogressbar.SmoothProgressBar
@@ -19,7 +20,7 @@
         />
 
     <de.timroes.android.listview.EnhancedListView
-        android:id="@+id/list_view"
+        android:id="@+id/notifications_list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -27,7 +28,20 @@
         android:layout_below="@+id/progress_bar"
         android:divider="@drawable/divider"
         android:footerDividersEnabled="true"
-        android:headerDividersEnabled="true"/>
+        android:headerDividersEnabled="true"
+        android:visibility="gone"/>
+
+    <de.timroes.android.listview.EnhancedListView
+        android:id="@+id/rules_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/default_object_height"
+        android:layout_below="@+id/progress_bar"
+        android:divider="@drawable/divider"
+        android:footerDividersEnabled="true"
+        android:headerDividersEnabled="true"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:id="@+id/warning_layout"

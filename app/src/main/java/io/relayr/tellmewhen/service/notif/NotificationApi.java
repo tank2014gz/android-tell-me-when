@@ -2,14 +2,14 @@ package io.relayr.tellmewhen.service.notif;
 
 import io.relayr.tellmewhen.service.model.DbBulkDelete;
 import io.relayr.tellmewhen.service.model.DbDocuments;
+import io.relayr.tellmewhen.service.model.DbNotification;
 import io.relayr.tellmewhen.service.model.DbSearch;
 import io.relayr.tellmewhen.service.model.DbStatus;
-import io.relayr.tellmewhen.service.model.DbNotification;
 import retrofit.http.Body;
 import retrofit.http.POST;
 import rx.Observable;
 
-import static io.relayr.tellmewhen.AppModule.NOTIFICATION_API_DB;
+import static io.relayr.tellmewhen.service.ServiceUtil.NOTIFICATION_API_DB;
 
 public interface NotificationApi {
 

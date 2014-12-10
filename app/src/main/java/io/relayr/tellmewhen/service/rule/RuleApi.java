@@ -12,7 +12,7 @@ import retrofit.http.Path;
 import retrofit.http.Query;
 import rx.Observable;
 
-import static io.relayr.tellmewhen.AppModule.RULE_API_DB;
+import static io.relayr.tellmewhen.service.ServiceUtil.RULE_API_DB;
 
 public interface RuleApi {
 

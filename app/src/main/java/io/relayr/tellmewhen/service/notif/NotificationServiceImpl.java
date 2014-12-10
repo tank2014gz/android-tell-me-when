@@ -53,12 +53,12 @@ public class NotificationServiceImpl implements NotificationService {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("NotificationServiceImpl", e.getMessage());
+                        Log.e(NotificationServiceImpl.class.getSimpleName(), e.getMessage());
                     }
 
                     @Override
                     public void onNext(DbStatus status) {
-                        Log.d("NotificationServiceImpl", status.getOk());
+                        Log.d(NotificationServiceImpl.class.getSimpleName(), status.getOk());
                     }
                 });
     }
