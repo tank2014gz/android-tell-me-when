@@ -51,7 +51,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
                 @Override
                 public void onNext(Integer integer) {
-                    Log.e(TAG, "Loaded " + integer + " notifications.");
+                    Log.d(TAG, "Loaded " + integer + " notifications.");
                 }
             });
         }
@@ -99,12 +99,12 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(TAG, "Error while deleting notifications");
+                        Log.d(TAG, "Error while deleting notifications");
                     }
 
                     @Override
                     public void onNext(DbStatus status) {
-                        Log.e(TAG, "Deleted remote notifications: " + status.getOk());
+                        Log.d(TAG, "Deleted remote notifications: " + status.getOk());
                     }
                 });
     }

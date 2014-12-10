@@ -8,7 +8,7 @@ import rx.Observable;
 
 public interface NotificationService {
 
-    public  static final int MIN_LIMIT = 7;
+    public  static final int MIN_LIMIT = 5;
 
     void deleteNotifications(List<DbNotification> documents);
 

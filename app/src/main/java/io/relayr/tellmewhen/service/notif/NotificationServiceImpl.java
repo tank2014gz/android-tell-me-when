@@ -37,13 +37,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void deleteNotifications(List<DbNotification> notifications) {
-        List<DbBulkDelete> deleteItems = new ArrayList<DbBulkDelete>();
+        List<DbBulkDelete> deleteItems = new ArrayList<>();
 
         for (DbNotification notif : notifications) {
             deleteItems.add(new DbBulkDelete(notif.getDbId(), notif.getDrRev()));
         }
 
-        notificationApi.deleteNotifications(new DbDocuments<DbBulkDelete>(deleteItems))
+        notificationApi.deleteNotifications(new DbDocuments<>(deleteItems))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<DbStatus>() {
@@ -65,7 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Observable<Integer> loadRemoteNotifications() {
-        final List<String> existingRules = new ArrayList<String>();
+        final List<String> existingRules = new ArrayList<>();
         List<TMWRule> rules = new Select().from(TMWRule.class).execute();
         for (TMWRule rule : rules) {
             existingRules.add(rule.dbId);
@@ -93,7 +93,10 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<TMWNotification> getLocalNotifications(int offset) {
-        return new Select().from(TMWNotification.class).orderBy("timestamp DESC").offset(offset)
-                .limit(MIN_LIMIT).execute();
+        return new Select().from(TMWNotification.class)
+                .orderBy("timestamp DESC")
+                .offset(offset)
+                .limit(MIN_LIMIT)
+                .execute();
     }
 }

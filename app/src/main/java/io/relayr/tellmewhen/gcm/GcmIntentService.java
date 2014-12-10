@@ -78,12 +78,7 @@ public class GcmIntentService extends IntentService {
                     sendNotification("Message type deleted.");
                     break;
                 case GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE:
-                    if (!Storage.isNotificationScreenVisible()) {
-                        sendNotification(extras);
-                        Log.e("GCM", "SEND NOTIFICATION");
-                    } else {
-                        Log.e("GCM", "NOOOOOOOOO NOTIFICATION FOR YOU");
-                    }
+                    if (!Storage.isNotificationScreenVisible()) sendNotification(extras);
                     break;
             }
         }

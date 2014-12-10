@@ -20,8 +20,8 @@ public class NotificationUtil {
         }
 
         Calendar today = Calendar.getInstance();
-        today.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        today.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH),
+                today.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
 
         SimpleDateFormat sdf = new SimpleDateFormat(context.getString(R.string.notification_date_format));
 

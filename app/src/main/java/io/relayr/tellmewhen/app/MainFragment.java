@@ -369,15 +369,6 @@ public class MainFragment extends WhatFragment {
                         mNotificationsAdapter.notifyDataSetChanged();
                     }
                 }
-
-                if (firstVisible == 0) {
-                    List<TMWNotification> local = notificationService.getLocalNotifications(total);
-                    if (!local.isEmpty()) {
-                        mNotificationsAdapter.clear();
-                        mNotificationsAdapter.addAll(local);
-                        mNotificationsAdapter.notifyDataSetChanged();
-                    }
-                }
             }
         });
     }
