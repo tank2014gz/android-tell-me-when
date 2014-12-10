@@ -61,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/default_object_title_text_size"
-            android:text="@string/notif_details_value"
+            android:text="@string/notif_triggering_value"
             android:gravity="center_vertical"
             android:layout_marginTop="@dimen/default_object_padding"
             style="@style/BoldText"/>
@@ -93,8 +93,16 @@
             android:textSize="@dimen/default_object_title_text_size"
             android:textAllCaps="true"
             android:layout_marginBottom="@dimen/default_object_padding"
-            style="@style/ExtraBoldText"/>
+            style="@style/ExtraBoldText"
+            android:visibility="gone"/>
 
+        <ProgressBar
+            android:id="@+id/notif_details_current_sensor_loading"
+            style="?android:attr/progressBarStyle"
+            android:layout_gravity="left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
     </LinearLayout>
 
     <include

@@ -15,6 +15,9 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keep public class butterknife.internal.*
+#-dontwarn public class butterknife.internal.**
+
 -keep class * extends java.util.ListResourceBundle {
     protected Object[][] getContents();
 }
@@ -31,3 +34,4 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
+

@@ -1,16 +1,18 @@
 buildscript {
     repositories {
+        mavenCentral()
         maven { url 'https://maven.fabric.io/repo' }
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.14.4'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 repositories {
+    mavenCentral()
     maven { url 'https://maven.fabric.io/repo' }
 }
 
@@ -23,8 +25,8 @@ android {
         applicationId "io.relayr.tellmewhen"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.0.4"
     }
 
     sourceSets {
@@ -34,12 +36,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         production {
             debuggable true
             signingConfig signingConfigs.debug
         }
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -52,11 +58,11 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.2'
     compile 'io.relayr:android-sdk:0.0.5'
     compile 'io.relayr:android-commons:1.0'
-    compile 'com.google.android.gms:play-services:6.1.71'
+    compile 'com.google.android.gms:play-services:6.5.87'
     compile 'de.timroes.android:EnhancedListView:0.3.4'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
     compile 'com.github.castorflex.smoothprogressbar:library:0.5.2'
-    compile files('libs/activeandroid-3.0.jar')
+    compile files('libs/activeandroid-3.1-beta.jar')
     compile('com.crashlytics.sdk.android:crashlytics:2.1.0@aar') {
         transitive = true;
     }

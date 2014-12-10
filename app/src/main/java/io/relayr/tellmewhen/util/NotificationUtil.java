@@ -14,15 +14,16 @@ public class NotificationUtil {
     public static String getDate(Context context, TMWNotification notif) {
         Calendar calendar = Calendar.getInstance();
         try {
-            calendar.setTime(notif.getTimestamp());
+            calendar.setTimeInMillis(notif.getTimestamp());
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
         Calendar today = Calendar.getInstance();
-        today.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        today.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat(context.getString(R.string.notification_date_format));
 
         return calendar.getTimeInMillis() > today.getTimeInMillis() ? context
                 .getString(R.string.today) : sdf.format(calendar.getTime());
@@ -31,7 +32,7 @@ public class NotificationUtil {
     public static String getTime(TMWNotification notif) {
         Calendar calendar = Calendar.getInstance();
         try {
-            calendar.setTime(notif.getTimestamp());
+            calendar.setTimeInMillis(notif.getTimestamp());
         } catch (ParseException e) {
             e.printStackTrace();
         }

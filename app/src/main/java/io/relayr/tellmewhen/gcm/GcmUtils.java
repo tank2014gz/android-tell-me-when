@@ -17,7 +17,6 @@ import io.relayr.tellmewhen.storage.Storage;
 
 public class GcmUtils {
 
-    private final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String SENDER_ID = "731084512451";
 
     private static GcmUtils sGcmUtils = null;
@@ -47,6 +46,7 @@ public class GcmUtils {
 
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
                 GooglePlayServicesUtil.getErrorDialog(resultCode, context,
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
             }
@@ -72,9 +72,8 @@ public class GcmUtils {
                     String mRegId = mGcm.register(SENDER_ID);
                     msg = "Registration ID=" + mRegId;
 
-                    // You should send the registration ID to your server over HTTP, so it
-                    // can use GCM/HTTP or CCS to send messages to your app.
-                    GcmUtils.sendRegistrationIdToBackend(mRegId);
+                    Log.e("REG", mRegId);
+
                     GcmUtils.storeRegistrationId(context.getApplicationContext(), mRegId);
                 } catch (IOException ex) {
                     msg = "Error :" + ex.getMessage();
@@ -105,7 +104,7 @@ public class GcmUtils {
      *
      * @return registration ID, or empty string if there is no existing registration ID.
      */
-    public static String getRegistrationId(Context context) {
+    private static String getRegistrationId(Context context) {
         String registrationId = Storage.loadGmsRegistrationId();
 
         if (registrationId == null) return null;
@@ -119,17 +118,6 @@ public class GcmUtils {
         if (registeredVersion != currentVersion) return null;
 
         return registrationId;
-    }
-
-    /**
-     * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP or CCS to send
-     * messages to your app. Not needed for this demo since the device sends upstream messages
-     * to a server that echoes back the message using the 'from' address in the message.
-     *
-     * @param mRegId
-     */
-    public static void sendRegistrationIdToBackend(String mRegId) {
-        // Your implementation here.
     }
 
     private static int getAppVersion(Context context) {

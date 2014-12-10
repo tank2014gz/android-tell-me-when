@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import butterknife.ButterKnife;
@@ -32,16 +33,22 @@ public class RulesAdapter extends ArrayAdapter<TMWRule> {
             view.setTag(holder);
         }
 
-        holder.name.setText(getItem(position).name);
-        holder.value.setText(SensorUtil.buildRuleValue(getItem(position)));
+        TMWRule rule = getItem(position);
+        holder.status.setText(getContext().getString(rule.isNotifying ? R.string.on : R.string.off));
+
+        holder.image.setImageResource(SensorUtil.getIcon(getContext(), rule.getSensorType()));
+
+        holder.name.setText(rule.name);
+        holder.value.setText(SensorUtil.buildRuleValue(rule));
 
         return view;
     }
 
     static class ViewHolder {
+        @InjectView(R.id.object_image) ImageView image;
         @InjectView(R.id.object_name) TextView name;
         @InjectView(R.id.object_value) TextView value;
-//        @InjectView(R.id.object_info) TextView info;
+        @InjectView(R.id.object_status) TextView status;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

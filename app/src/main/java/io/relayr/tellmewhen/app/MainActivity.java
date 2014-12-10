@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.activeandroid.query.Delete;
 import com.crashlytics.android.Crashlytics;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.gcm.GcmUtils;
+import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
@@ -44,6 +46,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     private FragmentName mCurrentFragment;
 
     private boolean logInStarted = false;
+    private boolean mBackPressed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,8 +105,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     public void onPause() {
         super.onPause();
 
-        logInStarted = false;
-
         EventBus.getDefault().unregister(this);
     }
 
@@ -138,8 +139,10 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     public void onBackPressed() {
         if (mCurrentFragment == null || mCurrentFragment.equals(FragmentName.MAIN))
             super.onBackPressed();
-        else
+        else {
+            mBackPressed = true;
             EventBus.getDefault().post(new WhenEvents.BackPressed());
+        }
     }
 
     @Override
@@ -184,14 +187,14 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
             case RULE_VALUE_CREATE:
                 fragment = RuleValueCreateFragment.newInstance();
                 break;
-            case RULE_VALUE_EDIT:
-                fragment = RuleValueEditFragment.newInstance();
-                break;
             case RULE_NAME:
                 fragment = RuleNameFragment.newInstance();
                 break;
             case RULE_EDIT:
                 fragment = RuleEditFragment.newInstance();
+                break;
+            case RULE_VALUE_EDIT:
+                fragment = RuleValueEditFragment.newInstance();
                 break;
             case NOTIFICATION_DETAILS:
                 fragment = NotificationDetailsFragment.newInstance();
@@ -206,8 +209,13 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     private void showFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        if (!mCurrentFragment.equals(FragmentName.MAIN))
-            transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+        if (mBackPressed) {
+            mBackPressed = false;
+            transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
+        } else {
+            if (!mCurrentFragment.equals(FragmentName.MAIN))
+                transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+        }
 
         transaction.replace(R.id.container, fragment).commit();
     }
@@ -237,6 +245,9 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
                         Crashlytics.setUserEmail(user.email);
                         Crashlytics.setUserName(user.getName());
                         Crashlytics.setUserIdentifier(user.id);
+
+                        if (Storage.loadUserId() != null && !Storage.loadUserId().equals(user.id))
+                            new Delete().from(TMWNotification.class).execute();
 
                         Storage.saveUserId(user.id);
 

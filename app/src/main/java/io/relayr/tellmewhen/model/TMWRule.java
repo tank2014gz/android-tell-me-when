@@ -4,8 +4,6 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
-import java.io.Serializable;
-
 import io.relayr.tellmewhen.util.OperatorType;
 import io.relayr.tellmewhen.util.SensorType;
 
@@ -22,7 +20,7 @@ public class TMWRule extends Model {
     @Column(name = "transmitterName") public String transmitterName;
     @Column(name = "sensorType") public int sensorType;
     @Column(name = "operatorType") public int operatorType;
-    @Column(name = "value") public Integer value;
+    @Column(name = "value") public Float value;
     @Column(name = "sensorId") public String sensorId;
 
     public SensorType getSensorType() {

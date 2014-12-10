@@ -4,12 +4,18 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.google.gson.Gson;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -37,10 +43,15 @@ public class NotificationDetailsFragment extends WhatFragment {
     @InjectView(R.id.notif_details_rule_value) TextView mRuleValue;
     @InjectView(R.id.notif_details_timestamp) TextView mTimestamp;
     @InjectView(R.id.notif_details_value) TextView mValue;
-    @InjectView(R.id.notif_details_current_sensor) TextView mCurrentSensor;
+
+    @InjectView(R.id.notif_details_current_sensor) TextView mSensorValue;
+    @InjectView(R.id.notif_details_current_sensor_loading) ProgressBar mCurrentSensorProgress;
 
     private Subscription mWebSocketSubscription = Subscriptions.empty();
     private String mSensorDeviceId;
+
+    private TMWRule mRule;
+    private TMWNotification mNotification;
 
     public static NotificationDetailsFragment newInstance() {
         return new NotificationDetailsFragment();
@@ -56,6 +67,8 @@ public class NotificationDetailsFragment extends WhatFragment {
 
         inject(this);
 
+        loadData();
+
         return view;
     }
 
@@ -63,19 +76,13 @@ public class NotificationDetailsFragment extends WhatFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TMWNotification notification = Storage.getNotificationDetails();
-        TMWRule rule = new Select().from(TMWRule.class)
-                .where("dbId = ?", notification.getRuleId()).executeSingle();
-
-        mRuleName.setText(rule.name);
-        mRuleValue.setText(SensorUtil.buildRuleValue(rule));
+        mRuleName.setText(mRule.name);
+        mRuleValue.setText(SensorUtil.buildRuleValue(mRule));
 
         mTimestamp.setText(NotificationUtil.getDate(getActivity(),
-                notification) + " " + NotificationUtil.getTime(notification));
+                mNotification) + " " + NotificationUtil.getTime(mNotification));
 
-        mValue.setText("" + notification.getValue());
-
-        loadDevice(rule.transmitterId, rule.getSensorType());
+        mValue.setText(SensorUtil.buildNotificationValue(mRule, mNotification));
     }
 
     @OnClick(R.id.button_done)
@@ -94,6 +101,14 @@ public class NotificationDetailsFragment extends WhatFragment {
 
         if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
         if (mSensorDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mSensorDeviceId);
+    }
+
+    private void loadData() {
+        mNotification = Storage.getNotificationDetails();
+        mRule = new Select().from(TMWRule.class)
+                .where("dbId = ?", mNotification.getRuleId()).executeSingle();
+
+        loadDevice(mRule.transmitterId, mRule.getSensorType());
     }
 
     private void loadDevice(String transmitterId, final SensorType sensor) {
@@ -138,28 +153,31 @@ public class NotificationDetailsFragment extends WhatFragment {
 
                     @Override
                     public void onNext(Object o) {
+                        mCurrentSensorProgress.setVisibility(View.GONE);
+                        mSensorValue.setVisibility(View.VISIBLE);
+
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
                         float value = 0f;
                         switch (sensor) {
-                            case TEMP:
+                            case TEMPERATURE:
                                 value = reading.temp;
                                 break;
-                            case HUM:
+                            case HUMIDITY:
                                 value = reading.hum;
                                 break;
-                            case PROX:
-                                value = SensorUtil.scaleToUiData(SensorType.PROX, reading.prox);
+                            case PROXIMITY:
+                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
                                 break;
-                            case SND_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.SND_LEVEL, reading.snd_level);
+                            case NOISE_LEVEL:
+                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
                                 break;
-                            case LIGHT:
-                                value = SensorUtil.scaleToUiData(SensorType.LIGHT, reading.light);
+                            case LUMINOSITY:
+                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
                                 break;
                         }
 
-                        mCurrentSensor.setText(value + sensor.getUnit());
+                        mSensorValue.setText(value + sensor.getUnit());
                     }
                 });
     }

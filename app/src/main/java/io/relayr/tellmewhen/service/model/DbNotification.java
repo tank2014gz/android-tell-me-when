@@ -12,7 +12,7 @@ public class DbNotification implements Serializable {
 
     @SerializedName("user_id") private String userId;
     @SerializedName("rule_id") private String ruleId;
-    @SerializedName("value") private int value;
+    @SerializedName("val") private float value;
     @SerializedName("timestamp") private String timestamp;
 
     public DbNotification() {
@@ -50,11 +50,11 @@ public class DbNotification implements Serializable {
         this.ruleId = ruleId;
     }
 
-    public int getValue() {
+    public float getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(float value) {
         this.value = value;
     }
 

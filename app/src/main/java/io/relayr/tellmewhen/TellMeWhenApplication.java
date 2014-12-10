@@ -1,11 +1,10 @@
 package io.relayr.tellmewhen;
 
-import com.activeandroid.ActiveAndroid;
-import com.activeandroid.app.Application;
+import android.app.Application;
 
-import com.crashlytics.android.Crashlytics;
+import com.activeandroid.ActiveAndroid;
+
 import dagger.ObjectGraph;
-import io.fabric.sdk.android.Fabric;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.SensorUtil;
 
@@ -16,16 +15,24 @@ public class TellMeWhenApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
-
-        ActiveAndroid.initialize(this);
 
         RelayrSdkInitializer.initSdk(this);
+
+        ActiveAndroid.initialize(this);
 
         Storage.init(getApplicationContext());
         SensorUtil.init(getApplicationContext());
 
-        objectGraph = ObjectGraph.create(new AppModule());
+        objectGraph = ObjectGraph.create(new AppModule(getApplicationContext()));
         objectGraph.injectStatics();
+
     }
+
+    @Override
+    public void onTerminate() {
+        ActiveAndroid.dispose();
+        super.onTerminate();
+    }
+
+
 }

@@ -18,6 +18,8 @@ public class Storage {
     private static final String USER_ID = "user.id";
     private static final String USER_ONBOADRED = "user.onboarded";
     private static final String START_SCREEN = "start.screen";
+    private static final String NOTIFICATION_VISIBILITY = "notifications.visibility";
+    private static final String SHOW_NOTIFICATIONS = "show.notifications";
 
     private static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
@@ -27,7 +29,6 @@ public class Storage {
     private static TMWRule createRule = null;
     private static Pair<String, SensorType> originalSensor = null;
     private static List<Transmitter> sTransmitters = new ArrayList<Transmitter>();
-    private static boolean checkGcmData = false;
     private static TMWNotification mNotificationDetails;
 
     private Storage(Context context) {
@@ -39,8 +40,6 @@ public class Storage {
     }
 
     public static void saveUserId(String id) {
-        checkGcmData =  (loadUserId() != null && !loadUserId().equals(id));
-
         SharedPreferences.Editor editor = sStorage.edit();
         editor.putString(USER_ID, id);
         editor.apply();
@@ -126,15 +125,21 @@ public class Storage {
         return sStorage.getBoolean(START_SCREEN, true);
     }
 
-    public static boolean checkGcmData(){
-        return checkGcmData;
-    }
-
     public static void showNotification(TMWNotification notification) {
         mNotificationDetails = notification;
     }
 
     public static TMWNotification getNotificationDetails() {
         return mNotificationDetails;
+    }
+
+    public static void setNotificationScreeVisible(boolean visible) {
+        SharedPreferences.Editor editor = sStorage.edit();
+        editor.putBoolean(NOTIFICATION_VISIBILITY, visible);
+        editor.apply();
+    }
+
+    public static boolean isNotificationScreenVisible() {
+        return sStorage.getBoolean(NOTIFICATION_VISIBILITY, false);
     }
 }

@@ -2,13 +2,12 @@ package io.relayr.tellmewhen.app.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -18,8 +17,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import io.relayr.RelayrSdk;
-import io.relayr.model.Device;
-import io.relayr.model.DeviceModel;
 import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
@@ -30,7 +27,6 @@ import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
@@ -39,7 +35,7 @@ public class RuleValueView extends RelativeLayout {
     private String mSensorDeviceId;
 
     public interface OnDoneClickListener {
-        public void onDoneClicked(int progress, OperatorType mCurrentOperator);
+        public void onDoneClicked(float progress, OperatorType mCurrentOperator);
     }
 
     @InjectView(R.id.vf_object_icon) ImageView mObjectIcon;
@@ -55,6 +51,7 @@ public class RuleValueView extends RelativeLayout {
     @InjectView(R.id.button_done) TextView mButtonDone;
 
     @InjectView(R.id.sensor_value) TextView mSensorValue;
+    @InjectView(R.id.notif_details_current_sensor_loading) ProgressBar mCurrentSensorProgress;
 
     private int mButtonTextId;
     private OnDoneClickListener onDoneClickListener;
@@ -66,11 +63,11 @@ public class RuleValueView extends RelativeLayout {
 
     private OperatorType mOperator;
     private SensorType mSensor;
-    private Integer mValue;
+    private Float mValue;
 
     private Subscription mWebSocketSubscription = Subscriptions.empty();
 
-    public RuleValueView(Context context, SensorType sensor, OperatorType operator, Integer value) {
+    public RuleValueView(Context context, SensorType sensor, OperatorType operator, Float value) {
         this(context, null);
 
         this.mSensor = sensor;
@@ -97,6 +94,8 @@ public class RuleValueView extends RelativeLayout {
         ButterKnife.inject(this, this);
 
         initData();
+
+        loadDevice();
     }
 
     @Override
@@ -160,8 +159,6 @@ public class RuleValueView extends RelativeLayout {
         });
 
         showSavedData();
-
-        loadDevice();
     }
 
     private void showSavedData() {
@@ -170,12 +167,12 @@ public class RuleValueView extends RelativeLayout {
         mObjectName.setText(Storage.getRule().transmitterName);
 
         if (mValue != null) setValue(mValue + Math.abs(min), mValue, mOperator);
-        else setValue(total / 2, (max - Math.abs(min)) / 2, OperatorType.LESS);
+        else setValue(total / 2, (max - Math.abs(min)) / 2, OperatorType.GREATER);
     }
 
-    private void setValue(int seekValue, int indicatorValue, OperatorType type) {
-        mValueSeek.setProgress(seekValue);
-        mValueIndicator.setText(indicatorValue + unit);
+    private void setValue(float seekValue, float indicatorValue, OperatorType type) {
+        mValueSeek.setProgress((int) seekValue);
+        mValueIndicator.setText((int)indicatorValue + unit);
         toggleOperator(type);
     }
 
@@ -237,24 +234,27 @@ public class RuleValueView extends RelativeLayout {
 
                     @Override
                     public void onNext(Object o) {
+                        mCurrentSensorProgress.setVisibility(View.GONE);
+                        mSensorValue.setVisibility(View.VISIBLE);
+
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        int value = 0;
+                        float value = 0;
                         switch (mSensor) {
-                            case TEMP:
+                            case TEMPERATURE:
                                 value = (int) reading.temp;
                                 break;
-                            case HUM:
+                            case HUMIDITY:
                                 value = (int) reading.hum;
                                 break;
-                            case PROX:
-                                value = SensorUtil.scaleToUiData(SensorType.PROX, reading.prox);
+                            case PROXIMITY:
+                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
                                 break;
-                            case SND_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.SND_LEVEL, reading.snd_level);
+                            case NOISE_LEVEL:
+                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
                                 break;
-                            case LIGHT:
-                                value = SensorUtil.scaleToUiData(SensorType.LIGHT, reading.light);
+                            case LUMINOSITY:
+                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
                                 break;
                         }
 

@@ -21,7 +21,6 @@ public class DbRule implements Serializable {
     @SerializedName("details") private Details details;
     @SerializedName("condition") private Condition condition;
     @SerializedName("notifications") private List<Notification> notifications = new ArrayList<Notification>();
-    ;
 
     public String getId() {
         return id;
@@ -123,9 +122,9 @@ public class DbRule implements Serializable {
 
         @SerializedName("meaning") private String sensor;
         @SerializedName("op") private String operator;
-        @SerializedName("val") private int value;
+        @SerializedName("val") private float value;
 
-        public Condition(String sensor, String operator, int value) {
+        public Condition(String sensor, String operator, float value) {
             this.sensor = sensor;
             this.operator = operator;
             this.value = value;
@@ -139,7 +138,7 @@ public class DbRule implements Serializable {
             return OperatorType.getByValue(operator);
         }
 
-        public int getValue() {
+        public float getValue() {
             return value;
         }
     }
@@ -152,10 +151,6 @@ public class DbRule implements Serializable {
         public Notification(String type, String key) {
             this.type = type;
             this.key = key;
-        }
-
-        public String getType() {
-            return type;
         }
 
         public String getKey() {

@@ -21,8 +21,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.activeandroid.query.Select;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -42,8 +46,14 @@ import io.relayr.tellmewhen.util.SensorUtil;
  */
 public class GcmIntentService extends IntentService {
 
-    public static final int NOTIFICATION_ID = 1;
-    public static final String TAG = GcmIntentService.class.getSimpleName();
+    public static final String NOTIFICATION_ACTION_DELETE = "tmw_notification_canceled";
+
+    public static final int TMW_NOTIFICATION_ID = 34560;
+    public static final int TMW_TEMP_ID = 34561;
+    public static final int TMW_HUM_ID = 34562;
+    public static final int TMW_LIGHT_ID = 34563;
+    public static final int TMW_NOISE_ID = 34564;
+    public static final int TMW_PROX_ID = 34565;
 
     public GcmIntentService() {
         super(GcmIntentService.class.getSimpleName());
@@ -60,16 +70,24 @@ public class GcmIntentService extends IntentService {
         String messageType = gcm.getMessageType(intent);
 
         if (!extras.isEmpty()) {
-            if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                sendNotification("MTSE: " + extras.toString());
-            } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-                sendNotification("MTD: " + extras.toString());
-            } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                sendNotification(extras);
+            switch (messageType) {
+                case GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR:
+                    sendNotification("Message type send error.");
+                    break;
+                case GoogleCloudMessaging.MESSAGE_TYPE_DELETED:
+                    sendNotification("Message type deleted.");
+                    break;
+                case GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE:
+                    if (!Storage.isNotificationScreenVisible()) {
+                        sendNotification(extras);
+                        Log.e("GCM", "SEND NOTIFICATION");
+                    } else {
+                        Log.e("GCM", "NOOOOOOOOO NOTIFICATION FOR YOU");
+                    }
+                    break;
             }
         }
 
-        // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
@@ -77,7 +95,7 @@ public class GcmIntentService extends IntentService {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        String ruleId = msg.getString("rule_id", null);
+        String ruleId = msg.getString("rule_id", "null");
         if (ruleId == null) {
             sendNotification(getBaseContext().getString(R.string.please_open_app));
             return;
@@ -89,28 +107,59 @@ public class GcmIntentService extends IntentService {
             return;
         }
 
-        Float val = msg.getFloat("val", 0f);
+        Storage.startRuleScreen(false);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+        Float val = Float.parseFloat(msg.getString("val", "0f"));
 
         Notification notification = new NotificationCompat.Builder(this)
-                .setContentIntent(contentIntent)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(PendingIntent.getActivity(this, 0,
+                        new Intent(this, MainActivity.class), 0))
+                .setDeleteIntent(PendingIntent.getBroadcast(getApplicationContext(), 0,
+                        new Intent(NOTIFICATION_ACTION_DELETE), 0))
+                .setSmallIcon(R.drawable.icon_notifications)
                 .setContentTitle(rule.name)
                 .setAutoCancel(true)
-                .setContentInfo("Current value:" + val)
+                .setContentInfo(getString(R.string.notif_triggering_value) + ": " + SensorUtil.scaleToUiData(rule.getSensorType(),
+                        val))
                 .setContentText(SensorUtil.buildRuleValue(rule))
                 .build();
 
-        mNotificationManager.notify(NOTIFICATION_ID, notification);
+        switch (rule.getSensorType()) {
+            case HUMIDITY:
+                mNotificationManager.notify(TMW_HUM_ID, notification);
+                break;
+            case LUMINOSITY:
+                mNotificationManager.notify(TMW_LIGHT_ID, notification);
+                break;
+            case NOISE_LEVEL:
+                mNotificationManager.notify(TMW_NOISE_ID, notification);
+                break;
+            case PROXIMITY:
+                mNotificationManager.notify(TMW_PROX_ID, notification);
+                break;
+            case TEMPERATURE:
+                mNotificationManager.notify(TMW_TEMP_ID, notification);
+                break;
+        }
+
+        playSound();
+    }
+
+    private void playSound() {
+        try {
+            Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), sound);
+            r.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendNotification(String msg) {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mNotificationManager.notify(NOTIFICATION_ID, buildNotification(msg));
+        mNotificationManager.notify(TMW_NOTIFICATION_ID, buildNotification(msg));
     }
 
     private Notification buildNotification(String msg) {
@@ -122,8 +171,8 @@ public class GcmIntentService extends IntentService {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setContentIntent(contentIntent)
-                        .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("TMW")
+                        .setSmallIcon(R.drawable.icon_notifications)
+                        .setContentTitle("Tell me when")
                         .setAutoCancel(true)
                         .setContentText(msg);
 

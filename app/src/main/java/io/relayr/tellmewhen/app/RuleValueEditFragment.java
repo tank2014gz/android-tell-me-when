@@ -30,12 +30,12 @@ public class RuleValueEditFragment extends WhatFragment {
                     rule.getOperatorType(), rule.value);
         else
             view = new RuleValueView(getActivity(), rule.getSensorType(),
-                    OperatorType.LESS, null);
+                    OperatorType.GREATER, null);
 
 
         view.setOnDoneClickListener(new RuleValueView.OnDoneClickListener() {
             @Override
-            public void onDoneClicked(int value, OperatorType mCurrentOperator) {
+            public void onDoneClicked(float value, OperatorType mCurrentOperator) {
                 Storage.getRule().value = value;
                 Storage.getRule().operatorType = mCurrentOperator.ordinal();
 

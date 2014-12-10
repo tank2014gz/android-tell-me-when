@@ -1,183 +1,199 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/background">
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/navigation_height">
-
-        <LinearLayout
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:background="@color/background">
 
-            <RelativeLayout
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/default_object_height"
+            android:background="@drawable/edit_button_selector"
+            android:paddingLeft="@dimen/default_object_padding"
+            android:paddingRight="@dimen/default_object_padding"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical">
+
+            <io.relayr.commons.widget.CustomTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ref_get_notifications"
+                android:layout_alignParentLeft="true"
+                android:textSize="@dimen/default_object_subtitle_text_size"
+                style="@style/BoldText"/>
+
+            <Switch
+                android:id="@+id/ref_notification_switch"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/default_object_height"
-                android:paddingLeft="@dimen/default_object_padding"
-                android:paddingRight="@dimen/default_object_padding"
-                android:layout_gravity="center_vertical"
-                android:gravity="center_vertical">
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"/>
+        </RelativeLayout>
+
+        <include layout="@layout/view_divider"/>
+
+        <RelativeLayout
+            android:id="@+id/ref_rule_name_edit"
+            android:layout_width="match_parent"
+            android:background="@drawable/edit_button_selector"
+            android:layout_height="@dimen/default_object_height"
+            android:paddingLeft="@dimen/default_object_padding"
+            android:paddingRight="@dimen/default_object_padding">
+
+            <io.relayr.commons.widget.CustomTextView
+                android:id="@+id/ref_rule_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:textSize="@dimen/default_object_title_text_size"
+                android:textAllCaps="true"
+                style="@style/BoldText"/>
+
+            <include
+                layout="@layout/view_edit_button"/>
+
+        </RelativeLayout>
+
+        <include layout="@layout/view_divider"/>
+
+        <RelativeLayout
+            android:id="@+id/ref_transmitter_edit"
+            android:layout_width="match_parent"
+            android:background="@drawable/edit_button_selector"
+            android:layout_height="@dimen/default_object_height"
+            android:paddingLeft="@dimen/default_object_padding"
+            android:paddingRight="@dimen/default_object_padding">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:orientation="vertical">
 
                 <io.relayr.commons.widget.CustomTextView
+                    android:id="@+id/ref_transmitter_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ref_get_notifications"
-                    android:layout_alignParentLeft="true"
-                    android:textSize="@dimen/default_object_subtitle_text_size"
-                    style="@style/BoldText"/>
-
-                <Switch
-                    android:id="@+id/ref_notification_switch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"/>
-            </RelativeLayout>
-
-            <include layout="@layout/view_divider"/>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/default_object_height"
-                android:paddingLeft="@dimen/default_object_padding"
-                android:paddingRight="@dimen/default_object_padding">
-
-                <io.relayr.commons.widget.CustomTextView
-                    android:id="@+id/ref_rule_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentLeft="true"
                     android:textSize="@dimen/default_object_title_text_size"
                     android:textAllCaps="true"
                     style="@style/BoldText"/>
 
-                <include
-                    android:id="@+id/ref_rule_name_edit"
-                    layout="@layout/view_edit_button"/>
-
-            </RelativeLayout>
-
-            <include layout="@layout/view_divider"/>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/default_object_height"
-                android:paddingLeft="@dimen/default_object_padding"
-                android:paddingRight="@dimen/default_object_padding">
-
-                <LinearLayout
+                <io.relayr.commons.widget.CustomTextView
+                    android:id="@+id/ref_transmitter_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:orientation="vertical">
+                    android:textSize="@dimen/default_object_subtitle_text_size"
+                    android:singleLine="true"
+                    style="@style/NormalText"/>
+            </LinearLayout>
 
-                    <io.relayr.commons.widget.CustomTextView
-                        android:id="@+id/ref_transmitter_type"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/default_object_title_text_size"
-                        android:textAllCaps="true"
-                        style="@style/BoldText"/>
+            <include
+                layout="@layout/view_edit_button"/>
 
-                    <io.relayr.commons.widget.CustomTextView
-                        android:id="@+id/ref_transmitter_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:textSize="@dimen/default_object_subtitle_text_size"
-                        android:singleLine="true"
-                        style="@style/NormalText"/>
-                </LinearLayout>
+        </RelativeLayout>
 
-                <include
-                    android:id="@+id/ref_transmitter_edit"
-                    layout="@layout/view_edit_button"/>
+        <include layout="@layout/view_divider"/>
 
-            </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/ref_sensor_edit"
+            android:layout_width="match_parent"
+            android:background="@drawable/edit_button_selector"
+            android:layout_height="@dimen/default_object_height"
+            android:paddingLeft="@dimen/default_object_padding"
+            android:paddingRight="@dimen/default_object_padding">
 
-            <include layout="@layout/view_divider"/>
+            <ImageView
+                android:id="@+id/ref_sensor_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"/>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/default_object_height"
-                android:paddingLeft="@dimen/default_object_padding"
-                android:paddingRight="@dimen/default_object_padding">
-
-                <ImageView
-                    android:id="@+id/ref_sensor_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"/>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_marginLeft="@dimen/default_object_height"
-                    android:layout_centerVertical="true"
-                    android:orientation="vertical">
-
-                    <io.relayr.commons.widget.CustomTextView
-                        android:id="@+id/ref_sensor_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/default_object_title_text_size"
-                        android:textAllCaps="true"
-                        android:gravity="center_vertical"
-                        style="@style/NormalText"/>
-
-                    <io.relayr.commons.widget.CustomTextView
-                        android:id="@+id/ref_sensor_info"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/default_object_subtitle_text_size"
-                        android:gravity="center_vertical"
-                        style="@style/NormalText"/>
-                </LinearLayout>
-
-                <include
-                    android:id="@+id/ref_sensor_edit"
-                    layout="@layout/view_edit_button"/>
-            </RelativeLayout>
-
-            <include layout="@layout/view_divider"/>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/default_object_height"
-                android:paddingLeft="@dimen/default_object_padding"
-                android:paddingRight="@dimen/default_object_padding">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="@dimen/default_object_height"
+                android:layout_centerVertical="true"
+                android:orientation="vertical">
 
                 <io.relayr.commons.widget.CustomTextView
-                    android:id="@+id/ref_rule_value"
+                    android:id="@+id/ref_sensor_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentLeft="true"
-                    android:textSize="@dimen/operator_size_small"
+                    android:textSize="@dimen/default_object_title_text_size"
                     android:textAllCaps="true"
-                    style="@style/BoldText"/>
+                    android:gravity="center_vertical"
+                    style="@style/NormalText"/>
 
-                <include
-                    android:id="@+id/ref_rule_value_edit"
-                    layout="@layout/view_edit_button"/>
+                <io.relayr.commons.widget.CustomTextView
+                    android:id="@+id/ref_sensor_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/default_object_subtitle_text_size"
+                    android:gravity="center_vertical"
+                    style="@style/NormalText"/>
+            </LinearLayout>
 
-            </RelativeLayout>
+            <include
+                layout="@layout/view_edit_button"/>
+        </RelativeLayout>
 
-            <include layout="@layout/view_divider"/>
+        <include layout="@layout/view_divider"/>
 
-        </LinearLayout>
-    </ScrollView>
+        <RelativeLayout
+            android:id="@+id/ref_rule_value_edit"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/default_object_height"
+            android:background="@drawable/edit_button_selector"
+            android:paddingLeft="@dimen/default_object_padding"
+            android:paddingRight="@dimen/default_object_padding">
 
-    <include
-        layout="@layout/view_button_green"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/button_done_margin"/>
-</RelativeLayout>
+            <io.relayr.commons.widget.CustomTextView
+                android:id="@+id/ref_rule_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:textSize="@dimen/operator_size_small"
+                android:textAllCaps="true"
+                style="@style/BoldText"/>
+
+            <include
+                layout="@layout/view_edit_button"/>
+
+        </RelativeLayout>
+
+        <include layout="@layout/view_divider"/>
+
+        <io.relayr.commons.widget.CustomTextView
+            android:id="@+id/sensor_value"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/default_object_height"
+            android:textSize="@dimen/default_object_title_text_size"
+            android:gravity="center"
+            android:layout_gravity="center"
+            style="@style/BoldText"
+            android:visibility="gone"/>
+
+        <ProgressBar
+            android:id="@+id/notif_details_current_sensor_loading"
+            style="?android:attr/progressBarStyle"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <include
+            layout="@layout/view_button_green"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="@dimen/button_done_margin"/>
+    </LinearLayout>
+</ScrollView>

@@ -29,4 +29,6 @@
     <dimen name="operator_size_large">90sp</dimen>
     <dimen name="operator_size_large_padding">-10sp</dimen>
 
+    <dimen name="progress_bar_height">15dp</dimen>
+
 </resources>
