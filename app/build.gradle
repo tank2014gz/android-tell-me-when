@@ -1,7 +1,7 @@
 buildscript {
     repositories {
-        mavenCentral()
         maven { url 'https://maven.fabric.io/repo' }
+        mavenCentral()
     }
 
     dependencies {
