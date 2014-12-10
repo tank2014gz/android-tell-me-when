@@ -14,12 +14,6 @@ apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
-repositories {
-    mavenCentral()
-    maven { url 'https://maven.fabric.io/repo' }
-}
-
-
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.1"
@@ -52,6 +46,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.fabric.io/repo' }
 }
 
 dependencies {
