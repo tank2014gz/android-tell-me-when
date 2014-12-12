@@ -66,7 +66,7 @@ public class MainFragment extends WhatFragment {
     private boolean mLoadingNotifications = false;
     private boolean mLoadingRules = false;
 
-    private ScheduledExecutorService mNotificationsScheduler;
+    private ScheduledExecutorService mNotifScheduler;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -116,14 +116,13 @@ public class MainFragment extends WhatFragment {
         super.onPause();
 
         Storage.setNotificationScreeVisible(false);
-        stopDynamicNotificationLoading();
+
+        if (mNotifScheduler != null && !mNotifScheduler.isShutdown()) mNotifScheduler.shutdown();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        stopDynamicNotificationLoading();
 
         if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
         if (!mRulesSubscription.isUnsubscribed()) mRulesSubscription.unsubscribe();
@@ -213,17 +212,12 @@ public class MainFragment extends WhatFragment {
         if (view != null) mWarningLayout.addView(view);
     }
 
-    private void stopDynamicNotificationLoading() {
-        if (mNotificationsScheduler != null && !mNotificationsScheduler.isShutdown())
-            mNotificationsScheduler.shutdown();
-    }
-
     private void startDynamicNotificationLoading() {
-        if (mNotificationsScheduler != null && !mNotificationsScheduler.isShutdown())
+        if (mNotifScheduler != null && !mNotifScheduler.isShutdown())
             return;
 
-        mNotificationsScheduler = Executors.newSingleThreadScheduledExecutor();
-        mNotificationsScheduler.scheduleAtFixedRate(new Runnable() {
+        mNotifScheduler = Executors.newSingleThreadScheduledExecutor();
+        mNotifScheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 if (!Storage.isStartScreenRules()) {
@@ -505,10 +499,5 @@ public class MainFragment extends WhatFragment {
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
         manager.cancel(GcmIntentService.TMW_NOTIFICATION_ID);
-        manager.cancel(GcmIntentService.TMW_HUM_ID);
-        manager.cancel(GcmIntentService.TMW_LIGHT_ID);
-        manager.cancel(GcmIntentService.TMW_NOISE_ID);
-        manager.cancel(GcmIntentService.TMW_PROX_ID);
-        manager.cancel(GcmIntentService.TMW_TEMP_ID);
     }
 }

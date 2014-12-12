@@ -21,21 +21,31 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.util.Log;
 
 import com.activeandroid.query.Select;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.MainActivity;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
+
+import static android.support.v4.app.NotificationCompat.Builder;
+import static android.support.v4.app.NotificationCompat.InboxStyle;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -47,13 +57,11 @@ import io.relayr.tellmewhen.util.SensorUtil;
 public class GcmIntentService extends IntentService {
 
     public static final String NOTIFICATION_ACTION_DELETE = "tmw_notification_canceled";
+    public static final String NOTIFICATION_ACTION_CLICK = "tmw_notification_clicked";
 
     public static final int TMW_NOTIFICATION_ID = 34560;
-    public static final int TMW_TEMP_ID = 34561;
-    public static final int TMW_HUM_ID = 34562;
-    public static final int TMW_LIGHT_ID = 34563;
-    public static final int TMW_NOISE_ID = 34564;
-    public static final int TMW_PROX_ID = 34565;
+
+    public static Map<TMWRule, Float> pushedRules = new HashMap<>();
 
     public GcmIntentService() {
         super(GcmIntentService.class.getSimpleName());
@@ -61,15 +69,11 @@ public class GcmIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
-
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
 
-        // The getMessageType() intent parameter must be the intent you received
-        // in your BroadcastReceiver.
         String messageType = gcm.getMessageType(intent);
 
-        if (!extras.isEmpty()) {
+        if (!intent.getExtras().isEmpty()) {
             switch (messageType) {
                 case GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR:
                     sendNotification("Message type send error.");
@@ -78,7 +82,8 @@ public class GcmIntentService extends IntentService {
                     sendNotification("Message type deleted.");
                     break;
                 case GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE:
-                    if (!Storage.isNotificationScreenVisible()) sendNotification(extras);
+                    if (!Storage.isNotificationScreenVisible())
+                        sendNotification(intent.getExtras());
                     break;
             }
         }
@@ -87,8 +92,7 @@ public class GcmIntentService extends IntentService {
     }
 
     private void sendNotification(Bundle msg) {
-        NotificationManager mNotificationManager = (NotificationManager)
-                this.getSystemService(Context.NOTIFICATION_SERVICE);
+        Storage.startRuleScreen(false);
 
         String ruleId = msg.getString("rule_id", "null");
         if (ruleId == null) {
@@ -102,76 +106,115 @@ public class GcmIntentService extends IntentService {
             return;
         }
 
-        Storage.startRuleScreen(false);
+        Float notificationValue = 0f;
+        try {
+            notificationValue = Float.parseFloat(msg.getString("val", "0"));
+        } catch (NumberFormatException e) {
+            Log.e(GcmIntentService.class.getSimpleName(), e.getMessage());
+        }
 
-        Float val = Float.parseFloat(msg.getString("val", "0f"));
+        pushedRules.put(rule, notificationValue);
 
-        Notification notification = new NotificationCompat.Builder(this)
-                .setContentIntent(PendingIntent.getActivity(this, 0,
-                        new Intent(this, MainActivity.class), 0))
-                .setDeleteIntent(PendingIntent.getBroadcast(getApplicationContext(), 0,
-                        new Intent(NOTIFICATION_ACTION_DELETE), 0))
+        String title = pushedRules.size() + " " + (pushedRules.size() > 1 ? getString(R.string
+                .push_notification_title) : getString(R.string.push_notification_title_one_rule));
+
+        Spannable spanTitle = new SpannableString(title);
+        spanTitle.setSpan(new StyleSpan(android.graphics.Typeface.BOLD),
+                0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        Notification notification = new Builder(getApplicationContext())
+                .setContentIntent(createContentIntent())
+                .setDeleteIntent(createDeleteIntent())
                 .setSmallIcon(R.drawable.icon_notifications)
-                .setContentTitle(rule.name)
+                .setContentTitle(spanTitle)
                 .setAutoCancel(true)
-                .setContentInfo(getString(R.string.notif_triggering_value) + ": " + SensorUtil.scaleToUiData(rule.getSensorType(),
-                        val))
-                .setContentText(SensorUtil.buildRuleValue(rule))
+                .setStyle(prepareBigNotificationDetails(spanTitle))
                 .build();
 
-        switch (rule.getSensorType()) {
-            case HUMIDITY:
-                mNotificationManager.notify(TMW_HUM_ID, notification);
-                break;
-            case LUMINOSITY:
-                mNotificationManager.notify(TMW_LIGHT_ID, notification);
-                break;
-            case NOISE_LEVEL:
-                mNotificationManager.notify(TMW_NOISE_ID, notification);
-                break;
-            case PROXIMITY:
-                mNotificationManager.notify(TMW_PROX_ID, notification);
-                break;
-            case TEMPERATURE:
-                mNotificationManager.notify(TMW_TEMP_ID, notification);
-                break;
-        }
+        showNotification(TMW_NOTIFICATION_ID, notification);
 
         playSound();
     }
 
-    private void playSound() {
-        try {
-            Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), sound);
-            r.play();
-        } catch (Exception e) {
-            e.printStackTrace();
+    private InboxStyle prepareBigNotificationDetails(Spannable spanTitle) {
+        NotificationCompat.InboxStyle result = new InboxStyle();
+        result.setBigContentTitle(spanTitle);
+
+        for (Map.Entry<TMWRule, Float> entry : pushedRules.entrySet()) {
+            SensorType sensorType = entry.getKey().getSensorType();
+
+            String ruleName = entry.getKey().name;
+            if (ruleName.length() > 30)
+                ruleName = ruleName.substring(0, 27) + "...";
+            else
+                for (int i = 0; i < 30 - ruleName.length(); i++) {
+                    ruleName += ".";
+                }
+
+            String notificationText = getString(R.string.push_notification_value) + " " +
+                    SensorUtil.scaleToUiData(sensorType, entry.getValue()) +
+                    sensorType.getUnit();
+
+            String all = ruleName + " (" + notificationText + ")";
+
+            Spannable spanNotif = new SpannableString(all);
+            spanNotif.setSpan(new StyleSpan(android.graphics.Typeface.BOLD),
+                    0, ruleName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            result.addLine(spanNotif);
         }
+
+        result.setSummaryText(getString(R.string.push_notification_summary));
+
+        return result;
     }
 
     private void sendNotification(String msg) {
+        Storage.startRuleScreen(false);
+
+        Notification notification = new Builder(this)
+                .setContentIntent(createContentIntent())
+                .setSmallIcon(R.drawable.icon_notifications)
+                .setContentTitle(getString(R.string.app_name))
+                .setAutoCancel(true)
+                .setContentText(msg)
+                .build();
+
+        showNotification(TMW_NOTIFICATION_ID, notification);
+    }
+
+    private PendingIntent createContentIntent() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(NOTIFICATION_ACTION_CLICK, "clicked");
+        return PendingIntent.getActivity(this, 0, intent, 0);
+    }
+
+    private PendingIntent createDeleteIntent() {
+        return PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(NOTIFICATION_ACTION_DELETE), PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private void showNotification(int id, Notification notification) {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mNotificationManager.notify(TMW_NOTIFICATION_ID, buildNotification(msg));
+        mNotificationManager.notify(id, notification);
     }
 
-    private Notification buildNotification(String msg) {
-        Storage.startRuleScreen(false);
+    private boolean playingSound = false;
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+    private void playSound() {
+        if (playingSound) return;
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setContentIntent(contentIntent)
-                        .setSmallIcon(R.drawable.icon_notifications)
-                        .setContentTitle("Tell me when")
-                        .setAutoCancel(true)
-                        .setContentText(msg);
+        playingSound = true;
 
-        return mBuilder.build();
+        Handler mHandler = new Handler(getMainLooper());
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                RingtoneManager.getRingtone(getApplicationContext(), sound).play();
+                playingSound = false;
+            }
+        });
     }
-
 }

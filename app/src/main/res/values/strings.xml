@@ -6,11 +6,6 @@
     <string name="successfully_logged_in">You were successfully logged in!</string>
     <string name="unsuccessfully_logged_in">There was a problem in the log in.</string>
     <string name="err_loading_user_data">Oops! Loading user data failed</string>
-    <string name="err_loading_devices">Oops! Loading devices failed</string>
-    <string name="err_socket_problem">Oops! Web socket problem</string>
-    <string name="please_connect_to_wifi">Please connect to WiFi</string>
-    <string name="connect">Connect</string>
-    <string name="cancel">Cancel</string>
 
     <string name="warning_onboard_title">onboard wunderbar</string>
     <string name="warning_onboard_text_top">Looks like you have no WunderBars on your account.</string>
@@ -24,12 +19,8 @@
     <string name="warning_no_notif_text">Notifications will be listed here</string>
     <string name="warning_no_notif_title">No new notifications</string>
 
-    <string name="rf_clear">clear</string>
-    <string name="rf_logout">logout</string>
-
     <string name="operator_less"><![CDATA[<]]></string>
     <string name="operator_greater"><![CDATA[>]]></string>
-    <string name="operator_equals">=</string>
 
     <string name="nf_rule_hint">rule name</string>
     <string name="nf_rule_name_empty">Please set name for your rule.</string>
@@ -41,15 +32,14 @@
     <string name="measurement_noise">noise</string>
     <string name="measurement_proximity">proximity</string>
     <string name="measurement_light">light</string>
-    <string name="measurement_acceleration">acceleration</string>
 
     <string name="title_tab_rules">rules</string>
     <string name="title_tab_notifications">notifications</string>
     <string name="title_rule_name">name rule</string>
-    <string name="title_select_transmitter">select transmitter</string>
-    <string name="title_select_sensor">select sensor</string>
-    <string name="title_rule_value">value</string>
-    <string name="title_rule_edit">rule</string>
+    <string name="title_select_transmitter">transmitters</string>
+    <string name="title_select_sensor">measurements</string>
+    <string name="title_rule_value">set threshold</string>
+    <string name="title_rule_edit">rule summary</string>
     <string name="title_notif_details">notification details</string>
 
     <string name="button_done">done</string>
@@ -72,13 +62,15 @@
 
     <string name="notif_details_rule">Rule</string>
     <string name="notif_details_treshold_timestamp">Time when threshold met</string>
-    <string name="notif_details_value">Notification value</string>
     <string name="notif_details_current_value">Current sensor value</string>
-    <string name="notif_triggering_value">value</string>
-    <string name="notif_rule">rule</string>
+    <string name="notif_triggering_value">Value</string>
     <string name="notification_date_format">dd.MM.yyyy</string>
     <string name="on">on</string>
     <string name="off">off</string>
-    <string name="list_error">Error listing items</string>
+
+    <string name="push_notification_summary">Click for more details.</string>
+    <string name="push_notification_title">"rules triggered"</string>
+    <string name="push_notification_title_one_rule">rule triggered</string>
+    <string name="push_notification_value">value</string>
 
 </resources>

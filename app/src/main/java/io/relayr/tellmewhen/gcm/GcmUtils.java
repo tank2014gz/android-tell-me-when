@@ -17,6 +17,7 @@ import io.relayr.tellmewhen.storage.Storage;
 
 public class GcmUtils {
 
+    private final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String SENDER_ID = "731084512451";
 
     private static GcmUtils sGcmUtils = null;
@@ -46,7 +47,6 @@ public class GcmUtils {
 
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
                 GooglePlayServicesUtil.getErrorDialog(resultCode, context,
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
             }
@@ -71,8 +71,6 @@ public class GcmUtils {
 
                     String mRegId = mGcm.register(SENDER_ID);
                     msg = "Registration ID=" + mRegId;
-
-                    Log.e("REG", mRegId);
 
                     GcmUtils.storeRegistrationId(context.getApplicationContext(), mRegId);
                 } catch (IOException ex) {
@@ -104,7 +102,7 @@ public class GcmUtils {
      *
      * @return registration ID, or empty string if there is no existing registration ID.
      */
-    private static String getRegistrationId(Context context) {
+    public static String getRegistrationId(Context context) {
         String registrationId = Storage.loadGmsRegistrationId();
 
         if (registrationId == null) return null;

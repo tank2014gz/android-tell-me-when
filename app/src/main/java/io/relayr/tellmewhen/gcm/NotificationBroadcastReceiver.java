@@ -3,6 +3,7 @@ package io.relayr.tellmewhen.gcm;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.activeandroid.query.Select;
@@ -20,10 +21,12 @@ import io.relayr.tellmewhen.service.model.DbSearch;
 import io.relayr.tellmewhen.service.model.DbStatus;
 import io.relayr.tellmewhen.service.notif.NotificationApi;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.SensorType;
 import retrofit.Endpoint;
 import retrofit.Endpoints;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -38,8 +41,12 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         if (api == null)
             api = getApi(context);
 
+        Log.e(TAG, "onReceive()");
+
         if (intent.getAction().equals(GcmIntentService.NOTIFICATION_ACTION_DELETE)) {
-            loadNotifications().subscribe(new Subscriber<Integer>() {
+
+            GcmIntentService.pushedRules.clear();
+            loadRemoteNotifications().subscribe(new Subscriber<Integer>() {
                 @Override
                 public void onCompleted() {
                 }
@@ -57,8 +64,8 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    private Observable<Integer> loadNotifications() {
-        final List<String> existingRules = new ArrayList<String>();
+    private Observable<Integer> loadRemoteNotifications() {
+        final List<String> existingRules = new ArrayList<>();
         List<TMWRule> rules = new Select().from(TMWRule.class).execute();
         for (TMWRule rule : rules) {
             existingRules.add(rule.dbId);
@@ -83,14 +90,14 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
                 });
     }
 
-    public void deleteNotifications(List<DbNotification> notifications) {
-        List<DbBulkDelete> deleteItems = new ArrayList<DbBulkDelete>();
+    private void deleteNotifications(List<DbNotification> notifications) {
+        List<DbBulkDelete> deleteItems = new ArrayList<>();
 
         for (DbNotification notif : notifications) {
             deleteItems.add(new DbBulkDelete(notif.getDbId(), notif.getDrRev()));
         }
 
-        api.deleteNotifications(new DbDocuments<DbBulkDelete>(deleteItems))
+        api.deleteNotifications(new DbDocuments<>(deleteItems))
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Subscriber<DbStatus>() {
                     @Override

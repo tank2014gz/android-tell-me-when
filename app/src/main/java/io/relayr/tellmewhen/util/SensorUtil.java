@@ -3,20 +3,22 @@ package io.relayr.tellmewhen.util;
 import android.content.Context;
 import android.util.Pair;
 
+import com.google.gson.Gson;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.relayr.model.Reading;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 
 public class SensorUtil {
 
-    private static Map<SensorType, String> sSensorMap = new HashMap<SensorType, String>();
-    private static Map<SensorType, Pair<Integer, Integer>> sSensorValues =
-            new HashMap<SensorType, Pair<Integer, Integer>>();
+    private static Map<SensorType, String> sSensorMap = new HashMap<>();
+    private static Map<SensorType, Pair<Integer, Integer>> sSensorValues = new HashMap<>();
 
     private SensorUtil(Context context) {
         sSensorMap.put(SensorType.TEMPERATURE, context.getString(R.string.measurement_temperature));
@@ -24,14 +26,12 @@ public class SensorUtil {
         sSensorMap.put(SensorType.NOISE_LEVEL, context.getString(R.string.measurement_noise));
         sSensorMap.put(SensorType.PROXIMITY, context.getString(R.string.measurement_proximity));
         sSensorMap.put(SensorType.LUMINOSITY, context.getString(R.string.measurement_light));
-//        sSensorMap.put(SensorType.ACCELERATION, context.getString(R.string.measurement_acceleration));
 
-        sSensorValues.put(SensorType.TEMPERATURE, new Pair<Integer, Integer>(-40, 100));
-        sSensorValues.put(SensorType.HUMIDITY, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.NOISE_LEVEL, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.PROXIMITY, new Pair<Integer, Integer>(0, 100));
-        sSensorValues.put(SensorType.LUMINOSITY, new Pair<Integer, Integer>(0, 100));
-//        sSensorValues.put(SensorType.ACCELERATION, new Pair<Integer, Integer>(0, 10));
+        sSensorValues.put(SensorType.TEMPERATURE, new Pair<>(-40, 140));
+        sSensorValues.put(SensorType.HUMIDITY, new Pair<>(0, 100));
+        sSensorValues.put(SensorType.NOISE_LEVEL, new Pair<>(0, 100));
+        sSensorValues.put(SensorType.PROXIMITY, new Pair<>(0, 100));
+        sSensorValues.put(SensorType.LUMINOSITY, new Pair<>(0, 100));
     }
 
     public static void init(Context context) {
@@ -70,6 +70,23 @@ public class SensorUtil {
         if (rule == null || notif == null) return "null";
         return SensorUtil.scaleToUiData(rule.getSensorType(),
                 notif.getValue()) + rule.getSensorType().getUnit();
+    }
+
+    public static String formatToUiValue(SensorType type, Reading r) {
+        switch (type) {
+            case TEMPERATURE:
+                return r.temp + type.getUnit();
+            case HUMIDITY:
+                return r.hum + type.getUnit();
+            case PROXIMITY:
+                return scaleToUiData(SensorType.PROXIMITY, r.prox) + type.getUnit();
+            case NOISE_LEVEL:
+                return scaleToUiData(SensorType.NOISE_LEVEL, r.snd_level) + type.getUnit();
+            case LUMINOSITY:
+                return scaleToUiData(SensorType.LUMINOSITY, r.light) + type.getUnit();
+            default:
+                return "0";
+        }
     }
 
     public static float scaleToUiData(SensorType type, float data) {

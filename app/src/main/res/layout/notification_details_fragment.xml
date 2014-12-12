@@ -73,7 +73,7 @@
             android:textSize="@dimen/default_object_title_text_size"
             android:textAllCaps="true"
             android:layout_marginBottom="@dimen/default_object_padding"
-            style="@style/BoldText"/>
+            style="@style/ExtraBoldText"/>
 
         <include layout="@layout/view_divider"/>
 

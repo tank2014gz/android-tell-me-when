@@ -172,7 +172,7 @@ public class RuleValueView extends RelativeLayout {
 
     private void setValue(float seekValue, float indicatorValue, OperatorType type) {
         mValueSeek.setProgress((int) seekValue);
-        mValueIndicator.setText((int)indicatorValue + unit);
+        mValueIndicator.setText((int) indicatorValue + unit);
         toggleOperator(type);
     }
 
@@ -239,27 +239,9 @@ public class RuleValueView extends RelativeLayout {
 
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        float value = 0;
-                        switch (mSensor) {
-                            case TEMPERATURE:
-                                value = (int) reading.temp;
-                                break;
-                            case HUMIDITY:
-                                value = (int) reading.hum;
-                                break;
-                            case PROXIMITY:
-                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
-                                break;
-                            case NOISE_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
-                                break;
-                            case LUMINOSITY:
-                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
-                                break;
-                        }
-
                         mSensorValue.setText(getContext().getString(R.string
-                                .current_reading) + ": " + value + mSensor.getUnit());
+                                .current_reading) + ": " +
+                                SensorUtil.formatToUiValue(mSensor, reading));
                     }
                 });
     }

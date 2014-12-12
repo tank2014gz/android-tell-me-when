@@ -21,6 +21,7 @@ import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.service.model.DbNotification;
 import io.relayr.tellmewhen.service.model.DbDocuments;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.SensorType;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -35,8 +36,7 @@ public class NotificationServiceImpl implements NotificationService {
         TellMeWhenApplication.objectGraph.inject(this);
     }
 
-    @Override
-    public void deleteNotifications(List<DbNotification> notifications) {
+    private void deleteNotifications(List<DbNotification> notifications) {
         List<DbBulkDelete> deleteItems = new ArrayList<>();
 
         for (DbNotification notif : notifications) {
@@ -53,12 +53,12 @@ public class NotificationServiceImpl implements NotificationService {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(NotificationServiceImpl.class.getSimpleName(), e.getMessage());
+                        Log.d(NotificationServiceImpl.class.getSimpleName(), e.getMessage());
                     }
 
                     @Override
                     public void onNext(DbStatus status) {
-                        Log.d(NotificationServiceImpl.class.getSimpleName(), status.getOk());
+                        Log.v(NotificationServiceImpl.class.getSimpleName(), status.getOk());
                     }
                 });
     }

@@ -19,7 +19,6 @@ public class Storage {
     private static final String USER_ONBOADRED = "user.onboarded";
     private static final String START_SCREEN = "start.screen";
     private static final String NOTIFICATION_VISIBILITY = "notifications.visibility";
-    private static final String SHOW_NOTIFICATIONS = "show.notifications";
 
     private static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
@@ -28,7 +27,7 @@ public class Storage {
 
     private static TMWRule createRule = null;
     private static Pair<String, SensorType> originalSensor = null;
-    private static List<Transmitter> sTransmitters = new ArrayList<Transmitter>();
+    private static List<Transmitter> sTransmitters = new ArrayList<>();
     private static TMWNotification mNotificationDetails;
 
     private Storage(Context context) {

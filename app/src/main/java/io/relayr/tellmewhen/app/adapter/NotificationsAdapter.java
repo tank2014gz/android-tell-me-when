@@ -15,7 +15,7 @@ import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.model.TMWNotification;
-import io.relayr.tellmewhen.util.NotificationUtil;
+import io.relayr.tellmewhen.util.NotificationTimeUtil;
 import io.relayr.tellmewhen.util.SensorUtil;
 
 public class NotificationsAdapter extends ArrayAdapter<TMWNotification> {
@@ -45,8 +45,8 @@ public class NotificationsAdapter extends ArrayAdapter<TMWNotification> {
             holder.info.setText(getContext().getString(R.string.notif_triggering_value) + ": " +
                     SensorUtil.buildNotificationValue(rule, item));
 
-            holder.date.setText(NotificationUtil.getDate(getContext(), item));
-            holder.time.setText(NotificationUtil.getTime(item));
+            holder.date.setText(NotificationTimeUtil.getDate(getContext(), item));
+            holder.time.setText(NotificationTimeUtil.getTime(item));
         } else {
             item.delete();
             notifyDataSetChanged();

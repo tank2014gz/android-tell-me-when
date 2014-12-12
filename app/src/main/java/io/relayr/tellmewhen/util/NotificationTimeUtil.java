@@ -9,7 +9,7 @@ import java.util.Calendar;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.TMWNotification;
 
-public class NotificationUtil {
+public class NotificationTimeUtil {
 
     public static String getDate(Context context, TMWNotification notif) {
         Calendar calendar = Calendar.getInstance();

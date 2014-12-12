@@ -7,15 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.google.gson.Gson;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -28,7 +23,7 @@ import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.FragmentName;
-import io.relayr.tellmewhen.util.NotificationUtil;
+import io.relayr.tellmewhen.util.NotificationTimeUtil;
 import io.relayr.tellmewhen.util.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
@@ -67,9 +62,19 @@ public class NotificationDetailsFragment extends WhatFragment {
 
         inject(this);
 
-        loadData();
+        mNotification = Storage.getNotificationDetails();
+        mRule = new Select().from(TMWRule.class)
+                .where("dbId = ?", mNotification.getRuleId())
+                .executeSingle();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        loadDevice(mRule.transmitterId, mRule.getSensorType());
     }
 
     @Override
@@ -79,8 +84,8 @@ public class NotificationDetailsFragment extends WhatFragment {
         mRuleName.setText(mRule.name);
         mRuleValue.setText(SensorUtil.buildRuleValue(mRule));
 
-        mTimestamp.setText(NotificationUtil.getDate(getActivity(),
-                mNotification) + " " + NotificationUtil.getTime(mNotification));
+        mTimestamp.setText(NotificationTimeUtil.getDate(getActivity(),
+                mNotification) + " " + NotificationTimeUtil.getTime(mNotification));
 
         mValue.setText(SensorUtil.buildNotificationValue(mRule, mNotification));
     }
@@ -101,14 +106,6 @@ public class NotificationDetailsFragment extends WhatFragment {
 
         if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
         if (mSensorDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mSensorDeviceId);
-    }
-
-    private void loadData() {
-        mNotification = Storage.getNotificationDetails();
-        mRule = new Select().from(TMWRule.class)
-                .where("dbId = ?", mNotification.getRuleId()).executeSingle();
-
-        loadDevice(mRule.transmitterId, mRule.getSensorType());
     }
 
     private void loadDevice(String transmitterId, final SensorType sensor) {
@@ -158,26 +155,7 @@ public class NotificationDetailsFragment extends WhatFragment {
 
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        float value = 0f;
-                        switch (sensor) {
-                            case TEMPERATURE:
-                                value = reading.temp;
-                                break;
-                            case HUMIDITY:
-                                value = reading.hum;
-                                break;
-                            case PROXIMITY:
-                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
-                                break;
-                            case NOISE_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
-                                break;
-                            case LUMINOSITY:
-                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
-                                break;
-                        }
-
-                        mSensorValue.setText(value + sensor.getUnit());
+                        mSensorValue.setText(SensorUtil.formatToUiValue(sensor, reading));
                     }
                 });
     }

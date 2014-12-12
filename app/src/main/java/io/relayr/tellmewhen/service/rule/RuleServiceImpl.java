@@ -1,7 +1,5 @@
 package io.relayr.tellmewhen.service.rule;
 
-import android.util.Log;
-
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
@@ -13,16 +11,15 @@ import javax.inject.Named;
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
+import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.service.model.DataMapper;
+import io.relayr.tellmewhen.service.model.DbDocuments;
+import io.relayr.tellmewhen.service.model.DbRule;
 import io.relayr.tellmewhen.service.model.DbSearch;
 import io.relayr.tellmewhen.service.model.DbStatus;
-import io.relayr.tellmewhen.service.RuleService;
-import io.relayr.tellmewhen.service.model.DbRule;
-import io.relayr.tellmewhen.service.model.DbDocuments;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -122,12 +119,6 @@ public class RuleServiceImpl implements RuleService {
     private void updateRuleNotifications(DbRule rule) {
         ruleApi.updateRule(rule.getId(), rule.getRev(), rule)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<DbStatus>() {
-                    @Override
-                    public void call(DbStatus status) {
-                        Log.e("RuleServiceImpl", "Rule updated: " + status.getOk().toLowerCase().equals("true"));
-                    }
-                });
+                .observeOn(AndroidSchedulers.mainThread());
     }
 }

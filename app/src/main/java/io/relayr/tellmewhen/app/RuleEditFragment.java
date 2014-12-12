@@ -2,7 +2,6 @@ package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +44,6 @@ public class RuleEditFragment extends WhatFragment {
 
     @InjectView(R.id.ref_sensor_icon) ImageView mSensorIcon;
     @InjectView(R.id.ref_sensor_name) TextView mSensorName;
-    @InjectView(R.id.ref_sensor_info) TextView mSensorInfo;
 
     @InjectView(R.id.ref_rule_value) TextView mRuleValue;
 
@@ -54,6 +52,7 @@ public class RuleEditFragment extends WhatFragment {
 
     private Subscription mWebSocketSubscription = Subscriptions.empty();
     private String mSensorDeviceId;
+    private TMWRule mRule;
 
     public static RuleEditFragment newInstance() {
         return new RuleEditFragment();
@@ -68,6 +67,8 @@ public class RuleEditFragment extends WhatFragment {
         ButterKnife.inject(this, view);
         inject(this);
 
+        mRule = Storage.getRule();
+
         return view;
     }
 
@@ -75,11 +76,7 @@ public class RuleEditFragment extends WhatFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TMWRule rule = Storage.getRule();
-
-        loadDevice(rule.transmitterId, rule.getSensorType());
-
-        mRuleSwitch.setChecked(rule.isNotifying);
+        mRuleSwitch.setChecked(mRule.isNotifying);
         mRuleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -87,16 +84,23 @@ public class RuleEditFragment extends WhatFragment {
             }
         });
 
-        mRuleName.setText(rule.name);
+        mRuleName.setText(mRule.name);
 
-        mTransType.setText(rule.transmitterType);
-        mTransName.setText(rule.transmitterName);
+        mTransType.setText(mRule.transmitterType);
+        mTransName.setText(mRule.transmitterName);
 
-        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), rule.getSensorType()));
-        mSensorName.setText(SensorUtil.getTitle(rule.getSensorType()));
+        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), mRule.getSensorType()));
+        mSensorName.setText(SensorUtil.getTitle(mRule.getSensorType()));
 
-        mRuleValue.setText((rule.getOperatorType().getValue() + " " +
-                rule.value + " " + rule.getSensorType().getUnit()));
+        mRuleValue.setText((mRule.getOperatorType().getValue() + " " +
+                mRule.value + " " + mRule.getSensorType().getUnit()));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        loadDevice(mRule.transmitterId, mRule.getSensorType());
     }
 
     @Override
@@ -206,32 +210,16 @@ public class RuleEditFragment extends WhatFragment {
 
                     @Override
                     public void onNext(Object o) {
-                        mCurrentSensorProgress.setVisibility(View.GONE);
-                        mSensorValue.setVisibility(View.VISIBLE);
-
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        float value = 0f;
-                        switch (sensor) {
-                            case TEMPERATURE:
-                                value = reading.temp;
-                                break;
-                            case HUMIDITY:
-                                value = reading.hum;
-                                break;
-                            case PROXIMITY:
-                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
-                                break;
-                            case NOISE_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
-                                break;
-                            case LUMINOSITY:
-                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
-                                break;
-                        }
+                        if (mCurrentSensorProgress != null) {
+                            mCurrentSensorProgress.setVisibility(View.GONE);
+                            mSensorValue.setVisibility(View.VISIBLE);
 
-                        mSensorValue.setText(getString(R.string
-                                .current_reading) + ": " + value + sensor.getUnit());
+                            mSensorValue.setText(getString(R.string
+                                    .current_reading) + ": " +
+                                    SensorUtil.formatToUiValue(sensor, reading));
+                        }
                     }
                 });
     }
