@@ -25,7 +25,7 @@
     <string name="nf_rule_hint">rule name</string>
     <string name="nf_rule_name_empty">Please set name for your rule.</string>
 
-    <string name="ref_get_notifications">get notification</string>
+    <string name="ref_get_notifications">Notifications</string>
 
     <string name="measurement_temperature">temperature</string>
     <string name="measurement_humidity">humidity</string>
@@ -68,9 +68,11 @@
     <string name="on">on</string>
     <string name="off">off</string>
 
-    <string name="push_notification_summary">Click for more details.</string>
+    <string name="push_notification_summary">Tap for more details.</string>
     <string name="push_notification_title">"rules triggered"</string>
     <string name="push_notification_title_one_rule">rule triggered</string>
     <string name="push_notification_value">value</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="error_loading_device_data">Error while loading data</string>
 
 </resources>

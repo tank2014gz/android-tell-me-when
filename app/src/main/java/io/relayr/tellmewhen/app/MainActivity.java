@@ -53,9 +53,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getIntent().getStringExtra(GcmIntentService.NOTIFICATION_ACTION_CLICK) != null)
-            GcmIntentService.pushedRules.clear();
-
         setContentView(R.layout.activity_main);
 
         ButterKnife.inject(this);
@@ -71,6 +68,9 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     @Override
     public void onResume() {
         super.onResume();
+
+        if (GcmIntentService.pushedRules != null)
+            GcmIntentService.pushedRules.clear();
 
         if (GcmUtils.getInstance().checkPlayServices(this)) {
             GcmUtils.getInstance().init(this);

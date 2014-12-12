@@ -84,7 +84,6 @@ public class SensorFragment extends WhatFragment {
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
                     @Override
                     public void onCompleted() {
-
                     }
 
                     @Override

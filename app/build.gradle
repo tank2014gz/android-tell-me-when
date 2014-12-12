@@ -25,8 +25,8 @@ android {
         applicationId "io.relayr.tellmewhen"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 7
-        versionName "1.0.7"
+        versionCode 8
+        versionName "1.0.8"
     }
 
     sourceSets {

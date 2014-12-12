@@ -74,6 +74,8 @@ public class NotificationDetailsFragment extends WhatFragment {
     public void onResume() {
         super.onResume();
 
+        mCurrentSensorProgress.setVisibility(View.VISIBLE);
+
         loadDevice(mRule.transmitterId, mRule.getSensorType());
     }
 
@@ -120,7 +122,7 @@ public class NotificationDetailsFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        showToast(R.string.error_loading_device_data);
                     }
 
                     @Override
@@ -145,17 +147,22 @@ public class NotificationDetailsFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        showToast(R.string.error_loading_device_data);
+
+                        if (mCurrentSensorProgress != null)
+                            mCurrentSensorProgress.setVisibility(View.GONE);
                     }
 
                     @Override
                     public void onNext(Object o) {
-                        mCurrentSensorProgress.setVisibility(View.GONE);
-                        mSensorValue.setVisibility(View.VISIBLE);
-
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        mSensorValue.setText(SensorUtil.formatToUiValue(sensor, reading));
+                        if (mCurrentSensorProgress != null) {
+                            mCurrentSensorProgress.setVisibility(View.GONE);
+                            mSensorValue.setVisibility(View.VISIBLE);
+
+                            mSensorValue.setText(SensorUtil.formatToUiValue(sensor, reading));
+                        }
                     }
                 });
     }

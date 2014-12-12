@@ -69,6 +69,9 @@ public class GcmUtils {
                     if (mGcm == null)
                         mGcm = GoogleCloudMessaging.getInstance(context.getApplicationContext());
 
+                    if(Storage.loadGmsRegId() != null)
+                        mGcm.unregister();
+
                     String mRegId = mGcm.register(SENDER_ID);
                     msg = "Registration ID=" + mRegId;
 
@@ -103,7 +106,7 @@ public class GcmUtils {
      * @return registration ID, or empty string if there is no existing registration ID.
      */
     public static String getRegistrationId(Context context) {
-        String registrationId = Storage.loadGmsRegistrationId();
+        String registrationId = Storage.loadGmsRegId();
 
         if (registrationId == null) return null;
 

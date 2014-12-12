@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 
 import com.activeandroid.query.Delete;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -430,8 +431,16 @@ public class MainFragment extends WhatFragment {
                     public void onNext(List<TMWRule> rules) {
                         mRulesAdapter.clear();
                         mRulesAdapter.addAll(rules);
+                        mRulesAdapter.sort(new Comparator<TMWRule>() {
+                            @Override
+                            public int compare(TMWRule lhs, TMWRule rhs) {
+                                return Long.valueOf(lhs.modified).compareTo(rhs.modified);
+                            }
+                        });
 
                         refreshMenuItems();
+
+                        stopProgressBar();
 
                         if (mRulesAdapter.isEmpty()) {
                             showRulesWarning();
@@ -439,7 +448,6 @@ public class MainFragment extends WhatFragment {
                             toggleList(true);
                         }
 
-                        stopProgressBar();
                         mLoadingRules = false;
                     }
                 });

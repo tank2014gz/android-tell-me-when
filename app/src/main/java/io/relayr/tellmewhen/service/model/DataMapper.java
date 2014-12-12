@@ -14,7 +14,7 @@ public class DataMapper {
     public static DbRule toDbRule(TMWRule rule) {
         DbRule dbRule = new DbRule(Storage.loadUserId(), rule.transmitterId, rule.sensorId, rule.isNotifying);
 
-        DbRule.Details details = new DbRule.Details(rule.name);
+        DbRule.Details details = new DbRule.Details(rule.name, rule.modified);
         dbRule.setDetails(details);
 
         Condition condition = new Condition(rule.getSensorType().name().toLowerCase(),
@@ -22,7 +22,7 @@ public class DataMapper {
                 SensorUtil.scaleToServerData(rule.getSensorType(), rule.value));
         dbRule.setCondition(condition);
 
-        Notification notif = new Notification("gcm", Storage.loadGmsRegistrationId());
+        Notification notif = new Notification("gcm", Storage.loadGmsRegId());
         dbRule.addNotification(notif);
 
         return dbRule;
@@ -57,6 +57,8 @@ public class DataMapper {
         rule.operatorType = dbRule.getCondition().getOperator().ordinal();
 
         rule.value = SensorUtil.scaleToUiData(rule.getSensorType(), dbRule.getCondition().getValue());
+
+        rule.modified = dbRule.getDetails().getModified();
 
         return rule;
     }

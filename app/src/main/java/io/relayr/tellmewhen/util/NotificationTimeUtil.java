@@ -23,10 +23,16 @@ public class NotificationTimeUtil {
         today.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH),
                 today.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
 
+        long dayMillis = 24 * 60 * 60 * 1000;
+
         SimpleDateFormat sdf = new SimpleDateFormat(context.getString(R.string.notification_date_format));
 
-        return calendar.getTimeInMillis() > today.getTimeInMillis() ? context
-                .getString(R.string.today) : sdf.format(calendar.getTime());
+        if (calendar.getTimeInMillis() > today.getTimeInMillis())
+            return context.getString(R.string.today);
+        else if (calendar.getTimeInMillis() > today.getTimeInMillis() - dayMillis)
+            return context.getString(R.string.yesterday);
+        else
+            return sdf.format(calendar.getTime());
     }
 
     public static String getTime(TMWNotification notif) {

@@ -8,6 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -193,6 +194,8 @@ public class RuleValueView extends RelativeLayout {
     }
 
     private void loadDevice() {
+        mCurrentSensorProgress.setVisibility(View.VISIBLE);
+
         RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(Storage.getRule().transmitterId)
                 .subscribeOn(Schedulers.io())
@@ -204,7 +207,7 @@ public class RuleValueView extends RelativeLayout {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        showToast(R.string.error_loading_device_data);
                     }
 
                     @Override
@@ -213,7 +216,6 @@ public class RuleValueView extends RelativeLayout {
                             if (device.getModel().equals(mSensor.getModel()))
                                 subscribeForDeviceReadings(device);
                         }
-
                     }
                 });
     }
@@ -229,20 +231,30 @@ public class RuleValueView extends RelativeLayout {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        showToast(R.string.error_loading_device_data);
+
+                        if (mCurrentSensorProgress != null)
+                            mCurrentSensorProgress.setVisibility(View.GONE);
                     }
 
                     @Override
                     public void onNext(Object o) {
-                        mCurrentSensorProgress.setVisibility(View.GONE);
-                        mSensorValue.setVisibility(View.VISIBLE);
-
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        mSensorValue.setText(getContext().getString(R.string
-                                .current_reading) + ": " +
-                                SensorUtil.formatToUiValue(mSensor, reading));
+                        if (mCurrentSensorProgress != null) {
+                            mCurrentSensorProgress.setVisibility(View.GONE);
+                            mSensorValue.setVisibility(View.VISIBLE);
+
+                            mSensorValue.setText(getContext().getString(R.string
+                                    .current_reading) + ": " +
+                                    SensorUtil.formatToUiValue(mSensor, reading));
+                        }
                     }
                 });
+    }
+
+    private void showToast(int stringId) {
+        if (getContext() != null)
+            Toast.makeText(getContext(), getContext().getString(stringId), Toast.LENGTH_SHORT).show();
     }
 }

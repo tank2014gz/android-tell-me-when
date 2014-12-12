@@ -41,8 +41,6 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         if (api == null)
             api = getApi(context);
 
-        Log.e(TAG, "onReceive()");
-
         if (intent.getAction().equals(GcmIntentService.NOTIFICATION_ACTION_DELETE)) {
 
             GcmIntentService.pushedRules.clear();

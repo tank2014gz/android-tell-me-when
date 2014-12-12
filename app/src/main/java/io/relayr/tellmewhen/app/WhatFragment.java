@@ -58,11 +58,11 @@ public abstract class WhatFragment extends Fragment {
     }
 
     protected void showToast(int stringId) {
-        if(getActivity() != null)
-        Toast.makeText(getActivity(), getActivity().getString(stringId),   Toast.LENGTH_SHORT).show();
+        if (getActivity() != null)
+            Toast.makeText(getActivity(), getActivity().getString(stringId), Toast.LENGTH_SHORT).show();
     }
 
-    protected void inject(Object o){
+    protected void inject(Object o) {
         TellMeWhenApplication.objectGraph.inject(o);
     }
 

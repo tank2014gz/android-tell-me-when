@@ -144,12 +144,12 @@ public class GcmIntentService extends IntentService {
             SensorType sensorType = entry.getKey().getSensorType();
 
             String ruleName = entry.getKey().name;
-            if (ruleName.length() > 30)
-                ruleName = ruleName.substring(0, 27) + "...";
-            else
-                for (int i = 0; i < 30 - ruleName.length(); i++) {
-                    ruleName += ".";
+            if (ruleName.length() < 30) {
+                int empty = 30 - ruleName.length();
+                for (int i = 0; i < empty; i++) {
+                    ruleName += " ";
                 }
+            }
 
             String notificationText = getString(R.string.push_notification_value) + " " +
                     SensorUtil.scaleToUiData(sensorType, entry.getValue()) +
