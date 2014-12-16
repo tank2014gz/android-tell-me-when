@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,19 +26,18 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.timroes.android.listview.EnhancedListView;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
-import io.relayr.RelayrSdk;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.app.adapter.RulesAdapter;
 import io.relayr.tellmewhen.app.views.WarningNoNotificationsView;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
+import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.consts.LogUtil;
 import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.consts.FragmentName;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -167,7 +165,7 @@ public class MainFragment extends WhatFragment {
             mNotificationsAdapter.notifyDataSetChanged();
 
             List<Model> execute = new Delete().from(TMWNotification.class).execute();
-            RelayrSdk.logMessage(String.format(LogUtil.DELETE_ALL_NOTIFICATIONS,
+            LogUtil.logMessage(String.format(LogUtil.DELETE_ALL_NOTIFICATIONS,
                     execute != null ? "" + execute.size() : ""));
 
             showNoNotificationsWarning();
@@ -257,7 +255,7 @@ public class MainFragment extends WhatFragment {
                         toggleList(true);
 
                         mRulesAdapter.insert(item, position);
-                        mRulesAdapter.notifyDataSetChanged();
+                        mRulesAdapter.sortRules();
                     }
 
                     @Override
@@ -280,7 +278,7 @@ public class MainFragment extends WhatFragment {
                                         if (!status) {
                                             undo();
                                         } else {
-                                            RelayrSdk.logMessage(LogUtil.DELETE_RULE);
+                                            LogUtil.logMessage(LogUtil.DELETE_RULE);
                                             item.delete();
                                         }
                                     }
@@ -303,8 +301,6 @@ public class MainFragment extends WhatFragment {
     }
 
     private void toggleList(boolean rules) {
-        RelayrSdk.logMessage(rules ? LogUtil.VIEW_RULES : LogUtil.VIEW_NOTIFICATIONS);
-
         mWarningLayout.setVisibility(View.GONE);
 
         mRulesListView.setVisibility(rules ? View.VISIBLE : View.GONE);
@@ -332,7 +328,7 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void discard() {
-                        RelayrSdk.logMessage(LogUtil.DELETE_NOTIFICATION);
+                        LogUtil.logMessage(LogUtil.DELETE_NOTIFICATION);
                         item.delete();
                     }
                 };
@@ -446,12 +442,7 @@ public class MainFragment extends WhatFragment {
                     public void onNext(List<TMWRule> rules) {
                         mRulesAdapter.clear();
                         mRulesAdapter.addAll(rules);
-                        mRulesAdapter.sort(new Comparator<TMWRule>() {
-                            @Override
-                            public int compare(TMWRule lhs, TMWRule rhs) {
-                                return Long.valueOf(lhs.modified).compareTo(rhs.modified);
-                            }
-                        });
+                        mRulesAdapter.sortRules();
 
                         refreshMenuItems();
 

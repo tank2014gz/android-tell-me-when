@@ -1,6 +1,10 @@
 package io.relayr.tellmewhen.consts;
 
-public interface LogUtil {
+import io.relayr.RelayrSdk;
+
+public class LogUtil {
+
+    public static final String PREFIX = "TMW";
 
     public static final String CREATE_RULE_TRANSMITTER = "CREATE rule - transmitter screen";
     public static final String CREATE_RULE_SENSOR = "CREATE rule - sensor screen";
@@ -22,8 +26,10 @@ public interface LogUtil {
     public static final String DELETE_NOTIFICATION = "DELETED notification";
     public static final String DELETE_ALL_NOTIFICATIONS = "DELETED all %s notifications";
 
-    public static final String VIEW_RULES = "VIEW rules";
-    public static final String VIEW_NOTIFICATIONS = "VIEW notifications";
+    public static final String VIEW_APP = "VIEW app";
     public static final String VIEW_WITH_PUSH = "VIEW push notification";
 
+    public static void logMessage(String msg) {
+//        RelayrSdk.logMessage(PREFIX + ": " + msg);
+    }
 }

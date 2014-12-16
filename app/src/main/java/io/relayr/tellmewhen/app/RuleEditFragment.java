@@ -60,6 +60,8 @@ public class RuleEditFragment extends WhatFragment {
     private String mDeviceId;
     private TMWRule mRule;
 
+    private boolean saveError = false;
+
     public static RuleEditFragment newInstance() {
         return new RuleEditFragment();
     }
@@ -88,7 +90,7 @@ public class RuleEditFragment extends WhatFragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Storage.getRule().isNotifying = isChecked;
 
-                RelayrSdk.logMessage(LogUtil.EDIT_RULE_NOTIFYING);
+                LogUtil.logMessage(LogUtil.EDIT_RULE_NOTIFYING);
             }
         });
 
@@ -141,7 +143,8 @@ public class RuleEditFragment extends WhatFragment {
 
     @Override
     void onBackPressed() {
-        saveRule();
+        if (saveError) switchTo(FragmentName.MAIN);
+        else saveRule();
     }
 
     private void saveRule() {
@@ -155,12 +158,14 @@ public class RuleEditFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
+                        saveError = true;
                         mButtonDone.setEnabled(true);
                         showToast(R.string.error_saving_rule);
                     }
 
                     @Override
                     public void onNext(Boolean status) {
+                        saveError = false;
                         if (status) {
                             Storage.clearRuleData();
                             unSubscribe();

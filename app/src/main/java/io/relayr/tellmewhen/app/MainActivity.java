@@ -24,12 +24,12 @@ import io.relayr.model.Transmitter;
 import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.TellMeWhenApplication;
+import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.consts.LogUtil;
 import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.gcm.GcmUtils;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 import rx.Subscriber;
 import rx.Subscription;
@@ -66,13 +66,16 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         }
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
 
+        LogUtil.logMessage(LogUtil.VIEW_APP);
+
         if (getIntent() != null && getIntent().getStringExtra(GcmIntentService
                 .NOTIFICATION_ACTION_CLICK) != null)
-            RelayrSdk.logMessage(LogUtil.VIEW_WITH_PUSH);
+            LogUtil.logMessage(LogUtil.VIEW_WITH_PUSH);
 
         if (GcmIntentService.pushedRules != null)
             GcmIntentService.pushedRules.clear();

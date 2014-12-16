@@ -24,6 +24,7 @@ import io.relayr.tellmewhen.app.RuleValueEditFragment;
 import io.relayr.tellmewhen.app.SensorFragment;
 import io.relayr.tellmewhen.app.TransmitterFragment;
 import io.relayr.tellmewhen.app.WhatFragment;
+import io.relayr.tellmewhen.app.adapter.RulesAdapter;
 import io.relayr.tellmewhen.gcm.NotificationBroadcastReceiver;
 import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.service.RuleService;

@@ -40,7 +40,7 @@ public class RuleValueEditFragment extends WhatFragment {
                 Storage.getRule().value = value;
                 Storage.getRule().operatorType = mCurrentOperator.ordinal();
 
-                RelayrSdk.logMessage(LogUtil.EDIT_RULE_FINISH);
+                LogUtil.logMessage(LogUtil.EDIT_RULE_FINISH);
 
                 switchTo(FragmentName.RULE_EDIT);
             }
@@ -48,7 +48,7 @@ public class RuleValueEditFragment extends WhatFragment {
 
         view.setButtonText(R.string.button_done);
 
-        RelayrSdk.logMessage(LogUtil.EDIT_RULE_THRESHOLD);
+        LogUtil.logMessage(LogUtil.EDIT_RULE_THRESHOLD);
 
         return view;
     }
@@ -58,7 +58,7 @@ public class RuleValueEditFragment extends WhatFragment {
         Storage.getRule().sensorId = Storage.getOriginalSensor().first;
         Storage.getRule().sensorType = Storage.getOriginalSensor().second.ordinal();
 
-        RelayrSdk.logMessage(LogUtil.EDIT_RULE_CANCEL);
+        LogUtil.logMessage(LogUtil.EDIT_RULE_CANCEL);
 
         switchTo(FragmentName.RULE_EDIT);
     }

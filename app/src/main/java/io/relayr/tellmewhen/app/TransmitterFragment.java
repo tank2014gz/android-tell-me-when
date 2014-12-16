@@ -37,7 +37,7 @@ public class TransmitterFragment extends WhatFragment {
         mTransmitterAdapter = new TransmitterAdapter(this.getActivity());
         mListView.setAdapter(mTransmitterAdapter);
 
-        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_TRANSMITTER :
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_TRANSMITTER :
                 LogUtil.CREATE_RULE_TRANSMITTER);
 
         return view;
@@ -58,7 +58,7 @@ public class TransmitterFragment extends WhatFragment {
         Storage.getRule().transmitterName = mTransmitterAdapter.getItem(position).getName();
         Storage.getRule().transmitterType = "Relayr WunderBar";
 
-        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_FINISH :
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_FINISH :
                 LogUtil.CREATE_RULE_FINISH);
 
         switchToEdit(FragmentName.SENSOR);
@@ -66,7 +66,7 @@ public class TransmitterFragment extends WhatFragment {
 
     @Override
     void onBackPressed() {
-        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
                 LogUtil.CREATE_RULE_CANCEL);
 
         switchToEdit(FragmentName.MAIN);

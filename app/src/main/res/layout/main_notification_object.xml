@@ -17,6 +17,8 @@
         android:textSize="@dimen/default_object_title_text_size"
         android:gravity="center_vertical"
         android:textAllCaps="true"
+        android:singleLine="true"
+        android:paddingRight="@dimen/default_object_height"
         style="@style/BoldText"/>
 
     <io.relayr.commons.widget.CustomTextView

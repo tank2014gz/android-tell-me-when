@@ -76,5 +76,6 @@
     <string name="error_loading_device_data">Fehler beim Laden der Daten</string>
 
     <string name="unknown">Unbekannte Regel</string>
+    <string name="no_active_devices">No active devices. Please check your WunderBar</string>
 
 </resources>

@@ -48,7 +48,7 @@ public class SensorFragment extends WhatFragment {
 
         mListView.setAdapter(new SensorAdapter(this.getActivity()));
 
-        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_SENSOR :
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_SENSOR :
                 LogUtil.CREATE_RULE_SENSOR);
 
         return view;
@@ -76,7 +76,7 @@ public class SensorFragment extends WhatFragment {
 
     @Override
     void onBackPressed() {
-        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
                 LogUtil.CREATE_RULE_CANCEL);
 
         switchToEdit(FragmentName.TRANS);
@@ -119,7 +119,7 @@ public class SensorFragment extends WhatFragment {
                 Storage.getRule().sensorType = mSensorType.ordinal();
                 Storage.getRule().sensorId = transmitter.id;
 
-                RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_FINISH :
+                LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_FINISH :
                         LogUtil.CREATE_RULE_FINISH);
 
                 if (Storage.isRuleEditing()) switchTo(FragmentName.RULE_VALUE_EDIT);

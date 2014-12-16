@@ -57,11 +57,15 @@ public class RuleServiceImpl implements RuleService {
                 .subscribeOn(Schedulers.io())
                 .map(new Func1<DbStatus, Boolean>() {
                     @Override
-                    public Boolean call(DbStatus status) {
-                        rule.drRev = status.getRev();
-                        rule.save();
+                    public Boolean call(DbStatus dbStatus) {
+                        boolean status = dbStatus.getOk().toLowerCase().equals("true");
 
-                        return status.getOk().toLowerCase().equals("true");
+                        if (status) {
+                            rule.drRev = dbStatus.getRev();
+                            rule.save();
+                        }
+
+                        return status;
                     }
                 });
     }
@@ -72,10 +76,12 @@ public class RuleServiceImpl implements RuleService {
                 .subscribeOn(Schedulers.io())
                 .map(new Func1<DbStatus, Boolean>() {
                     @Override
-                    public Boolean call(DbStatus status) {
-                        new Delete().from(TMWNotification.class).where("ruleId = ?", rule.dbId).execute();
+                    public Boolean call(DbStatus dbStatus) {
+                        boolean status = dbStatus.getOk().toLowerCase().equals("true");
+                        if (status)
+                            new Delete().from(TMWNotification.class).where("ruleId = ?", rule.dbId).execute();
 
-                        return status.getOk().toLowerCase().equals("true");
+                        return status;
                     }
                 });
     }
@@ -136,7 +142,7 @@ public class RuleServiceImpl implements RuleService {
 
                     @Override
                     public void onNext(DbStatus dbStatus) {
-                        Log.e("RuleService", "Updated rule: " + rule.getDetails().getName());
+                        Log.d("RuleService", "Updated rule: " + rule.getDetails().getName());
                     }
                 });
     }

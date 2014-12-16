@@ -14,8 +14,8 @@
     <ImageView
         android:id="@+id/object_image"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="@dimen/default_object_padding"/>
 
@@ -32,6 +32,8 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/default_object_title_text_size"
             android:textAllCaps="true"
+            android:singleLine="true"
+            android:layout_marginRight="@dimen/default_object_padding"
             style="@style/BoldText"/>
 
         <io.relayr.commons.widget.CustomTextView

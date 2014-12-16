@@ -146,11 +146,13 @@ public class GcmIntentService extends IntentService {
             SensorType sensorType = entry.getKey().first;
 
             String ruleName = entry.getKey().second;
-            if (ruleName.length() < 30) {
-                int empty = 30 - ruleName.length();
+            if (ruleName.length() <= 20) {
+                int empty = 20 - ruleName.length();
                 for (int i = 0; i < empty; i++) {
                     ruleName += " ";
                 }
+            } else {
+                ruleName = entry.getKey().second.substring(0, 20);
             }
 
             String notificationText = getString(R.string.push_notification_value) + " " +

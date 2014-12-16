@@ -44,7 +44,7 @@ public class RuleNameFragment extends WhatFragment {
         ButterKnife.inject(this, view);
         inject(this);
 
-        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_NAME :
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_NAME :
                 LogUtil.CREATE_RULE_NAME);
 
         return view;
@@ -87,7 +87,7 @@ public class RuleNameFragment extends WhatFragment {
             Storage.getRule().name = mRuleName.getText().toString();
 
             if (Storage.isRuleEditing()) {
-                RelayrSdk.logMessage(LogUtil.EDIT_RULE_FINISH);
+                LogUtil.logMessage(LogUtil.EDIT_RULE_FINISH);
                 switchToEdit(FragmentName.MAIN);
             } else {
                 ruleService.createRule(Storage.getRule())
@@ -107,7 +107,7 @@ public class RuleNameFragment extends WhatFragment {
                             @Override
                             public void onNext(Boolean status) {
                                 if (status) {
-                                    RelayrSdk.logMessage(String.format(LogUtil
+                                    LogUtil.logMessage(String.format(LogUtil
                                                     .CREATE_RULE_FINISHED,
                                             Storage.getRule().getSensorType().name(),
                                             SensorUtil.buildRuleValue(Storage.getRule())));
@@ -126,7 +126,7 @@ public class RuleNameFragment extends WhatFragment {
 
     @Override
     void onBackPressed() {
-        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
                 LogUtil.CREATE_RULE_CANCEL);
 
         switchToEdit(FragmentName.RULE_VALUE_CREATE);

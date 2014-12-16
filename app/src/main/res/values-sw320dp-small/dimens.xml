@@ -11,14 +11,14 @@
 
     <dimen name="default_object_padding">8dp</dimen>
     <dimen name="default_object_height">65dp</dimen>
-    <dimen name="default_object_title_text_size">16sp</dimen>
-    <dimen name="default_object_subtitle_text_size">16sp</dimen>
-    <dimen name="default_object_small_subtitle_text_size">14sp</dimen>
+    <dimen name="default_object_title_text_size">15sp</dimen>
+    <dimen name="default_object_subtitle_text_size">15sp</dimen>
+    <dimen name="default_object_small_subtitle_text_size">13sp</dimen>
 
     <dimen name="notification_date_text_size">14sp</dimen>
     <dimen name="notification_time_text_size">16sp</dimen>
 
-    <dimen name="button_radius">50dp</dimen>
+    <dimen name="rule_switch_size">40dp</dimen>
     <dimen name="button_done_padding">8dp</dimen>
     <dimen name="button_done_margin">4dp</dimen>
     <dimen name="button_done_text_size">16sp</dimen>
