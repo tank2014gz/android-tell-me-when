@@ -37,20 +37,21 @@ public class NotificationsAdapter extends ArrayAdapter<TMWNotification> {
         }
 
         TMWNotification item = getItem(position);
-        TMWRule rule = new Select().from(TMWRule.class).where("dbId = ?", item.getRuleId()).executeSingle();
+        TMWRule rule = new Select().from(TMWRule.class).where("dbId = ?",
+                item.ruleId).executeSingle();
 
         if (rule != null) {
             holder.name.setText(rule.name);
             holder.value.setText(SensorUtil.buildRuleValue(rule));
             holder.info.setText(getContext().getString(R.string.notif_triggering_value) + ": " +
                     SensorUtil.buildNotificationValue(rule, item));
-
-            holder.date.setText(NotificationTimeUtil.getDate(getContext(), item));
-            holder.time.setText(NotificationTimeUtil.getTime(item));
         } else {
-            item.delete();
-            notifyDataSetChanged();
+            holder.name.setText(getContext().getString(R.string.unknown));
+            holder.info.setText(getContext().getString(R.string.notif_triggering_value) + ": " + item.value);
         }
+
+        holder.date.setText(NotificationTimeUtil.getDate(getContext(), item));
+        holder.time.setText(NotificationTimeUtil.getTime(item));
 
         return view;
     }

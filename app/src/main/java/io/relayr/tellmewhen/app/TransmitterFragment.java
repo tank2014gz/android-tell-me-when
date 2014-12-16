@@ -9,10 +9,12 @@ import android.widget.ListView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
+import io.relayr.RelayrSdk;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.adapter.TransmitterAdapter;
+import io.relayr.tellmewhen.consts.LogUtil;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
+import io.relayr.tellmewhen.consts.FragmentName;
 
 public class TransmitterFragment extends WhatFragment {
 
@@ -35,6 +37,9 @@ public class TransmitterFragment extends WhatFragment {
         mTransmitterAdapter = new TransmitterAdapter(this.getActivity());
         mListView.setAdapter(mTransmitterAdapter);
 
+        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_TRANSMITTER :
+                LogUtil.CREATE_RULE_TRANSMITTER);
+
         return view;
     }
 
@@ -47,23 +52,23 @@ public class TransmitterFragment extends WhatFragment {
         mTransmitterAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-
-    }
-
     @OnItemClick(R.id.list_view)
     public void onItemClick(int position) {
         Storage.getRule().transmitterId = mTransmitterAdapter.getItem(position).id;
         Storage.getRule().transmitterName = mTransmitterAdapter.getItem(position).getName();
         Storage.getRule().transmitterType = "Relayr WunderBar";
 
+        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_FINISH :
+                LogUtil.CREATE_RULE_FINISH);
+
         switchToEdit(FragmentName.SENSOR);
     }
 
     @Override
     void onBackPressed() {
+        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
+                LogUtil.CREATE_RULE_CANCEL);
+
         switchToEdit(FragmentName.MAIN);
     }
 

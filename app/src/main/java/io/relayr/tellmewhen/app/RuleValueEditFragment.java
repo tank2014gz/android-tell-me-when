@@ -5,12 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import io.relayr.RelayrSdk;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.views.RuleValueView;
+import io.relayr.tellmewhen.consts.LogUtil;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
-import io.relayr.tellmewhen.util.OperatorType;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.consts.OperatorType;
 
 public class RuleValueEditFragment extends WhatFragment {
 
@@ -26,12 +28,11 @@ public class RuleValueEditFragment extends WhatFragment {
 
         RuleValueView view;
         if (rule.getSensorType().equals(Storage.getOriginalSensor().second))
-            view = new RuleValueView(getActivity(), rule.getSensorType(),
+            view = new RuleValueView(getActivity(), false, rule.getSensorType(),
                     rule.getOperatorType(), rule.value);
         else
-            view = new RuleValueView(getActivity(), rule.getSensorType(),
+            view = new RuleValueView(getActivity(),false,  rule.getSensorType(),
                     OperatorType.GREATER, null);
-
 
         view.setOnDoneClickListener(new RuleValueView.OnDoneClickListener() {
             @Override
@@ -39,11 +40,15 @@ public class RuleValueEditFragment extends WhatFragment {
                 Storage.getRule().value = value;
                 Storage.getRule().operatorType = mCurrentOperator.ordinal();
 
+                RelayrSdk.logMessage(LogUtil.EDIT_RULE_FINISH);
+
                 switchTo(FragmentName.RULE_EDIT);
             }
         });
 
         view.setButtonText(R.string.button_done);
+
+        RelayrSdk.logMessage(LogUtil.EDIT_RULE_THRESHOLD);
 
         return view;
     }
@@ -52,6 +57,8 @@ public class RuleValueEditFragment extends WhatFragment {
     void onBackPressed() {
         Storage.getRule().sensorId = Storage.getOriginalSensor().first;
         Storage.getRule().sensorType = Storage.getOriginalSensor().second.ordinal();
+
+        RelayrSdk.logMessage(LogUtil.EDIT_RULE_CANCEL);
 
         switchTo(FragmentName.RULE_EDIT);
     }

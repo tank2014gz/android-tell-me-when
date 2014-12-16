@@ -4,8 +4,8 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
-import io.relayr.tellmewhen.util.OperatorType;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.OperatorType;
+import io.relayr.tellmewhen.consts.SensorType;
 
 @Table(name = "Rule")
 public class TMWRule extends Model {

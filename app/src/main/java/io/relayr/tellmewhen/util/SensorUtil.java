@@ -3,8 +3,6 @@ package io.relayr.tellmewhen.util;
 import android.content.Context;
 import android.util.Pair;
 
-import com.google.gson.Gson;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +12,7 @@ import io.relayr.model.Reading;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
+import io.relayr.tellmewhen.consts.SensorType;
 
 public class SensorUtil {
 
@@ -55,7 +54,7 @@ public class SensorUtil {
     }
 
     public static int getIcon(Context context, SensorType type) {
-        return context.getResources().getIdentifier("ms_" + SensorUtil.getTitle(type),
+        return context.getResources().getIdentifier("ms_" + type.name().toLowerCase(),
                 "drawable", context.getPackageName());
     }
 
@@ -69,7 +68,7 @@ public class SensorUtil {
     public static String buildNotificationValue(TMWRule rule, TMWNotification notif) {
         if (rule == null || notif == null) return "null";
         return SensorUtil.scaleToUiData(rule.getSensorType(),
-                notif.getValue()) + rule.getSensorType().getUnit();
+                notif.value) + rule.getSensorType().getUnit();
     }
 
     public static String formatToUiValue(SensorType type, Reading r) {

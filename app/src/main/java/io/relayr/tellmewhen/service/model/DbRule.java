@@ -6,8 +6,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.relayr.tellmewhen.util.OperatorType;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.OperatorType;
+import io.relayr.tellmewhen.consts.SensorType;
 
 public class DbRule implements Serializable {
 

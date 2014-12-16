@@ -43,7 +43,6 @@ public class RuleServiceImpl implements RuleService {
     public Observable<Boolean> createRule(final TMWRule rule) {
         return ruleApi.createRule(DataMapper.toDbRule(rule))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbStatus, Boolean>() {
                     @Override
                     public Boolean call(DbStatus status) {
@@ -56,7 +55,6 @@ public class RuleServiceImpl implements RuleService {
     public Observable<Boolean> updateRule(final TMWRule rule) {
         return ruleApi.updateRule(rule.dbId, rule.drRev, DataMapper.toDbRule(rule))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbStatus, Boolean>() {
                     @Override
                     public Boolean call(DbStatus status) {
@@ -72,7 +70,6 @@ public class RuleServiceImpl implements RuleService {
     public Observable<Boolean> deleteRule(final TMWRule rule) {
         return ruleApi.deleteRule(rule.dbId, rule.drRev)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbStatus, Boolean>() {
                     @Override
                     public Boolean call(DbStatus status) {
@@ -87,7 +84,6 @@ public class RuleServiceImpl implements RuleService {
     public Observable<List<TMWRule>> loadRemoteRules() {
         return ruleApi.getAllRules(new DbSearch(Storage.loadUserId()))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbDocuments<DbRule>, List<TMWRule>>() {
                     @Override
                     public List<TMWRule> call(DbDocuments<DbRule> docs) {
@@ -128,7 +124,6 @@ public class RuleServiceImpl implements RuleService {
     private void updateRuleNotifications(final DbRule rule) {
         ruleApi.updateRule(rule.getId(), rule.getRev(), rule)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<DbStatus>() {
                     @Override
                     public void onCompleted() {

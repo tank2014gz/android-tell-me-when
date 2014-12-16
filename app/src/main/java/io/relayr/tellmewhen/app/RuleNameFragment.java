@@ -15,9 +15,12 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import io.relayr.RelayrSdk;
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.consts.LogUtil;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -40,6 +43,9 @@ public class RuleNameFragment extends WhatFragment {
 
         ButterKnife.inject(this, view);
         inject(this);
+
+        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_NAME :
+                LogUtil.CREATE_RULE_NAME);
 
         return view;
     }
@@ -80,34 +86,49 @@ public class RuleNameFragment extends WhatFragment {
         if (isNameOk()) {
             Storage.getRule().name = mRuleName.getText().toString();
 
-            if (Storage.isRuleEditing()) switchToEdit(FragmentName.MAIN);
-            else ruleService.createRule(Storage.getRule())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Subscriber<Boolean>() {
-                        @Override
-                        public void onCompleted() {
-                        }
+            if (Storage.isRuleEditing()) {
+                RelayrSdk.logMessage(LogUtil.EDIT_RULE_FINISH);
+                switchToEdit(FragmentName.MAIN);
+            } else {
+                ruleService.createRule(Storage.getRule())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<Boolean>() {
+                            @Override
+                            public void onCompleted() {
+                            }
 
-                        @Override
-                        public void onError(Throwable e) {
-                            button.setEnabled(true);
-                            showToast(R.string.error_saving_rule);
-                        }
+                            @Override
+                            public void onError(Throwable e) {
+                                button.setEnabled(true);
+                                showToast(R.string.error_saving_rule);
+                            }
 
-                        @Override
-                        public void onNext(Boolean status) {
-                            if (status) switchToEdit(FragmentName.MAIN);
-                            else onError(new Throwable());
+                            @Override
+                            public void onNext(Boolean status) {
+                                if (status) {
+                                    RelayrSdk.logMessage(String.format(LogUtil
+                                                    .CREATE_RULE_FINISHED,
+                                            Storage.getRule().getSensorType().name(),
+                                            SensorUtil.buildRuleValue(Storage.getRule())));
 
-                            button.setEnabled(true);
-                        }
-                    });
+                                    switchToEdit(FragmentName.MAIN);
+                                } else {
+                                    onError(new Throwable());
+                                }
+
+                                button.setEnabled(true);
+                            }
+                        });
+            }
         }
     }
 
     @Override
     void onBackPressed() {
+        RelayrSdk.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
+                LogUtil.CREATE_RULE_CANCEL);
+
         switchToEdit(FragmentName.RULE_VALUE_CREATE);
     }
 

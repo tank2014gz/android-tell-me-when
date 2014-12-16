@@ -12,7 +12,7 @@ import java.util.TimeZone;
 import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.SensorType;
 
 public class Storage {
 

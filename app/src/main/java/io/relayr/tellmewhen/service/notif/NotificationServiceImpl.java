@@ -12,7 +12,6 @@ import javax.inject.Named;
 
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.model.TMWNotification;
-import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.service.model.DataMapper;
 import io.relayr.tellmewhen.service.model.DbBulkDelete;
 import io.relayr.tellmewhen.service.model.DbSearch;
@@ -21,7 +20,6 @@ import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.service.model.DbNotification;
 import io.relayr.tellmewhen.service.model.DbDocuments;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.SensorType;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -65,12 +63,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Observable<Integer> loadRemoteNotifications() {
-        final List<String> existingRules = new ArrayList<>();
-        List<TMWRule> rules = new Select().from(TMWRule.class).execute();
-        for (TMWRule rule : rules) {
-            existingRules.add(rule.dbId);
-        }
-
         return notificationApi.getAllNotifications(new DbSearch(Storage.loadUserId()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -79,8 +71,7 @@ public class NotificationServiceImpl implements NotificationService {
                     public Integer call(DbDocuments<DbNotification> docs) {
                         if (!docs.getDocuments().isEmpty()) {
                             for (DbNotification notif : docs.getDocuments()) {
-                                if (existingRules.contains(notif.getRuleId()))
-                                    DataMapper.toRuleNotification(notif).save();
+                                DataMapper.toRuleNotification(notif).save();
                             }
 
                             deleteNotifications(docs.getDocuments());

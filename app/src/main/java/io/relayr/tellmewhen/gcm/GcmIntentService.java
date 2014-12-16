@@ -30,6 +30,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.util.Pair;
 
 import com.activeandroid.query.Select;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -41,7 +42,7 @@ import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.MainActivity;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 
 import static android.support.v4.app.NotificationCompat.Builder;
@@ -57,11 +58,11 @@ import static android.support.v4.app.NotificationCompat.InboxStyle;
 public class GcmIntentService extends IntentService {
 
     public static final String NOTIFICATION_ACTION_DELETE = "tmw_notification_canceled";
-    public static final String NOTIFICATION_ACTION_CLICK = "tmw_notification_clicked";
+    public static final String NOTIFICATION_ACTION_CLICK = "tmw_notification_click";
 
     public static final int TMW_NOTIFICATION_ID = 34560;
 
-    public static Map<TMWRule, Float> pushedRules = new HashMap<>();
+    public static Map<Pair<SensorType, String>, Float> pushedRules = new HashMap<>();
 
     public GcmIntentService() {
         super(GcmIntentService.class.getSimpleName());
@@ -113,7 +114,7 @@ public class GcmIntentService extends IntentService {
             Log.e(GcmIntentService.class.getSimpleName(), e.getMessage());
         }
 
-        pushedRules.put(rule, notificationValue);
+        pushedRules.put(new Pair<>(rule.getSensorType(), rule.name), notificationValue);
 
         String title = pushedRules.size() + " " + (pushedRules.size() > 1 ? getString(R.string
                 .push_notification_title) : getString(R.string.push_notification_title_one_rule));
@@ -127,6 +128,7 @@ public class GcmIntentService extends IntentService {
                 .setDeleteIntent(createDeleteIntent())
                 .setSmallIcon(R.drawable.icon_notifications)
                 .setContentTitle(spanTitle)
+                .setContentText(getString(R.string.push_notification_summary))
                 .setAutoCancel(true)
                 .setStyle(prepareBigNotificationDetails(spanTitle))
                 .build();
@@ -140,10 +142,10 @@ public class GcmIntentService extends IntentService {
         NotificationCompat.InboxStyle result = new InboxStyle();
         result.setBigContentTitle(spanTitle);
 
-        for (Map.Entry<TMWRule, Float> entry : pushedRules.entrySet()) {
-            SensorType sensorType = entry.getKey().getSensorType();
+        for (Map.Entry<Pair<SensorType, String>, Float> entry : pushedRules.entrySet()) {
+            SensorType sensorType = entry.getKey().first;
 
-            String ruleName = entry.getKey().name;
+            String ruleName = entry.getKey().second;
             if (ruleName.length() < 30) {
                 int empty = 30 - ruleName.length();
                 for (int i = 0; i < empty; i++) {
@@ -185,7 +187,7 @@ public class GcmIntentService extends IntentService {
 
     private PendingIntent createContentIntent() {
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(NOTIFICATION_ACTION_CLICK, "clicked");
+        intent.putExtra(NOTIFICATION_ACTION_CLICK, NOTIFICATION_ACTION_CLICK);
         return PendingIntent.getActivity(this, 0, intent, 0);
     }
 

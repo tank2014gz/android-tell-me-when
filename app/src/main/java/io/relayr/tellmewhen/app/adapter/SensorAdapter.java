@@ -11,7 +11,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 
 public class SensorAdapter extends ArrayAdapter<SensorType> {

@@ -16,7 +16,7 @@ import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
+import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 
 public abstract class WhatFragment extends Fragment {

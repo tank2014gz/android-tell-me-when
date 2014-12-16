@@ -22,10 +22,11 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.consts.LogUtil;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
@@ -48,10 +49,15 @@ public class RuleEditFragment extends WhatFragment {
     @InjectView(R.id.ref_rule_value) TextView mRuleValue;
 
     @InjectView(R.id.sensor_value) TextView mSensorValue;
+
     @InjectView(R.id.notif_details_current_sensor_loading) ProgressBar mCurrentSensorProgress;
 
+    @InjectView(R.id.button_done) TextView mButtonDone;
+
     private Subscription mWebSocketSubscription = Subscriptions.empty();
-    private String mSensorDeviceId;
+    private Subscription mDeviceSubscription = Subscriptions.empty();
+
+    private String mDeviceId;
     private TMWRule mRule;
 
     public static RuleEditFragment newInstance() {
@@ -81,6 +87,8 @@ public class RuleEditFragment extends WhatFragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Storage.getRule().isNotifying = isChecked;
+
+                RelayrSdk.logMessage(LogUtil.EDIT_RULE_NOTIFYING);
             }
         });
 
@@ -104,44 +112,11 @@ public class RuleEditFragment extends WhatFragment {
         loadDevice(mRule.transmitterId, mRule.getSensorType());
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
-        if (mSensorDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mSensorDeviceId);
-    }
-
     @OnClick(R.id.button_done)
-    public void onDoneClicked(final View button) {
-        button.setEnabled(false);
+    public void onDoneClicked() {
+        mButtonDone.setEnabled(false);
 
-        ruleService.updateRule(Storage.getRule())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Boolean>() {
-                    @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        button.setEnabled(true);
-                        showToast(R.string.error_saving_rule);
-                    }
-
-                    @Override
-                    public void onNext(Boolean status) {
-                        if (status) {
-                            Storage.clearRuleData();
-                            switchTo(FragmentName.MAIN);
-                        } else {
-                            onError(new Throwable());
-                        }
-
-                        button.setEnabled(true);
-                    }
-                });
+        saveRule();
     }
 
     @OnClick(R.id.ref_rule_name_edit)
@@ -166,11 +141,47 @@ public class RuleEditFragment extends WhatFragment {
 
     @Override
     void onBackPressed() {
-        switchTo(FragmentName.MAIN);
+        saveRule();
+    }
+
+    private void saveRule() {
+        ruleService.updateRule(Storage.getRule())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Boolean>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        mButtonDone.setEnabled(true);
+                        showToast(R.string.error_saving_rule);
+                    }
+
+                    @Override
+                    public void onNext(Boolean status) {
+                        if (status) {
+                            Storage.clearRuleData();
+                            unSubscribe();
+                            switchTo(FragmentName.MAIN);
+                        } else {
+                            onError(new Throwable());
+                        }
+
+                        mButtonDone.setEnabled(true);
+                    }
+                });
+    }
+
+    private void unSubscribe() {
+        if (!mDeviceSubscription.isUnsubscribed()) mDeviceSubscription.unsubscribe();
+        if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
+        if (mDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mDeviceId);
     }
 
     private void loadDevice(String transmitterId, final SensorType sensor) {
-        RelayrSdk.getRelayrApi()
+        mDeviceSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(transmitterId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -187,16 +198,17 @@ public class RuleEditFragment extends WhatFragment {
                     @Override
                     public void onNext(List<TransmitterDevice> transmitterDevices) {
                         for (TransmitterDevice device : transmitterDevices) {
-                            if (device.getModel().equals(sensor.getModel()))
+                            if (device.getModel().equals(sensor.getModel())) {
                                 subscribeForDeviceReadings(device, sensor);
+                                break;
+                            }
                         }
-
                     }
                 });
     }
 
     private void subscribeForDeviceReadings(TransmitterDevice device, final SensorType sensor) {
-        mSensorDeviceId = device.id;
+        mDeviceId = device.id;
         mWebSocketSubscription = RelayrSdk.getWebSocketClient()
                 .subscribe(device, new Subscriber<Object>() {
 

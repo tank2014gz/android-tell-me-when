@@ -1,5 +1,7 @@
 package io.relayr.tellmewhen.util;
 
+import io.relayr.tellmewhen.consts.FragmentName;
+
 public class WhenEvents {
 
     public static class ShowFragment {

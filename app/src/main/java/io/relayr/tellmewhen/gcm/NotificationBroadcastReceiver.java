@@ -3,7 +3,6 @@ package io.relayr.tellmewhen.gcm;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.activeandroid.query.Select;
@@ -21,12 +20,10 @@ import io.relayr.tellmewhen.service.model.DbSearch;
 import io.relayr.tellmewhen.service.model.DbStatus;
 import io.relayr.tellmewhen.service.notif.NotificationApi;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.SensorType;
 import retrofit.Endpoint;
 import retrofit.Endpoints;
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 

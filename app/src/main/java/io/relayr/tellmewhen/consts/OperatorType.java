@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen.util;
+package io.relayr.tellmewhen.consts;
 
 import java.io.Serializable;
 

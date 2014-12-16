@@ -7,14 +7,14 @@
     <string name="unsuccessfully_logged_in">There was a problem in the log in.</string>
     <string name="err_loading_user_data">Oops! Loading user data failed</string>
 
-    <string name="warning_onboard_title">onboard wunderbar</string>
+    <string name="warning_onboard_title">Onboard WunderBar</string>
     <string name="warning_onboard_text_top">Looks like you have no WunderBars on your account.</string>
-    <string name="warning_onboard_text_bottom">Please onboard one using the onboarding/manager app</string>
+    <string name="warning_onboard_text_bottom">Please onboard one using the Onboarding/Manager app</string>
     <string name="warning_onboard_btn_text">onboarding app</string>
-    <string name="warning_no_rules_title">no rules yet</string>
-    <string name="warning_no_rules_text">Create rules to get notifications from your WunderBar sensor</string>
+    <string name="warning_no_rules_title">No rules created</string>
+    <string name="warning_no_rules_text">Create rules to get notifications from your WunderBar sensors</string>
     <string name="warn_no_rules_btn">create rule</string>
-    <string name="warning_reachability_text">Couldn\'t reach relayr cloud. Please make sure you are connected to the Internet.</string>
+    <string name="warning_reachability_text">Couldn\'t reach the relayr cloud. Please make sure you are connected to the Internet.</string>
     <string name="warning_reachability_title">relayr</string>
     <string name="warning_no_notif_text">Notifications will be listed here</string>
     <string name="warning_no_notif_title">No new notifications</string>
@@ -23,9 +23,9 @@
     <string name="operator_greater"><![CDATA[>]]></string>
 
     <string name="nf_rule_hint">rule name</string>
-    <string name="nf_rule_name_empty">Please set name for your rule.</string>
+    <string name="nf_rule_name_empty">Please set name for your rule</string>
 
-    <string name="ref_get_notifications">Notifications</string>
+    <string name="ref_get_notifications">Notification</string>
 
     <string name="measurement_temperature">temperature</string>
     <string name="measurement_humidity">humidity</string>
@@ -43,7 +43,7 @@
     <string name="title_notif_details">notification details</string>
 
     <string name="button_done">done</string>
-    <string name="operator_less_text">less than</string>
+    <string name="operator_less_text">lower than</string>
     <string name="operator_greater_text">greater than</string>
 
     <string name="menu_log_out">log out</string>
@@ -54,25 +54,28 @@
     <string name="error_saving_rule">Rule can\'t be saved. Please try again.</string>
     <string name="error_loading_transmitters">Error loading transmitters</string>
     <string name="error_loading_devices">Error loading sensor devices</string>
-    <string name="error_loading_rules">Error while loading rules</string>
+    <string name="error_loading_rules">Error loading rules</string>
     <string name="error_loading_notifications">Error loading notifications</string>
     <string name="today">Today</string>
-    <string name="please_open_app">Open application to see latest notifications</string>
+    <string name="please_open_app">Open the application to see your latest notifications</string>
     <string name="current_reading">Current sensor value</string>
 
     <string name="notif_details_rule">Rule</string>
-    <string name="notif_details_treshold_timestamp">Time when threshold met</string>
+    <string name="notif_details_treshold_timestamp">Timestamp</string>
     <string name="notif_details_current_value">Current sensor value</string>
     <string name="notif_triggering_value">Value</string>
     <string name="notification_date_format">dd.MM.yyyy</string>
     <string name="on">on</string>
     <string name="off">off</string>
 
-    <string name="push_notification_summary">Tap for more details.</string>
+    <string name="push_notification_summary">Tap for more details</string>
     <string name="push_notification_title">"rules triggered"</string>
     <string name="push_notification_title_one_rule">rule triggered</string>
     <string name="push_notification_value">value</string>
     <string name="yesterday">Yesterday</string>
     <string name="error_loading_device_data">Error while loading data</string>
+
+    <string name="unknown">Unknown rule</string>
+    <string name="no_active_devices">No active devices. Please check your WunderBar</string>
 
 </resources>

@@ -22,8 +22,8 @@ import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.OperatorType;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.OperatorType;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
@@ -32,8 +32,6 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
 public class RuleValueView extends RelativeLayout {
-
-    private String mSensorDeviceId;
 
     public interface OnDoneClickListener {
         public void onDoneClicked(float progress, OperatorType mCurrentOperator);
@@ -62,15 +60,21 @@ public class RuleValueView extends RelativeLayout {
     private int total;
     private String unit;
 
+    private String mDeviceId;
+
+    private boolean mUnSubscribe;
     private OperatorType mOperator;
     private SensorType mSensor;
     private Float mValue;
 
     private Subscription mWebSocketSubscription = Subscriptions.empty();
+    private Subscription mDeviceSubscription = Subscriptions.empty();
 
-    public RuleValueView(Context context, SensorType sensor, OperatorType operator, Float value) {
+    public RuleValueView(Context context, boolean unSubscribe, SensorType sensor,
+                         OperatorType operator, Float value) {
         this(context, null);
 
+        this.mUnSubscribe = unSubscribe;
         this.mSensor = sensor;
         this.mOperator = operator;
         this.mValue = value;
@@ -105,8 +109,11 @@ public class RuleValueView extends RelativeLayout {
 
         ButterKnife.reset(this);
 
-        if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
-        if (mSensorDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mSensorDeviceId);
+        if (mUnSubscribe) {
+            if (!mDeviceSubscription.isUnsubscribed()) mDeviceSubscription.unsubscribe();
+            if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
+            if (mDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mDeviceId);
+        }
     }
 
     @OnClick(R.id.button_done)
@@ -196,7 +203,9 @@ public class RuleValueView extends RelativeLayout {
     private void loadDevice() {
         mCurrentSensorProgress.setVisibility(View.VISIBLE);
 
-        RelayrSdk.getRelayrApi()
+        if (mDeviceId != null) return;
+
+        mDeviceSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(Storage.getRule().transmitterId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -221,7 +230,7 @@ public class RuleValueView extends RelativeLayout {
     }
 
     private void subscribeForDeviceReadings(TransmitterDevice device) {
-        mSensorDeviceId = device.id;
+        mDeviceId = device.id;
         mWebSocketSubscription = RelayrSdk.getWebSocketClient()
                 .subscribe(device, new Subscriber<Object>() {
 

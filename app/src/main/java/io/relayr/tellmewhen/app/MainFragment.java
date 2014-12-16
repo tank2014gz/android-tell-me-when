@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 
+import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
 
 import java.util.Comparator;
@@ -26,17 +27,19 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.timroes.android.listview.EnhancedListView;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
+import io.relayr.RelayrSdk;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.adapter.NotificationsAdapter;
 import io.relayr.tellmewhen.app.adapter.RulesAdapter;
 import io.relayr.tellmewhen.app.views.WarningNoNotificationsView;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
+import io.relayr.tellmewhen.consts.LogUtil;
 import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
+import io.relayr.tellmewhen.consts.FragmentName;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -155,13 +158,18 @@ public class MainFragment extends WhatFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_new_rule) {
             Storage.prepareRuleForCreate();
+
             switchTo(FragmentName.TRANS);
         }
 
         if (item.getItemId() == R.id.action_clear_notifications) {
             mNotificationsAdapter.clear();
             mNotificationsAdapter.notifyDataSetChanged();
-            new Delete().from(TMWNotification.class).execute();
+
+            List<Model> execute = new Delete().from(TMWNotification.class).execute();
+            RelayrSdk.logMessage(String.format(LogUtil.DELETE_ALL_NOTIFICATIONS,
+                    execute != null ? "" + execute.size() : ""));
+
             showNoNotificationsWarning();
         }
 
@@ -269,8 +277,12 @@ public class MainFragment extends WhatFragment {
 
                                     @Override
                                     public void onNext(Boolean status) {
-                                        if (!status) undo();
-                                        else item.delete();
+                                        if (!status) {
+                                            undo();
+                                        } else {
+                                            RelayrSdk.logMessage(LogUtil.DELETE_RULE);
+                                            item.delete();
+                                        }
                                     }
                                 });
                     }
@@ -291,6 +303,8 @@ public class MainFragment extends WhatFragment {
     }
 
     private void toggleList(boolean rules) {
+        RelayrSdk.logMessage(rules ? LogUtil.VIEW_RULES : LogUtil.VIEW_NOTIFICATIONS);
+
         mWarningLayout.setVisibility(View.GONE);
 
         mRulesListView.setVisibility(rules ? View.VISIBLE : View.GONE);
@@ -318,6 +332,7 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void discard() {
+                        RelayrSdk.logMessage(LogUtil.DELETE_NOTIFICATION);
                         item.delete();
                     }
                 };

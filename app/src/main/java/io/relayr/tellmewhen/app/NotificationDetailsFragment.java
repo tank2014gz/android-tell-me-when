@@ -22,9 +22,9 @@ import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
+import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.util.NotificationTimeUtil;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
@@ -43,7 +43,8 @@ public class NotificationDetailsFragment extends WhatFragment {
     @InjectView(R.id.notif_details_current_sensor_loading) ProgressBar mCurrentSensorProgress;
 
     private Subscription mWebSocketSubscription = Subscriptions.empty();
-    private String mSensorDeviceId;
+    private Subscription mDeviceSubscription = Subscriptions.empty();
+    private String mDeviceId;
 
     private TMWRule mRule;
     private TMWNotification mNotification;
@@ -64,7 +65,7 @@ public class NotificationDetailsFragment extends WhatFragment {
 
         mNotification = Storage.getNotificationDetails();
         mRule = new Select().from(TMWRule.class)
-                .where("dbId = ?", mNotification.getRuleId())
+                .where("dbId = ?", mNotification.ruleId)
                 .executeSingle();
 
         return view;
@@ -106,12 +107,17 @@ public class NotificationDetailsFragment extends WhatFragment {
     public void onPause() {
         super.onPause();
 
+        unSubscribe();
+    }
+
+    private void unSubscribe() {
+        if (!mDeviceSubscription.isUnsubscribed()) mDeviceSubscription.unsubscribe();
         if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
-        if (mSensorDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mSensorDeviceId);
+        if (mDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mDeviceId);
     }
 
     private void loadDevice(String transmitterId, final SensorType sensor) {
-        RelayrSdk.getRelayrApi()
+        mDeviceSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(transmitterId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -128,16 +134,17 @@ public class NotificationDetailsFragment extends WhatFragment {
                     @Override
                     public void onNext(List<TransmitterDevice> transmitterDevices) {
                         for (TransmitterDevice device : transmitterDevices) {
-                            if (device.getModel().equals(sensor.getModel()))
+                            if (device.getModel().equals(sensor.getModel())) {
                                 subscribeForDeviceReadings(device, sensor);
+                                break;
+                            }
                         }
-
                     }
                 });
     }
 
     private void subscribeForDeviceReadings(TransmitterDevice device, final SensorType sensor) {
-        mSensorDeviceId = device.id;
+        mDeviceId = device.id;
         mWebSocketSubscription = RelayrSdk.getWebSocketClient()
                 .subscribe(device, new Subscriber<Object>() {
 
