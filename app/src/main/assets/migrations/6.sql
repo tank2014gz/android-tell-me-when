@@ -1,0 +1,1 @@
+CREATE TABLE Push(id INTEGER PRIMARY KEY, ruleId TEXT, pkey TEXT, ptype TEXT);
