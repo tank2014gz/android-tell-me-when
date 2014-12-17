@@ -2,7 +2,6 @@ package io.relayr.tellmewhen.app;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +22,11 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
@@ -45,15 +45,22 @@ public class RuleEditFragment extends WhatFragment {
 
     @InjectView(R.id.ref_sensor_icon) ImageView mSensorIcon;
     @InjectView(R.id.ref_sensor_name) TextView mSensorName;
-    @InjectView(R.id.ref_sensor_info) TextView mSensorInfo;
 
     @InjectView(R.id.ref_rule_value) TextView mRuleValue;
 
     @InjectView(R.id.sensor_value) TextView mSensorValue;
+
     @InjectView(R.id.notif_details_current_sensor_loading) ProgressBar mCurrentSensorProgress;
 
+    @InjectView(R.id.button_done) TextView mButtonDone;
+
     private Subscription mWebSocketSubscription = Subscriptions.empty();
-    private String mSensorDeviceId;
+    private Subscription mDeviceSubscription = Subscriptions.empty();
+
+    private String mDeviceId;
+    private TMWRule mRule;
+
+    private boolean saveError = false;
 
     public static RuleEditFragment newInstance() {
         return new RuleEditFragment();
@@ -68,6 +75,8 @@ public class RuleEditFragment extends WhatFragment {
         ButterKnife.inject(this, view);
         inject(this);
 
+        mRule = Storage.getRule();
+
         return view;
     }
 
@@ -75,68 +84,41 @@ public class RuleEditFragment extends WhatFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TMWRule rule = Storage.getRule();
-
-        loadDevice(rule.transmitterId, rule.getSensorType());
-
-        mRuleSwitch.setChecked(rule.isNotifying);
+        mRuleSwitch.setChecked(mRule.isNotifying);
         mRuleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Storage.getRule().isNotifying = isChecked;
+
+                LogUtil.logMessage(LogUtil.EDIT_RULE_NOTIFYING);
             }
         });
 
-        mRuleName.setText(rule.name);
+        mRuleName.setText(mRule.name);
 
-        mTransType.setText(rule.transmitterType);
-        mTransName.setText(rule.transmitterName);
+        mTransType.setText(mRule.transmitterType);
+        mTransName.setText(mRule.transmitterName);
 
-        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), rule.getSensorType()));
-        mSensorName.setText(SensorUtil.getTitle(rule.getSensorType()));
+        mSensorIcon.setImageResource(SensorUtil.getIcon(getActivity(), mRule.getSensorType()));
+        mSensorName.setText(SensorUtil.getTitle(mRule.getSensorType()));
 
-        mRuleValue.setText((rule.getOperatorType().getValue() + " " +
-                rule.value + " " + rule.getSensorType().getUnit()));
+        mRuleValue.setText((mRule.getOperatorType().getValue() + " " +
+                mRule.value + " " + mRule.getSensorType().getUnit()));
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onResume() {
+        super.onResume();
 
-        if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
-        if (mSensorDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mSensorDeviceId);
+        mCurrentSensorProgress.setVisibility(View.VISIBLE);
+        loadDevice(mRule.transmitterId, mRule.getSensorType());
     }
 
     @OnClick(R.id.button_done)
-    public void onDoneClicked(final View button) {
-        button.setEnabled(false);
+    public void onDoneClicked() {
+        mButtonDone.setEnabled(false);
 
-        ruleService.updateRule(Storage.getRule())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Boolean>() {
-                    @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        button.setEnabled(true);
-                        showToast(R.string.error_saving_rule);
-                    }
-
-                    @Override
-                    public void onNext(Boolean status) {
-                        if (status) {
-                            Storage.clearRuleData();
-                            switchTo(FragmentName.MAIN);
-                        } else {
-                            onError(new Throwable());
-                        }
-
-                        button.setEnabled(true);
-                    }
-                });
+        saveRule();
     }
 
     @OnClick(R.id.ref_rule_name_edit)
@@ -161,11 +143,50 @@ public class RuleEditFragment extends WhatFragment {
 
     @Override
     void onBackPressed() {
-        switchTo(FragmentName.MAIN);
+        if (saveError) switchTo(FragmentName.MAIN);
+        else saveRule();
+    }
+
+    private void saveRule() {
+        ruleService.updateRule(Storage.getRule())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Boolean>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        saveError = true;
+                        mButtonDone.setEnabled(true);
+                        showToast(R.string.error_saving_rule);
+                    }
+
+                    @Override
+                    public void onNext(Boolean status) {
+                        saveError = false;
+                        if (status) {
+                            Storage.clearRuleData();
+                            unSubscribe();
+                            switchTo(FragmentName.MAIN);
+                        } else {
+                            onError(new Throwable());
+                        }
+
+                        mButtonDone.setEnabled(true);
+                    }
+                });
+    }
+
+    private void unSubscribe() {
+        if (!mDeviceSubscription.isUnsubscribed()) mDeviceSubscription.unsubscribe();
+        if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
+        if (mDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mDeviceId);
     }
 
     private void loadDevice(String transmitterId, final SensorType sensor) {
-        RelayrSdk.getRelayrApi()
+        mDeviceSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(transmitterId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -176,22 +197,23 @@ public class RuleEditFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        showToast(R.string.error_loading_device_data);
                     }
 
                     @Override
                     public void onNext(List<TransmitterDevice> transmitterDevices) {
                         for (TransmitterDevice device : transmitterDevices) {
-                            if (device.getModel().equals(sensor.getModel()))
+                            if (device.getModel().equals(sensor.getModel())) {
                                 subscribeForDeviceReadings(device, sensor);
+                                break;
+                            }
                         }
-
                     }
                 });
     }
 
     private void subscribeForDeviceReadings(TransmitterDevice device, final SensorType sensor) {
-        mSensorDeviceId = device.id;
+        mDeviceId = device.id;
         mWebSocketSubscription = RelayrSdk.getWebSocketClient()
                 .subscribe(device, new Subscriber<Object>() {
 
@@ -201,37 +223,24 @@ public class RuleEditFragment extends WhatFragment {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        showToast(R.string.error_loading_device_data);
+
+                        if (mCurrentSensorProgress != null)
+                            mCurrentSensorProgress.setVisibility(View.GONE);
                     }
 
                     @Override
                     public void onNext(Object o) {
-                        mCurrentSensorProgress.setVisibility(View.GONE);
-                        mSensorValue.setVisibility(View.VISIBLE);
-
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        float value = 0f;
-                        switch (sensor) {
-                            case TEMPERATURE:
-                                value = reading.temp;
-                                break;
-                            case HUMIDITY:
-                                value = reading.hum;
-                                break;
-                            case PROXIMITY:
-                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
-                                break;
-                            case NOISE_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
-                                break;
-                            case LUMINOSITY:
-                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
-                                break;
-                        }
+                        if (mCurrentSensorProgress != null) {
+                            mCurrentSensorProgress.setVisibility(View.GONE);
+                            mSensorValue.setVisibility(View.VISIBLE);
 
-                        mSensorValue.setText(getString(R.string
-                                .current_reading) + ": " + value + sensor.getUnit());
+                            mSensorValue.setText(getString(R.string
+                                    .current_reading) + ": " +
+                                    SensorUtil.formatToUiValue(sensor, reading));
+                        }
                     }
                 });
     }

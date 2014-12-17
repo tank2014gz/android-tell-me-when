@@ -9,7 +9,7 @@ import java.util.Calendar;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.model.TMWNotification;
 
-public class NotificationUtil {
+public class NotificationTimeUtil {
 
     public static String getDate(Context context, TMWNotification notif) {
         Calendar calendar = Calendar.getInstance();
@@ -20,13 +20,19 @@ public class NotificationUtil {
         }
 
         Calendar today = Calendar.getInstance();
-        today.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        today.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH),
+                today.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+
+        long dayMillis = 24 * 60 * 60 * 1000;
 
         SimpleDateFormat sdf = new SimpleDateFormat(context.getString(R.string.notification_date_format));
 
-        return calendar.getTimeInMillis() > today.getTimeInMillis() ? context
-                .getString(R.string.today) : sdf.format(calendar.getTime());
+        if (calendar.getTimeInMillis() > today.getTimeInMillis())
+            return context.getString(R.string.today);
+        else if (calendar.getTimeInMillis() > today.getTimeInMillis() - dayMillis)
+            return context.getString(R.string.yesterday);
+        else
+            return sdf.format(calendar.getTime());
     }
 
     public static String getTime(TMWNotification notif) {

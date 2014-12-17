@@ -1,10 +1,10 @@
-package io.relayr.tellmewhen.util;
+package io.relayr.tellmewhen.consts;
 
 import java.io.Serializable;
 
 public enum OperatorType implements Serializable{
 
-    EQUALS("="), GREATER(">"), LESS("<");
+    GREATER(">"), LESS("<");
 
     private final String value;
 

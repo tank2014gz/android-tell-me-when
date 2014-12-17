@@ -6,13 +6,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
+import io.relayr.RelayrSdk;
+import io.relayr.model.Transmitter;
+import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.adapter.TransmitterAdapter;
+import io.relayr.tellmewhen.consts.SensorType;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
+import io.relayr.tellmewhen.consts.FragmentName;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class TransmitterFragment extends WhatFragment {
 
@@ -35,6 +45,9 @@ public class TransmitterFragment extends WhatFragment {
         mTransmitterAdapter = new TransmitterAdapter(this.getActivity());
         mListView.setAdapter(mTransmitterAdapter);
 
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_TRANSMITTER :
+                LogUtil.CREATE_RULE_TRANSMITTER);
+
         return view;
     }
 
@@ -47,23 +60,64 @@ public class TransmitterFragment extends WhatFragment {
         mTransmitterAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-
-    }
-
     @OnItemClick(R.id.list_view)
     public void onItemClick(int position) {
-        Storage.getRule().transmitterId = mTransmitterAdapter.getItem(position).id;
-        Storage.getRule().transmitterName = mTransmitterAdapter.getItem(position).getName();
-        Storage.getRule().transmitterType = "Relayr WunderBar";
+        if (Storage.isRuleEditing())
+            findSensorId(mTransmitterAdapter.getItem(position), Storage.getRule().getSensorType());
+        else {
+            saveTransmitterData(mTransmitterAdapter.getItem(position));
+            switchToEdit(FragmentName.SENSOR);
+        }
 
-        switchToEdit(FragmentName.SENSOR);
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_FINISH :
+                LogUtil.CREATE_RULE_FINISH);
+    }
+
+    private void findSensorId(final Transmitter transmitter, final SensorType sensorType) {
+        RelayrSdk.getRelayrApi()
+                .getTransmitterDevices(transmitter.id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<TransmitterDevice>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        showToast(R.string.error_loading_devices);
+                    }
+
+                    @Override
+                    public void onNext(List<TransmitterDevice> devices) {
+                        boolean deviceFound = false;
+
+                        for (TransmitterDevice device : devices) {
+                            if (device.getModel().equals(sensorType.getModel())) {
+                                Storage.getRule().sensorId = device.id;
+                                saveTransmitterData(transmitter);
+                                deviceFound = true;
+                            }
+                        }
+
+                        if (!deviceFound) showToast(R.string.error_finding_device);
+
+                        switchToEdit(FragmentName.SENSOR);
+                    }
+                });
+    }
+
+    private void saveTransmitterData(Transmitter transmitter) {
+        Storage.getRule().transmitterId = transmitter.id;
+        Storage.getRule().transmitterName = transmitter.getName();
+        Storage.getRule().transmitterType = "Relayr WunderBar";
     }
 
     @Override
     void onBackPressed() {
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
+                LogUtil.CREATE_RULE_CANCEL);
+
         switchToEdit(FragmentName.MAIN);
     }
 

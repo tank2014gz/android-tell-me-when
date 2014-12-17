@@ -1,9 +1,6 @@
 package io.relayr.tellmewhen.app.views;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,7 +10,6 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
 
 public class WarningNoRulesView extends LinearLayout {
 
@@ -48,6 +44,7 @@ public class WarningNoRulesView extends LinearLayout {
     @OnClick(R.id.button_done)
     public void onDoneClicked() {
         Storage.prepareRuleForCreate();
+
         listener.onClick(this);
     }
 }

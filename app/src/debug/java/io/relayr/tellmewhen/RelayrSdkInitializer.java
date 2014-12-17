@@ -10,7 +10,7 @@ import io.relayr.RelayrSdk;
 public abstract class RelayrSdkInitializer {
 
     static void initSdk(Context context) {
-        RelayrSdk.init(context);
+        RelayrSdk.initInMockMode(context);
         Fabric.with(context, new Crashlytics());
     }
 }

@@ -14,10 +14,10 @@ import retrofit.RestAdapter;
 
 public class ServiceUtil {
 
-    private static final String PROPERTIES_FILE_NAME = "tellmewhen.properties";
-
     public static final String RULE_API_DB = "/tellmewhen_rules";
     public static final String NOTIFICATION_API_DB = "/tellmewhen_notifications";
+
+    private static final String PROPERTIES_FILE_NAME = "tellmewhen.properties";
 
     public static Properties getProperties(Context context) {
         Properties properties = new Properties();
@@ -27,7 +27,7 @@ public class ServiceUtil {
             properties.load(inputStream);
             inputStream.close();
         } catch (IOException e) {
-            Log.e("AppModule", "can not find properties file");
+            Log.e(ServiceUtil.class.getSimpleName(), "Can not find properties file");
         }
         return properties;
     }

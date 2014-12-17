@@ -24,10 +24,12 @@ import io.relayr.model.Transmitter;
 import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.TellMeWhenApplication;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.util.LogUtil;
+import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.gcm.GcmUtils;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 import rx.Subscriber;
 import rx.Subscription;
@@ -64,11 +66,20 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         }
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
 
-        //PlayServices are necessary for Notifications
+        LogUtil.logMessage(LogUtil.VIEW_APP);
+
+        if (getIntent() != null && getIntent().getStringExtra(GcmIntentService
+                .NOTIFICATION_ACTION_CLICK) != null)
+            LogUtil.logMessage(LogUtil.VIEW_WITH_PUSH);
+
+        if (GcmIntentService.pushedRules != null)
+            GcmIntentService.pushedRules.clear();
+
         if (GcmUtils.getInstance().checkPlayServices(this)) {
             GcmUtils.getInstance().init(this);
 
@@ -156,7 +167,15 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_log_out) {
             mCurrentFragment = null;
+            logInStarted = false;
+
             RelayrSdk.logOut();
+
+            Storage.startRuleScreen(true);
+            Storage.clearRuleData();
+            Storage.saveGmsRegId(null);
+            Storage.saveGmsAppVersion(0);
+
             checkUserState();
         }
 
@@ -242,14 +261,14 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
                     @Override
                     public void onNext(User user) {
-                        Crashlytics.setUserEmail(user.email);
-                        Crashlytics.setUserName(user.getName());
-                        Crashlytics.setUserIdentifier(user.id);
-
                         if (Storage.loadUserId() != null && !Storage.loadUserId().equals(user.id))
                             new Delete().from(TMWNotification.class).execute();
 
                         Storage.saveUserId(user.id);
+
+                        Crashlytics.setUserEmail(user.email);
+                        Crashlytics.setUserName(user.getName());
+                        Crashlytics.setUserIdentifier(user.id);
 
                         loadTransmitters();
                     }

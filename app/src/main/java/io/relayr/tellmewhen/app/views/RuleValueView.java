@@ -8,6 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -21,8 +22,8 @@ import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.OperatorType;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.OperatorType;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
@@ -31,8 +32,6 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
 public class RuleValueView extends RelativeLayout {
-
-    private String mSensorDeviceId;
 
     public interface OnDoneClickListener {
         public void onDoneClicked(float progress, OperatorType mCurrentOperator);
@@ -61,15 +60,21 @@ public class RuleValueView extends RelativeLayout {
     private int total;
     private String unit;
 
+    private String mDeviceId;
+
+    private boolean mUnSubscribe;
     private OperatorType mOperator;
     private SensorType mSensor;
     private Float mValue;
 
     private Subscription mWebSocketSubscription = Subscriptions.empty();
+    private Subscription mDeviceSubscription = Subscriptions.empty();
 
-    public RuleValueView(Context context, SensorType sensor, OperatorType operator, Float value) {
+    public RuleValueView(Context context, boolean unSubscribe, SensorType sensor,
+                         OperatorType operator, Float value) {
         this(context, null);
 
+        this.mUnSubscribe = unSubscribe;
         this.mSensor = sensor;
         this.mOperator = operator;
         this.mValue = value;
@@ -104,8 +109,11 @@ public class RuleValueView extends RelativeLayout {
 
         ButterKnife.reset(this);
 
-        if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
-        if (mSensorDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mSensorDeviceId);
+        if (mUnSubscribe) {
+            if (!mDeviceSubscription.isUnsubscribed()) mDeviceSubscription.unsubscribe();
+            if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
+            if (mDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mDeviceId);
+        }
     }
 
     @OnClick(R.id.button_done)
@@ -172,7 +180,7 @@ public class RuleValueView extends RelativeLayout {
 
     private void setValue(float seekValue, float indicatorValue, OperatorType type) {
         mValueSeek.setProgress((int) seekValue);
-        mValueIndicator.setText((int)indicatorValue + unit);
+        mValueIndicator.setText((int) indicatorValue + unit);
         toggleOperator(type);
     }
 
@@ -193,7 +201,11 @@ public class RuleValueView extends RelativeLayout {
     }
 
     private void loadDevice() {
-        RelayrSdk.getRelayrApi()
+        mCurrentSensorProgress.setVisibility(View.VISIBLE);
+
+        if (mDeviceId != null) return;
+
+        mDeviceSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(Storage.getRule().transmitterId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -204,7 +216,7 @@ public class RuleValueView extends RelativeLayout {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        showToast(R.string.error_loading_device_data);
                     }
 
                     @Override
@@ -213,13 +225,12 @@ public class RuleValueView extends RelativeLayout {
                             if (device.getModel().equals(mSensor.getModel()))
                                 subscribeForDeviceReadings(device);
                         }
-
                     }
                 });
     }
 
     private void subscribeForDeviceReadings(TransmitterDevice device) {
-        mSensorDeviceId = device.id;
+        mDeviceId = device.id;
         mWebSocketSubscription = RelayrSdk.getWebSocketClient()
                 .subscribe(device, new Subscriber<Object>() {
 
@@ -229,38 +240,30 @@ public class RuleValueView extends RelativeLayout {
 
                     @Override
                     public void onError(Throwable e) {
-                        e.printStackTrace();
+                        showToast(R.string.error_loading_device_data);
+
+                        if (mCurrentSensorProgress != null)
+                            mCurrentSensorProgress.setVisibility(View.GONE);
                     }
 
                     @Override
                     public void onNext(Object o) {
-                        mCurrentSensorProgress.setVisibility(View.GONE);
-                        mSensorValue.setVisibility(View.VISIBLE);
-
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        float value = 0;
-                        switch (mSensor) {
-                            case TEMPERATURE:
-                                value = (int) reading.temp;
-                                break;
-                            case HUMIDITY:
-                                value = (int) reading.hum;
-                                break;
-                            case PROXIMITY:
-                                value = SensorUtil.scaleToUiData(SensorType.PROXIMITY, reading.prox);
-                                break;
-                            case NOISE_LEVEL:
-                                value = SensorUtil.scaleToUiData(SensorType.NOISE_LEVEL, reading.snd_level);
-                                break;
-                            case LUMINOSITY:
-                                value = SensorUtil.scaleToUiData(SensorType.LUMINOSITY, reading.light);
-                                break;
-                        }
+                        if (mCurrentSensorProgress != null) {
+                            mCurrentSensorProgress.setVisibility(View.GONE);
+                            mSensorValue.setVisibility(View.VISIBLE);
 
-                        mSensorValue.setText(getContext().getString(R.string
-                                .current_reading) + ": " + value + mSensor.getUnit());
+                            mSensorValue.setText(getContext().getString(R.string
+                                    .current_reading) + ": " +
+                                    SensorUtil.formatToUiValue(mSensor, reading));
+                        }
                     }
                 });
+    }
+
+    private void showToast(int stringId) {
+        if (getContext() != null)
+            Toast.makeText(getContext(), getContext().getString(stringId), Toast.LENGTH_SHORT).show();
     }
 }

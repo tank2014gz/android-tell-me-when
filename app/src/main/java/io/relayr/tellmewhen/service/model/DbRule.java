@@ -6,8 +6,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.relayr.tellmewhen.util.OperatorType;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.OperatorType;
+import io.relayr.tellmewhen.consts.SensorType;
 
 public class DbRule implements Serializable {
 
@@ -108,13 +108,19 @@ public class DbRule implements Serializable {
     public static class Details implements Serializable {
 
         @SerializedName("name") private String name;
+        @SerializedName("modified") private long modified;
 
-        public Details(String name) {
+        public Details(String name, long modified) {
             this.name = name;
+            this.modified = modified;
         }
 
         public String getName() {
             return name;
+        }
+
+        public long getModified() {
+            return modified;
         }
     }
 
@@ -155,6 +161,29 @@ public class DbRule implements Serializable {
 
         public String getKey() {
             return key;
+        }
+        public String getType() {
+            return type;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Notification that = (Notification) o;
+
+            if (!key.equals(that.key)) return false;
+            if (!type.equals(that.type)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = type.hashCode();
+            result = 31 * result + key.hashCode();
+            return result;
         }
     }
 }

@@ -1,19 +1,12 @@
 package io.relayr.tellmewhen;
 
 import android.content.Context;
-import android.util.Base64;
-import android.util.Log;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import io.relayr.RelayrApp;
 import io.relayr.tellmewhen.app.MainActivity;
 import io.relayr.tellmewhen.app.MainFragment;
 import io.relayr.tellmewhen.app.NotificationDetailsFragment;
@@ -24,7 +17,6 @@ import io.relayr.tellmewhen.app.RuleValueEditFragment;
 import io.relayr.tellmewhen.app.SensorFragment;
 import io.relayr.tellmewhen.app.TransmitterFragment;
 import io.relayr.tellmewhen.app.WhatFragment;
-import io.relayr.tellmewhen.gcm.NotificationBroadcastReceiver;
 import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.service.ServiceUtil;
@@ -34,7 +26,6 @@ import io.relayr.tellmewhen.service.rule.RuleApi;
 import io.relayr.tellmewhen.service.rule.RuleServiceImpl;
 import retrofit.Endpoint;
 import retrofit.Endpoints;
-import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 
 @Module(

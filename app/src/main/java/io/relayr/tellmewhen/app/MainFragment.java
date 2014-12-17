@@ -13,7 +13,9 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 
+import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
+import com.activeandroid.query.Select;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -31,11 +33,12 @@ import io.relayr.tellmewhen.app.adapter.RulesAdapter;
 import io.relayr.tellmewhen.app.views.WarningNoNotificationsView;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -66,7 +69,7 @@ public class MainFragment extends WhatFragment {
     private boolean mLoadingNotifications = false;
     private boolean mLoadingRules = false;
 
-    private ScheduledExecutorService mNotificationsScheduler;
+    private ScheduledExecutorService mNotifScheduler;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -116,14 +119,13 @@ public class MainFragment extends WhatFragment {
         super.onPause();
 
         Storage.setNotificationScreeVisible(false);
-        stopDynamicNotificationLoading();
+
+        if (mNotifScheduler != null && !mNotifScheduler.isShutdown()) mNotifScheduler.shutdown();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        stopDynamicNotificationLoading();
 
         if (!mTransmitterSubscription.isUnsubscribed()) mTransmitterSubscription.unsubscribe();
         if (!mRulesSubscription.isUnsubscribed()) mRulesSubscription.unsubscribe();
@@ -155,13 +157,18 @@ public class MainFragment extends WhatFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_new_rule) {
             Storage.prepareRuleForCreate();
+
             switchTo(FragmentName.TRANS);
         }
 
         if (item.getItemId() == R.id.action_clear_notifications) {
             mNotificationsAdapter.clear();
             mNotificationsAdapter.notifyDataSetChanged();
-            new Delete().from(TMWNotification.class).execute();
+
+            List<Model> execute = new Delete().from(TMWNotification.class).execute();
+            LogUtil.logMessage(String.format(LogUtil.DELETE_ALL_NOTIFICATIONS,
+                    execute != null ? "" + execute.size() : ""));
+
             showNoNotificationsWarning();
         }
 
@@ -213,17 +220,12 @@ public class MainFragment extends WhatFragment {
         if (view != null) mWarningLayout.addView(view);
     }
 
-    private void stopDynamicNotificationLoading() {
-        if (mNotificationsScheduler != null && !mNotificationsScheduler.isShutdown())
-            mNotificationsScheduler.shutdown();
-    }
-
     private void startDynamicNotificationLoading() {
-        if (mNotificationsScheduler != null && !mNotificationsScheduler.isShutdown())
+        if (mNotifScheduler != null && !mNotifScheduler.isShutdown())
             return;
 
-        mNotificationsScheduler = Executors.newSingleThreadScheduledExecutor();
-        mNotificationsScheduler.scheduleAtFixedRate(new Runnable() {
+        mNotifScheduler = Executors.newSingleThreadScheduledExecutor();
+        mNotifScheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 if (!Storage.isStartScreenRules()) {
@@ -254,12 +256,12 @@ public class MainFragment extends WhatFragment {
                         toggleList(true);
 
                         mRulesAdapter.insert(item, position);
-                        mRulesAdapter.notifyDataSetChanged();
+                        mRulesAdapter.sortRules();
                     }
 
                     @Override
                     public void discard() {
-                        ruleService.deleteRule(item)
+                        ruleService.deleteRule(item.dbId, item.drRev)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Subscriber<Boolean>() {
@@ -274,8 +276,12 @@ public class MainFragment extends WhatFragment {
 
                                     @Override
                                     public void onNext(Boolean status) {
-                                        if (!status) undo();
-                                        else item.delete();
+                                        if (!status) {
+                                            undo();
+                                        } else {
+                                            LogUtil.logMessage(LogUtil.DELETE_RULE);
+                                            item.delete();
+                                        }
                                     }
                                 });
                     }
@@ -286,8 +292,25 @@ public class MainFragment extends WhatFragment {
         mRulesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                Storage.prepareRuleForEdit(mRulesAdapter.getItem(pos));
-                switchTo(FragmentName.RULE_EDIT);
+                ruleService.refreshRule(mRulesAdapter.getItem(pos).dbId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<Boolean>() {
+                            @Override
+                            public void onCompleted() {
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                showToast(R.string.error_loading_rules);
+                            }
+
+                            @Override
+                            public void onNext(Boolean status) {
+                                if (status)
+                                    switchTo(FragmentName.RULE_EDIT);
+                            }
+                        });
             }
         });
 
@@ -323,18 +346,26 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void discard() {
+                        LogUtil.logMessage(LogUtil.DELETE_NOTIFICATION);
                         item.delete();
                     }
                 };
             }
         });
 
-
         mNotificationsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                Storage.showNotification(mNotificationsAdapter.getItem(pos));
-                switchTo(FragmentName.NOTIFICATION_DETAILS);
+                TMWRule rule = new Select().from(TMWRule.class)
+                        .where("dbId = ?", mNotificationsAdapter.getItem(pos).ruleId)
+                        .executeSingle();
+
+                if (rule != null) {
+                    Storage.showNotification(mNotificationsAdapter.getItem(pos));
+                    switchTo(FragmentName.NOTIFICATION_DETAILS);
+                } else {
+                    mNotificationsAdapter.notifyDataSetChanged();
+                }
             }
         });
 
@@ -365,15 +396,6 @@ public class MainFragment extends WhatFragment {
                 if ((lastInScreen == total)) {
                     List<TMWNotification> local = notificationService.getLocalNotifications(total);
                     if (!local.isEmpty()) {
-                        mNotificationsAdapter.addAll(local);
-                        mNotificationsAdapter.notifyDataSetChanged();
-                    }
-                }
-
-                if (firstVisible == 0) {
-                    List<TMWNotification> local = notificationService.getLocalNotifications(total);
-                    if (!local.isEmpty()) {
-                        mNotificationsAdapter.clear();
                         mNotificationsAdapter.addAll(local);
                         mNotificationsAdapter.notifyDataSetChanged();
                     }
@@ -445,8 +467,11 @@ public class MainFragment extends WhatFragment {
                     public void onNext(List<TMWRule> rules) {
                         mRulesAdapter.clear();
                         mRulesAdapter.addAll(rules);
+                        mRulesAdapter.sortRules();
 
                         refreshMenuItems();
+
+                        stopProgressBar();
 
                         if (mRulesAdapter.isEmpty()) {
                             showRulesWarning();
@@ -454,7 +479,6 @@ public class MainFragment extends WhatFragment {
                             toggleList(true);
                         }
 
-                        stopProgressBar();
                         mLoadingRules = false;
                     }
                 });
@@ -514,10 +538,5 @@ public class MainFragment extends WhatFragment {
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
         manager.cancel(GcmIntentService.TMW_NOTIFICATION_ID);
-        manager.cancel(GcmIntentService.TMW_HUM_ID);
-        manager.cancel(GcmIntentService.TMW_LIGHT_ID);
-        manager.cancel(GcmIntentService.TMW_NOISE_ID);
-        manager.cancel(GcmIntentService.TMW_PROX_ID);
-        manager.cancel(GcmIntentService.TMW_TEMP_ID);
     }
 }

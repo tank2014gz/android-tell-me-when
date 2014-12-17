@@ -3,82 +3,80 @@
 
     <string name="app_name">TellMeWhen</string>
 
-    <string name="successfully_logged_in">You were successfully logged in!</string>
-    <string name="unsuccessfully_logged_in">There was a problem in the log in.</string>
-    <string name="err_loading_user_data">Oops! Loading user data failed</string>
-    <string name="err_loading_devices">Oops! Loading devices failed</string>
-    <string name="err_socket_problem">Oops! Web socket problem</string>
-    <string name="please_connect_to_wifi">Please connect to WiFi</string>
-    <string name="connect">Connect</string>
-    <string name="cancel">Cancel</string>
+    <string name="successfully_logged_in">Login erfolgreich!</string>
+    <string name="unsuccessfully_logged_in">Fehler beim Einloggen</string>
+    <string name="err_loading_user_data">Fehler beim Laden der Nutzerdaten</string>
 
-    <string name="warning_onboard_title">onboard wunderbar</string>
-    <string name="warning_onboard_text_top">Looks like you have no WunderBars on your account.</string>
-    <string name="warning_onboard_text_bottom">Please onboard one using the onboarding/manager app</string>
-    <string name="warning_onboard_btn_text">onboarding app</string>
-    <string name="warning_no_rules_title">no rules yet</string>
-    <string name="warning_no_rules_text">Create rules to get notifications from your WunderBar sensor</string>
-    <string name="warn_no_rules_btn">create rule</string>
-    <string name="warning_reachability_text">Couldn\'t reach relayr cloud. Please make sure you are connected to the Internet.</string>
+    <string name="warning_onboard_title">WunderBar Initialisierung</string>
+    <string name="warning_onboard_text_top">Du hast keine registrierten WunderBars</string>
+    <string name="warning_onboard_text_bottom">Bitte benutze die Initialisierungsapp um eine WunderBar zu registrieren</string>
+    <string name="warning_onboard_btn_text">Initialisierungsapp</string>
+    <string name="warning_no_rules_title">Keine Regeln vorhanden</string>
+    <string name="warning_no_rules_text">Bitte erstelle eine Regel, um Benachrichtigungen von deinen WunderBar-Sensoren zu bekommen</string>
+    <string name="warn_no_rules_btn">Regel erstellen</string>
+    <string name="warning_reachability_text">relayr cloud ist nicht erreichbar. Bitte überprüfe deine Internetverbindung.</string>
     <string name="warning_reachability_title">relayr</string>
-    <string name="warning_no_notif_text">Notifications will be listed here</string>
-    <string name="warning_no_notif_title">No new notifications</string>
-
-    <string name="rf_clear">clear</string>
-    <string name="rf_logout">logout</string>
+    <string name="warning_no_notif_text">Benachrichtigungen werden hier angezeigt</string>
+    <string name="warning_no_notif_title">Keine neue Benachrichtigungen</string>
 
     <string name="operator_less"><![CDATA[<]]></string>
     <string name="operator_greater"><![CDATA[>]]></string>
-    <string name="operator_equals">=</string>
 
-    <string name="nf_rule_hint">rule name</string>
-    <string name="nf_rule_name_empty">Please set name for your rule.</string>
+    <string name="nf_rule_hint">Regelname</string>
+    <string name="nf_rule_name_empty">Bitte gib deiner Regel einen Namen</string>
 
-    <string name="ref_get_notifications">get notification</string>
+    <string name="ref_get_notifications">Benachrichtigungen</string>
 
-    <string name="measurement_temperature">temperature</string>
-    <string name="measurement_humidity">humidity</string>
-    <string name="measurement_noise">noise</string>
-    <string name="measurement_proximity">proximity</string>
-    <string name="measurement_light">light</string>
-    <string name="measurement_acceleration">acceleration</string>
+    <string name="measurement_temperature">Temperatur</string>
+    <string name="measurement_humidity">Feuchtigkeit</string>
+    <string name="measurement_noise">Geräuschpegel</string>
+    <string name="measurement_proximity">Näherung</string>
+    <string name="measurement_light">Licht</string>
 
-    <string name="title_tab_rules">rules</string>
-    <string name="title_tab_notifications">notifications</string>
-    <string name="title_rule_name">name rule</string>
-    <string name="title_select_transmitter">select transmitter</string>
-    <string name="title_select_sensor">select sensor</string>
-    <string name="title_rule_value">value</string>
-    <string name="title_rule_edit">rule</string>
-    <string name="title_notif_details">notification details</string>
+    <string name="title_tab_rules">Regeln</string>
+    <string name="title_tab_notifications">Benachrichtigungen</string>
+    <string name="title_rule_name">Regel benennen</string>
+    <string name="title_select_transmitter">Transmitter</string>
+    <string name="title_select_sensor">Sensor auswählen</string>
+    <string name="title_rule_value">Schwelle setzen</string>
+    <string name="title_rule_edit">Regeleinstellungen</string>
+    <string name="title_notif_details">Benachrichtigungsdetails</string>
 
-    <string name="button_done">done</string>
-    <string name="operator_less_text">less than</string>
-    <string name="operator_greater_text">greater than</string>
+    <string name="button_done">fertig</string>
+    <string name="operator_less_text">niedriger als</string>
+    <string name="operator_greater_text">höher als</string>
 
-    <string name="menu_log_out">log out</string>
-    <string name="menu_clear">clear</string>
-    <string name="menu_new_rule">new rule</string>
-    <string name="button_next">next</string>
+    <string name="menu_log_out">abmelden</string>
+    <string name="menu_clear">löschen</string>
+    <string name="menu_new_rule">neue Regel</string>
+    <string name="button_next">weiter</string>
 
-    <string name="error_saving_rule">Rule can\'t be saved. Please try again.</string>
-    <string name="error_loading_transmitters">Error loading transmitters</string>
-    <string name="error_loading_devices">Error loading sensor devices</string>
-    <string name="error_loading_rules">Error while loading rules</string>
-    <string name="error_loading_notifications">Error loading notifications</string>
-    <string name="today">Today</string>
-    <string name="please_open_app">Open application to see latest notifications</string>
-    <string name="current_reading">Current sensor value</string>
+    <string name="error_saving_rule">Regel kann nicht gespeichert werden. Bitte versuche es noch einmal.</string>
+    <string name="error_loading_transmitters">Fehler beim Laden der Transmitter</string>
+    <string name="error_loading_devices">Fehler beim Laden der Sensoren</string>
+    <string name="error_loading_rules">Fehler beim Laden der Regeln</string>
+    <string name="error_loading_notifications">Fehler beim Laden der Benachrichtigungen</string>
+    <string name="error_finding_device">Kein Sensor gefunden</string>
+    <string name="today">Heute</string>
+    <string name="please_open_app">Öffne den App um neue Benachrichtigungen anzusehen</string>
+    <string name="current_reading">Aktueller Messwert des Sensors</string>
 
-    <string name="notif_details_rule">Rule</string>
-    <string name="notif_details_treshold_timestamp">Time when threshold met</string>
-    <string name="notif_details_value">Notification value</string>
-    <string name="notif_details_current_value">Current sensor value</string>
-    <string name="notif_triggering_value">triggering value</string>
-    <string name="notif_rule">rule</string>
+    <string name="notif_details_rule">Regel</string>
+    <string name="notif_details_treshold_timestamp">Zeitstempel</string>
+    <string name="notif_details_current_value">Aktueller Messwert des Sensors</string>
+    <string name="notif_triggering_value">Messwert</string>
     <string name="notification_date_format">dd.MM.yyyy</string>
-    <string name="on">on</string>
-    <string name="off">off</string>
-    <string name="list_error">Error listing items</string>
+    <string name="on">ein</string>
+    <string name="off">aus</string>
+
+    <string name="push_notification_summary">für weitere Informationen hier tippen</string>
+    <string name="push_notification_title">Regeln ausgelöst</string>
+    <string name="push_notification_title_one_rule">Regel ausgelöst</string>
+    <string name="push_notification_value">Messwert</string>
+    <string name="yesterday">Gestern</string>
+    <string name="error_loading_device_data">Fehler beim Laden der Daten</string>
+
+    <string name="unknown">Unbekannte Regel</string>
+    <string name="no_active_devices">No active devices. Please check your WunderBar</string>
 
 </resources>

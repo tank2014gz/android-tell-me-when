@@ -2,10 +2,13 @@ package io.relayr.tellmewhen.service.notif;
 
 import android.util.Log;
 
+import com.activeandroid.Model;
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,17 +38,15 @@ public class NotificationServiceImpl implements NotificationService {
         TellMeWhenApplication.objectGraph.inject(this);
     }
 
-    @Override
-    public void deleteNotifications(List<DbNotification> notifications) {
-        List<DbBulkDelete> deleteItems = new ArrayList<DbBulkDelete>();
+    private void deleteNotifications(List<DbNotification> notifications) {
+        List<DbBulkDelete> deleteItems = new ArrayList<>();
 
         for (DbNotification notif : notifications) {
             deleteItems.add(new DbBulkDelete(notif.getDbId(), notif.getDrRev()));
         }
 
-        notificationApi.deleteNotifications(new DbDocuments<DbBulkDelete>(deleteItems))
+        notificationApi.deleteNotifications(new DbDocuments<>(deleteItems))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<DbStatus>() {
                     @Override
                     public void onCompleted() {
@@ -53,34 +54,26 @@ public class NotificationServiceImpl implements NotificationService {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(NotificationServiceImpl.class.getSimpleName(), e.getMessage());
+                        Log.d(NotificationServiceImpl.class.getSimpleName(), e.getMessage());
                     }
 
                     @Override
                     public void onNext(DbStatus status) {
-                        Log.d(NotificationServiceImpl.class.getSimpleName(), status.getOk());
+                        Log.v(NotificationServiceImpl.class.getSimpleName(), status.getOk());
                     }
                 });
     }
 
     @Override
     public Observable<Integer> loadRemoteNotifications() {
-        final List<String> existingRules = new ArrayList<String>();
-        List<TMWRule> rules = new Select().from(TMWRule.class).execute();
-        for (TMWRule rule : rules) {
-            existingRules.add(rule.dbId);
-        }
-
         return notificationApi.getAllNotifications(new DbSearch(Storage.loadUserId()))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbDocuments<DbNotification>, Integer>() {
                     @Override
                     public Integer call(DbDocuments<DbNotification> docs) {
                         if (!docs.getDocuments().isEmpty()) {
                             for (DbNotification notif : docs.getDocuments()) {
-                                if (existingRules.contains(notif.getRuleId()))
-                                    DataMapper.toRuleNotification(notif).save();
+                                DataMapper.toRuleNotification(notif).save();
                             }
 
                             deleteNotifications(docs.getDocuments());
@@ -93,7 +86,30 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<TMWNotification> getLocalNotifications(int offset) {
-        return new Select().from(TMWNotification.class).orderBy("timestamp DESC").offset(offset)
-                .limit(MIN_LIMIT).execute();
+        List<String> currentRuleIds = new ArrayList<>();
+        List<TMWRule> rules = new Select().from(TMWRule.class).execute();
+        for (TMWRule rule : rules) {
+            currentRuleIds.add(rule.dbId);
+        }
+
+        if(currentRuleIds.isEmpty()){
+            new Delete().from(TMWNotification.class).execute();
+            return new ArrayList<>();
+        }
+
+        List<TMWNotification> notifications = new Select().from(TMWNotification.class)
+                .orderBy("timestamp DESC")
+                .offset(offset)
+                .limit(MIN_LIMIT)
+                .execute();
+
+        ListIterator<TMWNotification> iterator = notifications.listIterator();
+        while (iterator.hasNext()) {
+            TMWNotification notif = iterator.next();
+            if (!currentRuleIds.contains(notif.ruleId))
+                notif.delete();
+        }
+
+        return notifications;
     }
 }

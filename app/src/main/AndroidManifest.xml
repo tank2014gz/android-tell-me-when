@@ -38,7 +38,7 @@
             android:value="TMW.db"/>
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="5"/>
+            android:value="6"/>
 
         <activity
             android:name=".app.MainActivity"

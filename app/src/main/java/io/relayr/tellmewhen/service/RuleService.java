@@ -11,8 +11,9 @@ public interface RuleService {
 
     public Observable<Boolean> updateRule(TMWRule rule);
 
-    public Observable<Boolean> deleteRule(TMWRule rule);
+    public Observable<Boolean> deleteRule(String id, String revId);
 
     public Observable<List<TMWRule>> loadRemoteRules();
 
+    public Observable<Boolean> refreshRule(String ruleId);
 }

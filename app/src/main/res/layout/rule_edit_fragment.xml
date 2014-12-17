@@ -11,7 +11,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/default_object_height"
-            android:background="@drawable/edit_button_selector"
+            android:background="@drawable/default_selector"
             android:paddingLeft="@dimen/default_object_padding"
             android:paddingRight="@dimen/default_object_padding"
             android:layout_gravity="center_vertical"
@@ -37,7 +37,7 @@
         <RelativeLayout
             android:id="@+id/ref_rule_name_edit"
             android:layout_width="match_parent"
-            android:background="@drawable/edit_button_selector"
+            android:background="@drawable/default_selector"
             android:layout_height="@dimen/default_object_height"
             android:paddingLeft="@dimen/default_object_padding"
             android:paddingRight="@dimen/default_object_padding">
@@ -62,7 +62,7 @@
         <RelativeLayout
             android:id="@+id/ref_transmitter_edit"
             android:layout_width="match_parent"
-            android:background="@drawable/edit_button_selector"
+            android:background="@drawable/default_selector"
             android:layout_height="@dimen/default_object_height"
             android:paddingLeft="@dimen/default_object_padding"
             android:paddingRight="@dimen/default_object_padding">
@@ -102,7 +102,8 @@
         <RelativeLayout
             android:id="@+id/ref_sensor_edit"
             android:layout_width="match_parent"
-            android:background="@drawable/edit_button_selector"
+            android:background="@drawable/default_selector"
+            android:gravity="center_vertical"
             android:layout_height="@dimen/default_object_height"
             android:paddingLeft="@dimen/default_object_padding"
             android:paddingRight="@dimen/default_object_padding">
@@ -114,31 +115,16 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"/>
 
-            <LinearLayout
+            <io.relayr.commons.widget.CustomTextView
+                android:id="@+id/ref_sensor_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_marginLeft="@dimen/default_object_height"
+                android:layout_toRightOf="@id/ref_sensor_icon"
+                android:textSize="@dimen/default_object_title_text_size"
+                android:layout_marginLeft="@dimen/default_object_padding"
+                android:textAllCaps="true"
                 android:layout_centerVertical="true"
-                android:orientation="vertical">
-
-                <io.relayr.commons.widget.CustomTextView
-                    android:id="@+id/ref_sensor_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/default_object_title_text_size"
-                    android:textAllCaps="true"
-                    android:gravity="center_vertical"
-                    style="@style/NormalText"/>
-
-                <io.relayr.commons.widget.CustomTextView
-                    android:id="@+id/ref_sensor_info"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/default_object_subtitle_text_size"
-                    android:gravity="center_vertical"
-                    style="@style/NormalText"/>
-            </LinearLayout>
+                style="@style/NormalText"/>
 
             <include
                 layout="@layout/view_edit_button"/>
@@ -150,7 +136,7 @@
             android:id="@+id/ref_rule_value_edit"
             android:layout_width="match_parent"
             android:layout_height="@dimen/default_object_height"
-            android:background="@drawable/edit_button_selector"
+            android:background="@drawable/default_selector"
             android:paddingLeft="@dimen/default_object_padding"
             android:paddingRight="@dimen/default_object_padding">
 

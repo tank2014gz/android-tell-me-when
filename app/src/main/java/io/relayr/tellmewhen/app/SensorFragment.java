@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -16,9 +15,10 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.adapter.SensorAdapter;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
@@ -32,7 +32,7 @@ public class SensorFragment extends WhatFragment {
 
     private SensorType mSensorType;
     private Subscription mDevicesSubscription = Subscriptions.empty();
-    private List<TransmitterDevice> mTransmitters = new ArrayList<TransmitterDevice>();
+    private List<TransmitterDevice> mDevices = null;
 
     public static SensorFragment newInstance() {
         return new SensorFragment();
@@ -47,6 +47,9 @@ public class SensorFragment extends WhatFragment {
         ButterKnife.inject(this, view);
 
         mListView.setAdapter(new SensorAdapter(this.getActivity()));
+
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_SENSOR :
+                LogUtil.CREATE_RULE_SENSOR);
 
         return view;
     }
@@ -73,6 +76,9 @@ public class SensorFragment extends WhatFragment {
 
     @Override
     void onBackPressed() {
+        LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_CANCEL :
+                LogUtil.CREATE_RULE_CANCEL);
+
         switchToEdit(FragmentName.TRANS);
     }
 
@@ -84,7 +90,6 @@ public class SensorFragment extends WhatFragment {
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
                     @Override
                     public void onCompleted() {
-
                     }
 
                     @Override
@@ -93,23 +98,32 @@ public class SensorFragment extends WhatFragment {
                     }
 
                     @Override
-                    public void onNext(List<TransmitterDevice> transmitterDevices) {
-                        mTransmitters = transmitterDevices;
+                    public void onNext(List<TransmitterDevice> devices) {
+                        mDevices = devices;
                         saveSensorData();
                     }
                 });
     }
 
     private void saveSensorData() {
-        if (mSensorType != null && !mTransmitters.isEmpty()) {
-            for (TransmitterDevice transmitter : mTransmitters) {
-                if (transmitter.getModel().equals(mSensorType.getModel())) {
-                    Storage.getRule().sensorType = mSensorType.ordinal();
-                    Storage.getRule().sensorId = transmitter.id;
+        if (mSensorType == null) return;
+        if (mDevices == null) return;
 
-                    if (Storage.isRuleEditing()) switchTo(FragmentName.RULE_VALUE_EDIT);
-                    else switchTo(FragmentName.RULE_VALUE_CREATE);
-                }
+        if (mDevices.isEmpty()) {
+            showToast(R.string.no_active_devices);
+            return;
+        }
+
+        for (TransmitterDevice transmitter : mDevices) {
+            if (transmitter.getModel().equals(mSensorType.getModel())) {
+                Storage.getRule().sensorType = mSensorType.ordinal();
+                Storage.getRule().sensorId = transmitter.id;
+
+                LogUtil.logMessage(Storage.isRuleEditing() ? LogUtil.EDIT_RULE_FINISH :
+                        LogUtil.CREATE_RULE_FINISH);
+
+                if (Storage.isRuleEditing()) switchTo(FragmentName.RULE_VALUE_EDIT);
+                else switchTo(FragmentName.RULE_VALUE_CREATE);
             }
         }
     }

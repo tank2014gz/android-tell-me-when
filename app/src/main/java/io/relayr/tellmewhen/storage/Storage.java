@@ -5,12 +5,14 @@ import android.content.SharedPreferences;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import io.relayr.model.Transmitter;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
-import io.relayr.tellmewhen.util.SensorType;
+import io.relayr.tellmewhen.consts.SensorType;
 
 public class Storage {
 
@@ -19,16 +21,16 @@ public class Storage {
     private static final String USER_ONBOADRED = "user.onboarded";
     private static final String START_SCREEN = "start.screen";
     private static final String NOTIFICATION_VISIBILITY = "notifications.visibility";
-    private static final String SHOW_NOTIFICATIONS = "show.notifications";
 
     private static final String PROPERTY_REG_ID = "registration_id";
+    private static final String PROPERTY_OLD_REG_ID = "old_registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
 
     private static SharedPreferences sStorage = null;
 
     private static TMWRule createRule = null;
     private static Pair<String, SensorType> originalSensor = null;
-    private static List<Transmitter> sTransmitters = new ArrayList<Transmitter>();
+    private static List<Transmitter> sTransmitters = new ArrayList<>();
     private static TMWNotification mNotificationDetails;
 
     private Storage(Context context) {
@@ -61,6 +63,7 @@ public class Storage {
 
     public static void prepareRuleForCreate() {
         createRule = new TMWRule();
+        createRule.modified = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
     }
 
     public static TMWRule getRule() {
@@ -73,7 +76,9 @@ public class Storage {
 
     public static void prepareRuleForEdit(TMWRule rule) {
         createRule = rule;
-        originalSensor = new Pair<String, SensorType>(rule.sensorId, rule.getSensorType());
+        createRule.modified = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
+
+        originalSensor = new Pair<>(rule.sensorId, rule.getSensorType());
     }
 
     public static boolean isRuleEditing() {
@@ -81,6 +86,8 @@ public class Storage {
     }
 
     public static void saveGmsRegId(String regId) {
+        if (loadGmsRegId() != null && regId != null && !regId.equals(loadGmsRegId()))
+            save(PROPERTY_OLD_REG_ID, loadGmsRegId());
         save(PROPERTY_REG_ID, regId);
     }
 
@@ -90,8 +97,12 @@ public class Storage {
         editor.apply();
     }
 
-    public static String loadGmsRegistrationId() {
+    public static String loadGmsRegId() {
         return sStorage.getString(PROPERTY_REG_ID, null);
+    }
+
+    public static String loadOldGmsRegId() {
+        return sStorage.getString(PROPERTY_OLD_REG_ID, null);
     }
 
     public static int loadGmsAppVersion() {

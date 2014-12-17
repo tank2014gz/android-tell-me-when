@@ -7,10 +7,11 @@ import android.view.ViewGroup;
 
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.views.RuleValueView;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
-import io.relayr.tellmewhen.util.OperatorType;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.consts.OperatorType;
 
 public class RuleValueCreateFragment extends WhatFragment {
 
@@ -26,10 +27,10 @@ public class RuleValueCreateFragment extends WhatFragment {
 
         RuleValueView view;
         if (rule.operatorType != -1 && rule.value != null)
-            view = new RuleValueView(getActivity(), rule.getSensorType(),
+            view = new RuleValueView(getActivity(), true, rule.getSensorType(),
                     rule.getOperatorType(), rule.value);
         else
-            view = new RuleValueView(getActivity(), rule.getSensorType(),
+            view = new RuleValueView(getActivity(), true, rule.getSensorType(),
                     OperatorType.GREATER, null);
 
         view.setOnDoneClickListener(new RuleValueView.OnDoneClickListener() {
@@ -38,11 +39,15 @@ public class RuleValueCreateFragment extends WhatFragment {
                 Storage.getRule().value = value;
                 Storage.getRule().operatorType = mCurrentOperator.ordinal();
 
+                LogUtil.logMessage(LogUtil.CREATE_RULE_FINISH);
+
                 switchTo(FragmentName.RULE_NAME);
             }
         });
 
         view.setButtonText(R.string.button_next);
+
+        LogUtil.logMessage(LogUtil.CREATE_RULE_THRESHOLD);
 
         return view;
     }
@@ -51,6 +56,8 @@ public class RuleValueCreateFragment extends WhatFragment {
     void onBackPressed() {
         Storage.getRule().value = null;
         Storage.getRule().operatorType = -1;
+
+        LogUtil.logMessage(LogUtil.CREATE_RULE_CANCEL);
 
         switchTo(FragmentName.SENSOR);
     }

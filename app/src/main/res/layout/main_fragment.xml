@@ -3,7 +3,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/background"
-                android:animateLayoutChanges="true"
                 tools:context=".MainActivity">
 
     <fr.castorflex.android.smoothprogressbar.SmoothProgressBar
@@ -29,6 +28,7 @@
         android:divider="@drawable/divider"
         android:footerDividersEnabled="true"
         android:headerDividersEnabled="true"
+        android:listSelector="@drawable/default_selector"
         android:visibility="gone"/>
 
     <de.timroes.android.listview.EnhancedListView
@@ -41,6 +41,7 @@
         android:divider="@drawable/divider"
         android:footerDividersEnabled="true"
         android:headerDividersEnabled="true"
+        android:listSelector="@drawable/default_selector"
         android:visibility="gone"/>
 
     <LinearLayout

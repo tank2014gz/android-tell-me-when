@@ -39,7 +39,9 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
             api = getApi(context);
 
         if (intent.getAction().equals(GcmIntentService.NOTIFICATION_ACTION_DELETE)) {
-            loadNotifications().subscribe(new Subscriber<Integer>() {
+
+            GcmIntentService.pushedRules.clear();
+            loadRemoteNotifications().subscribe(new Subscriber<Integer>() {
                 @Override
                 public void onCompleted() {
                 }
@@ -51,14 +53,14 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
                 @Override
                 public void onNext(Integer integer) {
-                    Log.e(TAG, "Loaded " + integer + " notifications.");
+                    Log.d(TAG, "Loaded " + integer + " notifications.");
                 }
             });
         }
     }
 
-    private Observable<Integer> loadNotifications() {
-        final List<String> existingRules = new ArrayList<String>();
+    private Observable<Integer> loadRemoteNotifications() {
+        final List<String> existingRules = new ArrayList<>();
         List<TMWRule> rules = new Select().from(TMWRule.class).execute();
         for (TMWRule rule : rules) {
             existingRules.add(rule.dbId);
@@ -83,14 +85,14 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
                 });
     }
 
-    public void deleteNotifications(List<DbNotification> notifications) {
-        List<DbBulkDelete> deleteItems = new ArrayList<DbBulkDelete>();
+    private void deleteNotifications(List<DbNotification> notifications) {
+        List<DbBulkDelete> deleteItems = new ArrayList<>();
 
         for (DbNotification notif : notifications) {
             deleteItems.add(new DbBulkDelete(notif.getDbId(), notif.getDrRev()));
         }
 
-        api.deleteNotifications(new DbDocuments<DbBulkDelete>(deleteItems))
+        api.deleteNotifications(new DbDocuments<>(deleteItems))
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Subscriber<DbStatus>() {
                     @Override
@@ -99,12 +101,12 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(TAG, "Error while deleting notifications");
+                        Log.d(TAG, "Error while deleting notifications");
                     }
 
                     @Override
                     public void onNext(DbStatus status) {
-                        Log.e(TAG, "Deleted remote notifications: " + status.getOk());
+                        Log.d(TAG, "Deleted remote notifications: " + status.getOk());
                     }
                 });
     }

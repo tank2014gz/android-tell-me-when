@@ -16,7 +16,7 @@ import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.service.NotificationService;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.util.FragmentName;
+import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.util.WhenEvents;
 
 public abstract class WhatFragment extends Fragment {
@@ -58,11 +58,11 @@ public abstract class WhatFragment extends Fragment {
     }
 
     protected void showToast(int stringId) {
-        if(getActivity() != null)
-        Toast.makeText(getActivity(), getActivity().getString(stringId),   Toast.LENGTH_SHORT).show();
+        if (getActivity() != null)
+            Toast.makeText(getActivity(), getActivity().getString(stringId), Toast.LENGTH_SHORT).show();
     }
 
-    protected void inject(Object o){
+    protected void inject(Object o) {
         TellMeWhenApplication.objectGraph.inject(o);
     }
 
