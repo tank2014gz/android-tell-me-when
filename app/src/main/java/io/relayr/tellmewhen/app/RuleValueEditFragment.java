@@ -5,10 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import io.relayr.RelayrSdk;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.views.RuleValueView;
-import io.relayr.tellmewhen.consts.LogUtil;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.consts.FragmentName;

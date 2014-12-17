@@ -1,4 +1,4 @@
-package io.relayr.tellmewhen.consts;
+package io.relayr.tellmewhen.util;
 
 import io.relayr.RelayrSdk;
 
@@ -30,6 +30,6 @@ public class LogUtil {
     public static final String VIEW_WITH_PUSH = "VIEW push notification";
 
     public static void logMessage(String msg) {
-//        RelayrSdk.logMessage(PREFIX + ": " + msg);
+        RelayrSdk.logMessage(PREFIX + ": " + msg);
     }
 }

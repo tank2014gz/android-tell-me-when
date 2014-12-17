@@ -56,6 +56,7 @@
     <string name="error_loading_devices">Fehler beim Laden der Sensoren</string>
     <string name="error_loading_rules">Fehler beim Laden der Regeln</string>
     <string name="error_loading_notifications">Fehler beim Laden der Benachrichtigungen</string>
+    <string name="error_finding_device">Kein Sensor gefunden</string>
     <string name="today">Heute</string>
     <string name="please_open_app">Öffne den App um neue Benachrichtigungen anzusehen</string>
     <string name="current_reading">Aktueller Messwert des Sensors</string>

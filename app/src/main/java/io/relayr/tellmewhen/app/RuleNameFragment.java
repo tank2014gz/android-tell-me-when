@@ -15,9 +15,8 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import io.relayr.RelayrSdk;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.consts.LogUtil;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.util.SensorUtil;
@@ -121,6 +120,8 @@ public class RuleNameFragment extends WhatFragment {
                             }
                         });
             }
+        }else{
+            button.setEnabled(true);
         }
     }
 

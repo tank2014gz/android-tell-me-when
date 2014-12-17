@@ -2,16 +2,20 @@ package io.relayr.tellmewhen.service.notif;
 
 import android.util.Log;
 
+import com.activeandroid.Model;
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.model.TMWNotification;
+import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.service.model.DataMapper;
 import io.relayr.tellmewhen.service.model.DbBulkDelete;
 import io.relayr.tellmewhen.service.model.DbSearch;
@@ -43,7 +47,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         notificationApi.deleteNotifications(new DbDocuments<>(deleteItems))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<DbStatus>() {
                     @Override
                     public void onCompleted() {
@@ -65,7 +68,6 @@ public class NotificationServiceImpl implements NotificationService {
     public Observable<Integer> loadRemoteNotifications() {
         return notificationApi.getAllNotifications(new DbSearch(Storage.loadUserId()))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<DbDocuments<DbNotification>, Integer>() {
                     @Override
                     public Integer call(DbDocuments<DbNotification> docs) {
@@ -84,10 +86,30 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<TMWNotification> getLocalNotifications(int offset) {
-        return new Select().from(TMWNotification.class)
+        List<String> currentRuleIds = new ArrayList<>();
+        List<TMWRule> rules = new Select().from(TMWRule.class).execute();
+        for (TMWRule rule : rules) {
+            currentRuleIds.add(rule.dbId);
+        }
+
+        if(currentRuleIds.isEmpty()){
+            new Delete().from(TMWNotification.class).execute();
+            return new ArrayList<>();
+        }
+
+        List<TMWNotification> notifications = new Select().from(TMWNotification.class)
                 .orderBy("timestamp DESC")
                 .offset(offset)
                 .limit(MIN_LIMIT)
                 .execute();
+
+        ListIterator<TMWNotification> iterator = notifications.listIterator();
+        while (iterator.hasNext()) {
+            TMWNotification notif = iterator.next();
+            if (!currentRuleIds.contains(notif.ruleId))
+                notif.delete();
+        }
+
+        return notifications;
     }
 }

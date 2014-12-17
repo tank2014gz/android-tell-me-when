@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 
 import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
+import com.activeandroid.query.Select;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -33,7 +34,7 @@ import io.relayr.tellmewhen.app.views.WarningNoNotificationsView;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
 import io.relayr.tellmewhen.consts.FragmentName;
-import io.relayr.tellmewhen.consts.LogUtil;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
@@ -260,7 +261,7 @@ public class MainFragment extends WhatFragment {
 
                     @Override
                     public void discard() {
-                        ruleService.deleteRule(item)
+                        ruleService.deleteRule(item.dbId, item.drRev)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Subscriber<Boolean>() {
@@ -291,8 +292,25 @@ public class MainFragment extends WhatFragment {
         mRulesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                Storage.prepareRuleForEdit(mRulesAdapter.getItem(pos));
-                switchTo(FragmentName.RULE_EDIT);
+                ruleService.refreshRule(mRulesAdapter.getItem(pos).dbId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<Boolean>() {
+                            @Override
+                            public void onCompleted() {
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                showToast(R.string.error_loading_rules);
+                            }
+
+                            @Override
+                            public void onNext(Boolean status) {
+                                if (status)
+                                    switchTo(FragmentName.RULE_EDIT);
+                            }
+                        });
             }
         });
 
@@ -335,12 +353,19 @@ public class MainFragment extends WhatFragment {
             }
         });
 
-
         mNotificationsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                Storage.showNotification(mNotificationsAdapter.getItem(pos));
-                switchTo(FragmentName.NOTIFICATION_DETAILS);
+                TMWRule rule = new Select().from(TMWRule.class)
+                        .where("dbId = ?", mNotificationsAdapter.getItem(pos).ruleId)
+                        .executeSingle();
+
+                if (rule != null) {
+                    Storage.showNotification(mNotificationsAdapter.getItem(pos));
+                    switchTo(FragmentName.NOTIFICATION_DETAILS);
+                } else {
+                    mNotificationsAdapter.notifyDataSetChanged();
+                }
             }
         });
 

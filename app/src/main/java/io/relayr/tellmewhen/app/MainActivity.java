@@ -25,7 +25,7 @@ import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.consts.FragmentName;
-import io.relayr.tellmewhen.consts.LogUtil;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.gcm.GcmUtils;
 import io.relayr.tellmewhen.model.TMWNotification;

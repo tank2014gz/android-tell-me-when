@@ -45,13 +45,10 @@ public class NotificationsAdapter extends ArrayAdapter<TMWNotification> {
             holder.value.setText(SensorUtil.buildRuleValue(rule));
             holder.info.setText(getContext().getString(R.string.notif_triggering_value) + ": " +
                     SensorUtil.buildNotificationValue(rule, item));
-        } else {
-            holder.name.setText(getContext().getString(R.string.unknown));
-            holder.info.setText(getContext().getString(R.string.notif_triggering_value) + ": " + item.value);
-        }
 
-        holder.date.setText(NotificationTimeUtil.getDate(getContext(), item));
-        holder.time.setText(NotificationTimeUtil.getTime(item));
+            holder.date.setText(NotificationTimeUtil.getDate(getContext(), item));
+            holder.time.setText(NotificationTimeUtil.getTime(item));
+        }
 
         return view;
     }

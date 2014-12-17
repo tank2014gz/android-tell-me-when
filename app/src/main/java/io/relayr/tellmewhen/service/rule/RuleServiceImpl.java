@@ -12,6 +12,7 @@ import javax.inject.Named;
 
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.model.TMWNotification;
+import io.relayr.tellmewhen.model.TMWPush;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.service.RuleService;
 import io.relayr.tellmewhen.service.model.DataMapper;
@@ -22,21 +23,20 @@ import io.relayr.tellmewhen.service.model.DbStatus;
 import io.relayr.tellmewhen.storage.Storage;
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class RuleServiceImpl implements RuleService {
 
-    private final String mGcmRegistration;
-    private final String mOldGcmRegistration;
+    private final String mGcmRegId;
+    private final String mOldGcmRegId;
 
     @Inject @Named("ruleApi") RuleApi ruleApi;
 
     public RuleServiceImpl() {
         TellMeWhenApplication.objectGraph.inject(this);
-        mGcmRegistration = Storage.loadGmsRegId();
-        mOldGcmRegistration = Storage.loadOldGmsRegId();
+        mGcmRegId = Storage.loadGmsRegId();
+        mOldGcmRegId = Storage.loadOldGmsRegId();
     }
 
     @Override
@@ -71,15 +71,16 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
-    public Observable<Boolean> deleteRule(final TMWRule rule) {
-        return ruleApi.deleteRule(rule.dbId, rule.drRev)
+    public Observable<Boolean> deleteRule(final String id, String revId) {
+        return ruleApi.deleteRule(id, revId)
                 .subscribeOn(Schedulers.io())
                 .map(new Func1<DbStatus, Boolean>() {
                     @Override
                     public Boolean call(DbStatus dbStatus) {
                         boolean status = dbStatus.getOk().toLowerCase().equals("true");
                         if (status)
-                            new Delete().from(TMWNotification.class).where("ruleId = ?", rule.dbId).execute();
+                            new Delete().from(TMWNotification.class).where("ruleId = ?",
+                                    id).execute();
 
                         return status;
                     }
@@ -107,21 +108,43 @@ public class RuleServiceImpl implements RuleService {
                 });
     }
 
+    @Override
+    public Observable<Boolean> refreshRule(final String ruleId) {
+        return ruleApi.getAllRules(new DbSearch(Storage.loadUserId()))
+                .subscribeOn(Schedulers.io())
+                .map(new Func1<DbDocuments<DbRule>, Boolean>() {
+                    @Override
+                    public Boolean call(DbDocuments<DbRule> docs) {
+                        for (DbRule dbRule : docs.getDocuments()) {
+                            if (dbRule.getId().equals(ruleId)) {
+                                new Delete().from(TMWRule.class).where("dbId = ?", ruleId).execute();
+
+                                TMWRule rule = DataMapper.toRule(dbRule);
+                                rule.save();
+                                Storage.prepareRuleForEdit(rule);
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }
+                });
+    }
+
     private void checkGcmNotification(DbRule dbRule) {
         boolean registered = false;
         DbRule.Notification notifToRemove = null;
 
         List<DbRule.Notification> notifications = dbRule.getNotifications();
         for (DbRule.Notification notification : notifications) {
-            if (notification.getKey().equals(mGcmRegistration)) registered = true;
-
-            if (mOldGcmRegistration != null && notification.getKey().equals(mOldGcmRegistration))
+            if (notification.getKey().equals(mGcmRegId)) registered = true;
+            else if (mOldGcmRegId != null && notification.getKey().equals(mOldGcmRegId))
                 notifToRemove = notification;
         }
 
         if (notifToRemove != null) notifications.remove(notifToRemove);
 
-        if (!registered) notifications.add(new DbRule.Notification("gcm", Storage.loadGmsRegId()));
+        if (!registered) notifications.add(new DbRule.Notification("gcm", mGcmRegId));
 
         if (!registered || notifToRemove != null)
             updateRuleNotifications(dbRule);

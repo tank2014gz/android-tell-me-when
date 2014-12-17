@@ -22,7 +22,7 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.consts.LogUtil;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.consts.FragmentName;

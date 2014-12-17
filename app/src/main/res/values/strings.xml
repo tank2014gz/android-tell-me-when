@@ -56,6 +56,7 @@
     <string name="error_loading_devices">Error loading sensor devices</string>
     <string name="error_loading_rules">Error loading rules</string>
     <string name="error_loading_notifications">Error loading notifications</string>
+    <string name="error_finding_device">Device not found</string>
     <string name="today">Today</string>
     <string name="please_open_app">Open the application to see your latest notifications</string>
     <string name="current_reading">Current sensor value</string>

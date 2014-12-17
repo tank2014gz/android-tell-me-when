@@ -162,6 +162,9 @@ public class DbRule implements Serializable {
         public String getKey() {
             return key;
         }
+        public String getType() {
+            return type;
+        }
 
         @Override
         public boolean equals(Object o) {
