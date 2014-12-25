@@ -8,6 +8,8 @@ PLEASE NOTE: The purpose of this application is to exemplify a useful and easy-t
 
 For information about our sensors, have a look at our [Making Sense of Sensors](https://developer.relayr.io/documents/Welcome/Sensors) page.
 
+The app is available for download from the Google Play store at [this](https://play.google.com/store/apps/details?id=io.relayr.tellmewhen) link
+
 ### 1. Logging in
 
 Start by logging in with your relayr credentials
