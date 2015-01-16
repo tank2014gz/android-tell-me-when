@@ -18,7 +18,7 @@
         style="@style/WunderBarProgressBar"
         />
 
-    <de.timroes.android.listview.EnhancedListView
+    <ListView
         android:id="@+id/notifications_list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
         android:listSelector="@drawable/default_selector"
         android:visibility="gone"/>
 
-    <de.timroes.android.listview.EnhancedListView
+    <ListView
         android:id="@+id/rules_list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

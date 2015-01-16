@@ -12,10 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ListView;
 
 import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
+import com.hudomju.swipe.SwipeToDismissTouchListener;
+import com.hudomju.swipe.adapter.ListViewAdapter;
+import com.hudomju.swipe.adapter.ViewAdapter;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -25,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.timroes.android.listview.EnhancedListView;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.adapter.NotificationsAdapter;
@@ -34,11 +37,12 @@ import io.relayr.tellmewhen.app.views.WarningNoNotificationsView;
 import io.relayr.tellmewhen.app.views.WarningNoRulesView;
 import io.relayr.tellmewhen.app.views.WarningOnBoardView;
 import io.relayr.tellmewhen.consts.FragmentName;
-import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.LogUtil;
+import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -49,8 +53,8 @@ import rx.subscriptions.Subscriptions;
 public class MainFragment extends WhatFragment {
 
     @InjectView(R.id.warning_layout) ViewGroup mWarningLayout;
-    @InjectView(R.id.rules_list_view) EnhancedListView mRulesListView;
-    @InjectView(R.id.notifications_list_view) EnhancedListView mNotificationsListView;
+    @InjectView(R.id.rules_list_view) ListView mRulesListView;
+    @InjectView(R.id.notifications_list_view) ListView mNotificationsListView;
 
     @InjectView(R.id.tab_rules) View mTabRules;
     @InjectView(R.id.tab_notifications) View mTabNotifications;
@@ -70,6 +74,9 @@ public class MainFragment extends WhatFragment {
     private boolean mLoadingRules = false;
 
     private ScheduledExecutorService mNotifScheduler;
+
+    private SwipeToDismissTouchListener<ListViewAdapter> rulesListener;
+    private SwipeToDismissTouchListener<ListViewAdapter> notificationListener;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -241,80 +248,78 @@ public class MainFragment extends WhatFragment {
     }
 
     private void initRulesList() {
-        mRulesListView.setAdapter(mRulesAdapter);
-        mRulesListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
-            @Override
-            public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
-                final TMWRule item = mRulesAdapter.getItem(position);
-
-                mRulesAdapter.remove(item);
-                if (mRulesAdapter.isEmpty()) showRulesWarning();
-
-                return new EnhancedListView.Undoable() {
-                    @Override
-                    public void undo() {
-                        toggleList(true);
-
-                        mRulesAdapter.insert(item, position);
-                        mRulesAdapter.sortRules();
-                    }
-
-                    @Override
-                    public void discard() {
-                        ruleService.deleteRule(item.dbId, item.drRev)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Subscriber<Boolean>() {
-                                    @Override
-                                    public void onCompleted() {
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        undo();
-                                    }
-
-                                    @Override
-                                    public void onNext(Boolean status) {
-                                        if (!status) {
-                                            undo();
-                                        } else {
-                                            LogUtil.logMessage(LogUtil.DELETE_RULE);
-                                            item.delete();
-                                        }
-                                    }
-                                });
-                    }
-                };
-            }
-        });
-
-        mRulesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                ruleService.refreshRule(mRulesAdapter.getItem(pos).dbId)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<Boolean>() {
+        rulesListener =
+                new SwipeToDismissTouchListener<>(
+                        new ListViewAdapter(mRulesListView),
+                        new SwipeToDismissTouchListener.DismissCallbacks<ListViewAdapter>() {
                             @Override
-                            public void onCompleted() {
+                            public boolean canDismiss(int pos) {
+                                return true;
                             }
 
                             @Override
-                            public void onError(Throwable e) {
-                                showToast(R.string.error_loading_rules);
-                            }
+                            public void onDismiss(ListViewAdapter viewAdapter, int pos) {
+                                final TMWRule item = mRulesAdapter.getItem(pos);
+                                mRulesAdapter.remove(item);
 
-                            @Override
-                            public void onNext(Boolean status) {
-                                if (status)
-                                    switchTo(FragmentName.RULE_EDIT);
+                                if (mRulesAdapter.isEmpty()) showRulesWarning();
+
+                                ruleService.deleteRule(item.dbId, item.drRev)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(new Subscriber<Boolean>() {
+                                            @Override
+                                            public void onCompleted() {
+                                            }
+
+                                            @Override
+                                            public void onError(Throwable e) {
+                                            }
+
+                                            @Override
+                                            public void onNext(Boolean status) {
+                                                if (status) {
+                                                    LogUtil.logMessage(
+                                                            String.format(LogUtil.DELETE_RULE,
+                                                                    SensorUtil.buildRuleValue(item)));
+                                                    item.delete();
+                                                }
+                                            }
+                                        });
                             }
                         });
+
+        mRulesListView.setAdapter(mRulesAdapter);
+        mRulesListView.setOnTouchListener(rulesListener);
+        mRulesListView.setOnScrollListener((AbsListView.OnScrollListener) rulesListener.makeScrollListener());
+        mRulesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView parent, View view, int pos, long id) {
+                if (rulesListener.existPendingDismisses()) {
+                    rulesListener.undoPendingDismiss();
+                } else {
+                    ruleService.refreshRule(mRulesAdapter.getItem(pos).dbId)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Subscriber<Boolean>() {
+                                @Override
+                                public void onCompleted() {
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    showToast(R.string.error_loading_rules);
+                                }
+
+                                @Override
+                                public void onNext(Boolean status) {
+                                    if (status) switchTo(FragmentName.RULE_EDIT);
+                                }
+                            });
+                }
             }
         });
 
-        initList(mRulesListView);
         refreshMenuItems();
     }
 
@@ -326,61 +331,53 @@ public class MainFragment extends WhatFragment {
     }
 
     private void initNotificationList() {
+        notificationListener =
+                new SwipeToDismissTouchListener<>(
+                        new ListViewAdapter(mNotificationsListView),
+                        new SwipeToDismissTouchListener.DismissCallbacks<ListViewAdapter>() {
+                            @Override
+                            public boolean canDismiss(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismiss(ListViewAdapter viewAdapter, int position) {
+                                LogUtil.logMessage(LogUtil.DELETE_NOTIFICATION);
+
+                                final TMWNotification item = mNotificationsAdapter.getItem(position);
+
+                                mNotificationsAdapter.remove(item);
+                                if (mNotificationsAdapter.isEmpty()) showNoNotificationsWarning();
+
+                                item.delete();
+                            }
+                        });
+
         mNotificationsListView.setAdapter(mNotificationsAdapter);
-        mNotificationsListView.setDismissCallback(new de.timroes.android.listview.EnhancedListView.OnDismissCallback() {
-            @Override
-            public EnhancedListView.Undoable onDismiss(EnhancedListView listView, final int position) {
-                final TMWNotification item = mNotificationsAdapter.getItem(position);
-                mNotificationsAdapter.remove(item);
-
-                if (mNotificationsAdapter.isEmpty()) showNoNotificationsWarning();
-
-                return new EnhancedListView.Undoable() {
-                    @Override
-                    public void undo() {
-                        toggleList(false);
-
-                        mNotificationsAdapter.add(item);
-                        mNotificationsAdapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void discard() {
-                        LogUtil.logMessage(LogUtil.DELETE_NOTIFICATION);
-                        item.delete();
-                    }
-                };
-            }
-        });
-
+        mNotificationsListView.setOnTouchListener(notificationListener);
+        mNotificationsListView.setOnScrollListener((AbsListView.OnScrollListener) notificationListener.makeScrollListener());
         mNotificationsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                TMWRule rule = new Select().from(TMWRule.class)
-                        .where("dbId = ?", mNotificationsAdapter.getItem(pos).ruleId)
-                        .executeSingle();
-
-                if (rule != null) {
-                    Storage.showNotification(mNotificationsAdapter.getItem(pos));
-                    switchTo(FragmentName.NOTIFICATION_DETAILS);
+            public void onItemClick(AdapterView parent, View view, int pos, long id) {
+                if (notificationListener.existPendingDismisses()) {
+                    notificationListener.undoPendingDismiss();
                 } else {
-                    mNotificationsAdapter.notifyDataSetChanged();
+                    TMWRule rule = new Select().from(TMWRule.class)
+                            .where("dbId = ?", mNotificationsAdapter.getItem(pos).ruleId)
+                            .executeSingle();
+
+                    if (rule != null) {
+                        Storage.showNotification(mNotificationsAdapter.getItem(pos));
+                        switchTo(FragmentName.NOTIFICATION_DETAILS);
+                    } else {
+                        mNotificationsAdapter.notifyDataSetChanged();
+                    }
                 }
             }
         });
 
-        initList(mNotificationsListView);
         enableDynamicLoading();
         refreshMenuItems();
-    }
-
-    private void initList(EnhancedListView list) {
-        list.setSwipingLayout(R.id.main_list_object);
-        list.setUndoStyle(EnhancedListView.UndoStyle.SINGLE_POPUP);
-        list.enableSwipeToDismiss();
-        list.setUndoHideDelay(3000);
-        list.setRequireTouchBeforeDismiss(false);
-        list.setSwipeDirection(EnhancedListView.SwipeDirection.START);
     }
 
     private void enableDynamicLoading() {
@@ -461,6 +458,7 @@ public class MainFragment extends WhatFragment {
                         stopProgressBar();
                         showToast(R.string.error_loading_rules);
                         mLoadingRules = false;
+                        rulesListener.processPendingDismisses();
                     }
 
                     @Override
@@ -468,6 +466,7 @@ public class MainFragment extends WhatFragment {
                         mRulesAdapter.clear();
                         mRulesAdapter.addAll(rules);
                         mRulesAdapter.sortRules();
+                        rulesListener.processPendingDismisses();
 
                         refreshMenuItems();
 
@@ -510,6 +509,7 @@ public class MainFragment extends WhatFragment {
                         stopProgressBar();
                         showToast(R.string.error_loading_notifications);
                         mLoadingNotifications = false;
+                        notificationListener.processPendingDismisses();
                     }
 
                     @Override
@@ -517,6 +517,7 @@ public class MainFragment extends WhatFragment {
                         if (!dynamic || totalNotifications > 0) {
                             mNotificationsAdapter.clear();
                             mNotificationsAdapter.addAll(notificationService.getLocalNotifications(0));
+                            notificationListener.processPendingDismisses();
 
                             if (mNotificationsAdapter.isEmpty()) {
                                 showNoNotificationsWarning();

@@ -44,10 +44,8 @@ public class ServiceUtil {
                         authorizationValue = encodeForBasicAuth(context, rulesCre);
                         request.addHeader("Authorization", authorizationValue);
                         request.addHeader("Content-Type", "application/json");
-
                     }
-                })
-                .build();
+                }).build();
     }
 
     public static String encodeForBasicAuth(Context context, boolean rulesCre) {

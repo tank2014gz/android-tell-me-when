@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -31,6 +32,7 @@ import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
@@ -54,7 +56,6 @@ public class RuleEditFragment extends WhatFragment {
 
     @InjectView(R.id.button_done) TextView mButtonDone;
 
-    private Subscription mWebSocketSubscription = Subscriptions.empty();
     private Subscription mDeviceSubscription = Subscriptions.empty();
 
     private String mDeviceId;
@@ -149,8 +150,8 @@ public class RuleEditFragment extends WhatFragment {
 
     private void saveRule() {
         ruleService.updateRule(Storage.getRule())
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.newThread())
                 .subscribe(new Subscriber<Boolean>() {
                     @Override
                     public void onCompleted() {
@@ -159,7 +160,7 @@ public class RuleEditFragment extends WhatFragment {
                     @Override
                     public void onError(Throwable e) {
                         saveError = true;
-                        mButtonDone.setEnabled(true);
+                        if (mButtonDone != null) mButtonDone.setEnabled(true);
                         showToast(R.string.error_saving_rule);
                     }
 
@@ -174,22 +175,21 @@ public class RuleEditFragment extends WhatFragment {
                             onError(new Throwable());
                         }
 
-                        mButtonDone.setEnabled(true);
+                        if (mButtonDone != null) mButtonDone.setEnabled(true);
                     }
                 });
     }
 
     private void unSubscribe() {
         if (!mDeviceSubscription.isUnsubscribed()) mDeviceSubscription.unsubscribe();
-        if (!mWebSocketSubscription.isUnsubscribed()) mWebSocketSubscription.unsubscribe();
         if (mDeviceId != null) RelayrSdk.getWebSocketClient().unSubscribe(mDeviceId);
     }
 
     private void loadDevice(String transmitterId, final SensorType sensor) {
         mDeviceSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(transmitterId)
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.newThread())
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
                     @Override
                     public void onCompleted() {
@@ -214,9 +214,9 @@ public class RuleEditFragment extends WhatFragment {
 
     private void subscribeForDeviceReadings(TransmitterDevice device, final SensorType sensor) {
         mDeviceId = device.id;
-        mWebSocketSubscription = RelayrSdk.getWebSocketClient()
-                .subscribe(device, new Subscriber<Object>() {
-
+        RelayrSdk.getWebSocketClient().subscribe(device)
+                .timeout(7, TimeUnit.SECONDS)
+                .subscribe(new Subscriber<Object>() {
                     @Override
                     public void onCompleted() {
                     }
@@ -233,10 +233,9 @@ public class RuleEditFragment extends WhatFragment {
                     public void onNext(Object o) {
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
 
-                        if (mCurrentSensorProgress != null) {
+                        if (mCurrentSensorProgress != null && mSensorValue != null) {
                             mCurrentSensorProgress.setVisibility(View.GONE);
                             mSensorValue.setVisibility(View.VISIBLE);
-
                             mSensorValue.setText(getString(R.string
                                     .current_reading) + ": " +
                                     SensorUtil.formatToUiValue(sensor, reading));

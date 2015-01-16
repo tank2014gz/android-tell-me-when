@@ -3,30 +3,19 @@ package io.relayr.tellmewhen.app.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.Comparator;
 
-import javax.inject.Inject;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.model.TMWRule;
-import io.relayr.tellmewhen.service.RuleService;
-import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.SensorUtil;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class RulesAdapter extends ArrayAdapter<TMWRule> {
 

@@ -1,57 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/main_list_object"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/default_object_height"
-                android:paddingLeft="@dimen/default_object_padding"
-                android:paddingRight="@dimen/default_object_padding"
-                android:layout_marginLeft="@dimen/default_object_padding"
-                android:layout_marginRight="@dimen/default_object_padding"
-                android:gravity="center_vertical"
-                android:layout_gravity="center_vertical"
-                android:descendantFocusability="blocksDescendants">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/lyt_container">
 
-    <ImageView
-        android:id="@+id/object_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="@dimen/default_object_padding"/>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
+    <RelativeLayout
+        android:id="@+id/main_list_object"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_object_height"
+        android:paddingLeft="@dimen/default_object_padding"
+        android:paddingRight="@dimen/default_object_padding"
+        android:layout_marginLeft="@dimen/default_object_padding"
+        android:layout_marginRight="@dimen/default_object_padding"
         android:gravity="center_vertical"
-        android:layout_toRightOf="@id/object_image">
+        android:layout_gravity="center_vertical"
+        android:descendantFocusability="blocksDescendants">
+
+        <ImageView
+            android:id="@+id/object_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="@dimen/default_object_padding"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:layout_toRightOf="@id/object_image">
+
+            <io.relayr.commons.widget.CustomTextView
+                android:id="@+id/object_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/default_object_title_text_size"
+                android:textAllCaps="true"
+                android:singleLine="true"
+                android:layout_marginRight="@dimen/default_object_padding"
+                style="@style/BoldText"/>
+
+            <io.relayr.commons.widget.CustomTextView
+                android:id="@+id/object_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/default_object_subtitle_text_size"
+                style="@style/NormalText"/>
+        </LinearLayout>
 
         <io.relayr.commons.widget.CustomTextView
-            android:id="@+id/object_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/default_object_title_text_size"
-            android:textAllCaps="true"
-            android:singleLine="true"
-            android:layout_marginRight="@dimen/default_object_padding"
-            style="@style/BoldText"/>
-
-        <io.relayr.commons.widget.CustomTextView
-            android:id="@+id/object_value"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:id="@+id/object_status"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_alignParentRight="true"
             android:textSize="@dimen/default_object_subtitle_text_size"
             style="@style/NormalText"/>
-    </LinearLayout>
 
-    <io.relayr.commons.widget.CustomTextView
-        android:id="@+id/object_status"
-        android:layout_width="wrap_content"
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:layout_alignParentRight="true"
-        android:textSize="@dimen/default_object_subtitle_text_size"
-        style="@style/NormalText"/>
+        android:orientation="horizontal"
+        android:background="@color/navigation_background"
+        android:visibility="gone">
 
-</RelativeLayout>
+        <io.relayr.commons.widget.CustomTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:text="@string/deleted"
+            android:clickable="false"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/default_object_subtitle_text_size"
+            android:paddingLeft="@dimen/default_object_padding"
+            style="@style/NormalText"/>
 
+        <io.relayr.commons.widget.CustomTextView
+            android:id="@+id/txt_undo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="@string/undo"
+            android:clickable="false"
+            android:textColor="@color/tab_active_top"
+            android:textSize="@dimen/default_object_subtitle_text_size"
+            android:paddingRight="@dimen/default_object_padding"
+            android:textAllCaps="true"
+            style="@style/NormalText"/>
+
+    </RelativeLayout>
+
+</FrameLayout>

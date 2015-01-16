@@ -78,5 +78,7 @@
 
     <string name="unknown">Unknown rule</string>
     <string name="no_active_devices">No active devices. Please check your WunderBar</string>
+    <string name="undo">Undo</string>
+    <string name="deleted">Deleted</string>
 
 </resources>
