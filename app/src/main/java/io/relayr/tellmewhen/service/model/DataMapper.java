@@ -43,7 +43,8 @@ public class DataMapper {
             Notification notif = new Notification(push.type, push.key);
             rule.addNotification(notif);
 
-            if (push.key.equals(Storage.loadGmsRegId()))
+            String gmsId = Storage.loadGmsRegId();
+            if (push.key != null && gmsId != null && push.key.equals(gmsId))
                 registrationExists = true;
         }
 
