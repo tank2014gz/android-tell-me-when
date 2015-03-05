@@ -90,7 +90,6 @@ public class RuleNameFragment extends WhatFragment {
                 switchToEdit(FragmentName.MAIN);
             } else {
                 ruleService.createRule(Storage.getRule())
-                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<Boolean>() {
                             @Override

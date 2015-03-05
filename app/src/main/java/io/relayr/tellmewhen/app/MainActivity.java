@@ -18,26 +18,26 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
-import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
 import io.relayr.model.Transmitter;
 import io.relayr.model.User;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.TellMeWhenApplication;
 import io.relayr.tellmewhen.consts.FragmentName;
-import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.gcm.GcmIntentService;
 import io.relayr.tellmewhen.gcm.GcmUtils;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.util.WhenEvents;
+import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class MainActivity extends ActionBarActivity implements LoginEventListener {
+public class MainActivity extends ActionBarActivity {
 
     private static final int ACTION_REACHABILITY = 100;
     private final String CURRENT_FRAGMENT = "io.relayr.tmw.current.frag";
@@ -65,7 +65,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
             if (fragName != null) mCurrentFragment = FragmentName.valueOf(fragName);
         }
     }
-
 
     @Override
     public void onResume() {
@@ -107,7 +106,24 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
                 onBackPressed();
             } else {
                 logInStarted = true;
-                RelayrSdk.logIn(this, this);
+                RelayrSdk.logIn(this).subscribe(new Observer<User>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        logInStarted = false;
+                        Toast.makeText(MainActivity.this, R.string.unsuccessfully_logged_in,
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNext(User user) {
+                        logInStarted = false;
+                        Toast.makeText(MainActivity.this, R.string.successfully_logged_in, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         }
     }
@@ -132,18 +148,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         super.onSaveInstanceState(outState);
 
         if (mCurrentFragment != null) outState.putString(CURRENT_FRAGMENT, mCurrentFragment.name());
-    }
-
-    @Override
-    public void onSuccessUserLogIn() {
-        logInStarted = false;
-        Toast.makeText(this, R.string.successfully_logged_in, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onErrorLogin(Throwable e) {
-        logInStarted = false;
-        Toast.makeText(this, R.string.unsuccessfully_logged_in, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -246,7 +250,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     private void loadUserInfo() {
         mUserInfoSubscription = RelayrSdk.getRelayrApi().getUserInfo()
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<User>() {
                     @Override
@@ -278,7 +281,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     private void loadTransmitters() {
         mTransmitterSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitters(Storage.loadUserId())
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Transmitter>>() {
                     @Override

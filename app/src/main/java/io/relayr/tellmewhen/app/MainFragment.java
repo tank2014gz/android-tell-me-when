@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,7 +20,6 @@ import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.hudomju.swipe.SwipeToDismissTouchListener;
 import com.hudomju.swipe.adapter.ListViewAdapter;
-import com.hudomju.swipe.adapter.ViewAdapter;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -43,6 +43,7 @@ import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.util.SensorUtil;
+import io.relayr.tellmewhen.util.WhenEvents;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -77,6 +78,8 @@ public class MainFragment extends WhatFragment {
 
     private SwipeToDismissTouchListener<ListViewAdapter> rulesListener;
     private SwipeToDismissTouchListener<ListViewAdapter> notificationListener;
+
+    private long lastNotificationsReload = 0;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -187,6 +190,11 @@ public class MainFragment extends WhatFragment {
         getActivity().onBackPressed();
     }
 
+    //Refresh list of notifications every time when new notifications is received
+    public void onEvent(WhenEvents.RefreshNotifications rn) {
+        loadNotificationsData(false);
+    }
+
     private void initiateAdapters() {
         mRulesAdapter = new RulesAdapter(this.getActivity());
         mNotificationsAdapter = new NotificationsAdapter(this.getActivity());
@@ -235,16 +243,17 @@ public class MainFragment extends WhatFragment {
         mNotifScheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if (!Storage.isStartScreenRules()) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            loadNotificationsData(true);
-                        }
-                    });
-                }
+                if (Storage.isStartScreenRules()) return;
+                if (System.currentTimeMillis() - 5000 < lastNotificationsReload) return;
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadNotificationsData(true);
+                    }
+                });
             }
-        }, 5, 5, TimeUnit.SECONDS);
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
     private void initRulesList() {
@@ -265,7 +274,6 @@ public class MainFragment extends WhatFragment {
                                 if (mRulesAdapter.isEmpty()) showRulesWarning();
 
                                 ruleService.deleteRule(item.dbId, item.drRev)
-                                        .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe(new Subscriber<Boolean>() {
                                             @Override
@@ -299,7 +307,6 @@ public class MainFragment extends WhatFragment {
                     rulesListener.undoPendingDismiss();
                 } else {
                     ruleService.refreshRule(mRulesAdapter.getItem(pos).dbId)
-                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Subscriber<Boolean>() {
                                 @Override
@@ -355,7 +362,6 @@ public class MainFragment extends WhatFragment {
 
         mNotificationsListView.setAdapter(mNotificationsAdapter);
         mNotificationsListView.setOnTouchListener(notificationListener);
-        mNotificationsListView.setOnScrollListener((AbsListView.OnScrollListener) notificationListener.makeScrollListener());
         mNotificationsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView parent, View view, int pos, long id) {
@@ -381,18 +387,22 @@ public class MainFragment extends WhatFragment {
     }
 
     private void enableDynamicLoading() {
+        final AbsListView.OnScrollListener listener = (AbsListView.OnScrollListener) notificationListener.makeScrollListener();
         mNotificationsListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
+                listener.onScrollStateChanged(view, scrollState);
             }
 
             @Override
             public void onScroll(AbsListView view, int firstVisible, int visibleCount, int total) {
+                listener.onScroll(view, firstVisible, visibleCount, total);
                 int lastInScreen = firstVisible + visibleCount;
 
                 if ((lastInScreen == total)) {
                     List<TMWNotification> local = notificationService.getLocalNotifications(total);
                     if (!local.isEmpty()) {
+                        notificationListener.processPendingDismisses();
                         mNotificationsAdapter.addAll(local);
                         mNotificationsAdapter.notifyDataSetChanged();
                     }
@@ -401,18 +411,23 @@ public class MainFragment extends WhatFragment {
         });
     }
 
-    private void toggleTabs(boolean isRules) {
+    private void toggleTabs(final boolean isRules) {
         if (!Storage.isUserOnBoarded()) return;
 
         Storage.startRuleScreen(isRules);
         Storage.setNotificationScreeVisible(!isRules);
 
-        getActivity().setTitle(isRules ? R.string.title_tab_rules : R.string.title_tab_notifications);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                getActivity().setTitle(isRules ? R.string.title_tab_rules : R.string.title_tab_notifications);
 
-        mTabRules.setBackgroundResource(isRules ? R.drawable.tab_active : R.color.tab_inactive);
-        mTabNotifications.setBackgroundResource(isRules ? R.color.tab_inactive : R.drawable.tab_active);
+                mTabRules.setBackgroundResource(isRules ? R.drawable.tab_active : R.color.tab_inactive);
+                mTabNotifications.setBackgroundResource(isRules ? R.color.tab_inactive : R.drawable.tab_active);
 
-        refreshMenuItems();
+                refreshMenuItems();
+            }
+        });
     }
 
     private void refreshMenuItems() {
@@ -439,13 +454,10 @@ public class MainFragment extends WhatFragment {
         mLoadingRules = true;
         mLoadingNotifications = false;
 
-        mProgress.setVisibility(View.VISIBLE);
-        mProgress.progressiveStart();
-
+        showProgressBar();
         toggleTabs(true);
 
         ruleService.loadRemoteRules()
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<TMWRule>>() {
                     @Override
@@ -489,14 +501,13 @@ public class MainFragment extends WhatFragment {
         mLoadingRules = false;
         mLoadingNotifications = true;
 
-        mProgress.setVisibility(View.VISIBLE);
-        mProgress.progressiveStart();
+        lastNotificationsReload = System.currentTimeMillis();
 
+        showProgressBar();
         toggleTabs(false);
         clearStatusBar();
 
         notificationService.loadRemoteNotifications()
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Integer>() {
                     @Override
@@ -517,7 +528,6 @@ public class MainFragment extends WhatFragment {
                         if (!dynamic || totalNotifications > 0) {
                             mNotificationsAdapter.clear();
                             mNotificationsAdapter.addAll(notificationService.getLocalNotifications(0));
-                            notificationListener.processPendingDismisses();
 
                             if (mNotificationsAdapter.isEmpty()) {
                                 showNoNotificationsWarning();
@@ -540,4 +550,15 @@ public class MainFragment extends WhatFragment {
 
         manager.cancel(GcmIntentService.TMW_NOTIFICATION_ID);
     }
+    
+    private void showProgressBar(){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mProgress.setVisibility(View.VISIBLE);
+                mProgress.progressiveStart();           
+            }
+        });
+    }
+    
 }

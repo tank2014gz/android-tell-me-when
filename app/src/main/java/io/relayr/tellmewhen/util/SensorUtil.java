@@ -3,6 +3,8 @@ package io.relayr.tellmewhen.util;
 import android.content.Context;
 import android.util.Pair;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +12,9 @@ import java.util.Map;
 
 import io.relayr.model.Reading;
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
-import io.relayr.tellmewhen.consts.SensorType;
 
 public class SensorUtil {
 
@@ -67,38 +69,38 @@ public class SensorUtil {
 
     public static String buildNotificationValue(TMWRule rule, TMWNotification notif) {
         if (rule == null || notif == null) return "null";
-        return SensorUtil.scaleToUiData(rule.getSensorType(),
-                notif.value) + rule.getSensorType().getUnit();
+        return SensorUtil.scaleToUiData(rule.getSensorType(), round(notif.value, 2)) +
+                rule.getSensorType().getUnit();
     }
 
     public static String formatToUiValue(SensorType type, Reading r) {
         switch (type) {
             case TEMPERATURE:
-                return r.temp + type.getUnit();
+                return round((Double) r.value, 2) + type.getUnit();
             case HUMIDITY:
-                return r.hum + type.getUnit();
+                return (int) round((Double) r.value, 2) + type.getUnit();
             case PROXIMITY:
-                return scaleToUiData(SensorType.PROXIMITY, r.prox) + type.getUnit();
+                return scaleToUiData(SensorType.PROXIMITY, round((Double) r.value, 2)) + type.getUnit();
             case NOISE_LEVEL:
-                return scaleToUiData(SensorType.NOISE_LEVEL, r.snd_level) + type.getUnit();
+                return scaleToUiData(SensorType.NOISE_LEVEL, round((Double) r.value, 2)) + type.getUnit();
             case LUMINOSITY:
-                return scaleToUiData(SensorType.LUMINOSITY, r.light) + type.getUnit();
+                return scaleToUiData(SensorType.LUMINOSITY, round((Double) r.value, 2)) + type.getUnit();
             default:
                 return "0";
         }
     }
 
-    public static float scaleToUiData(SensorType type, float data) {
+    public static int scaleToUiData(SensorType type, Double data) {
         switch (type) {
             case PROXIMITY:
-                return Math.round(data / 2047 * getMaxValue(type));
+                return (int) Math.round(data / 2047 * getMaxValue(type));
             case LUMINOSITY:
-                return Math.round(data / 4095 * getMaxValue(type));
+                return (int) Math.round(data / 4095 * getMaxValue(type));
             case NOISE_LEVEL:
-                return Math.round(data / 1023 * getMaxValue(type));
+                return (int) Math.round(data / 1023 * getMaxValue(type));
         }
 
-        return data;
+        return data.intValue();
     }
 
     public static float scaleToServerData(SensorType type, float data) {
@@ -112,5 +114,27 @@ public class SensorUtil {
         }
 
         return data;
+    }
+
+    public static boolean checkReadingType(SensorType sensor, Reading reading) {
+        if (sensor == SensorType.TEMPERATURE && reading.meaning.equals("temperature"))
+            return true;
+        else if (sensor == SensorType.HUMIDITY && reading.meaning.equals("humidity"))
+            return true;
+        else if (sensor == SensorType.LUMINOSITY && reading.meaning.equals("luminosity"))
+            return true;
+        else if (sensor == SensorType.NOISE_LEVEL && reading.meaning.equals("noiseLevel"))
+            return true;
+        else if (sensor == SensorType.PROXIMITY && reading.meaning.equals("proximity"))
+            return true;
+        else return false;
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }

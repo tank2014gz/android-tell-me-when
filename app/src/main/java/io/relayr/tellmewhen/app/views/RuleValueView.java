@@ -10,8 +10,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -22,15 +20,13 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.consts.OperatorType;
 import io.relayr.tellmewhen.consts.SensorType;
+import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
 public class RuleValueView extends RelativeLayout {
@@ -207,7 +203,6 @@ public class RuleValueView extends RelativeLayout {
 
         mDeviceSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(Storage.getRule().transmitterId)
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
                     @Override
@@ -233,7 +228,8 @@ public class RuleValueView extends RelativeLayout {
         mDeviceId = device.id;
         RelayrSdk.getWebSocketClient().subscribe(device)
                 .timeout(7, TimeUnit.SECONDS)
-                .subscribe(new Subscriber<Object>() {
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Reading>() {
                     @Override
                     public void onCompleted() {
                     }
@@ -247,17 +243,15 @@ public class RuleValueView extends RelativeLayout {
                     }
 
                     @Override
-                    public void onNext(Object o) {
-                        Reading reading = new Gson().fromJson(o.toString(), Reading.class);
-
-                        if (mCurrentSensorProgress != null) {
-                            mCurrentSensorProgress.setVisibility(View.GONE);
-                            mSensorValue.setVisibility(View.VISIBLE);
-
-                            mSensorValue.setText(getContext().getString(R.string
-                                    .current_reading) + ": " +
-                                    SensorUtil.formatToUiValue(mSensor, reading));
-                        }
+                    public void onNext(Reading reading) {
+                        if (mCurrentSensorProgress != null && mSensorValue != null)
+                            if (SensorUtil.checkReadingType(mSensor, reading)) {
+                                mCurrentSensorProgress.setVisibility(View.GONE);
+                                mSensorValue.setVisibility(View.VISIBLE);
+                                mSensorValue.setText(getContext().getString(R.string
+                                        .current_reading) + ": " +
+                                        SensorUtil.formatToUiValue(mSensor, reading));
+                            }
                     }
                 });
     }

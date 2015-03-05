@@ -8,10 +8,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
-import com.google.gson.Gson;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -20,18 +18,16 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
+import io.relayr.tellmewhen.consts.FragmentName;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.model.TMWNotification;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.util.NotificationTimeUtil;
-import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
 public class NotificationDetailsFragment extends WhatFragment {
@@ -118,7 +114,6 @@ public class NotificationDetailsFragment extends WhatFragment {
 
     private void loadDevice(String transmitterId, final SensorType sensor) {
         mDeviceSubscription = RelayrSdk.getRelayrApi().getTransmitterDevices(transmitterId)
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
                     @Override
@@ -144,9 +139,9 @@ public class NotificationDetailsFragment extends WhatFragment {
 
     private void subscribeForDeviceReadings(TransmitterDevice device, final SensorType sensor) {
         mDeviceId = device.id;
-        RelayrSdk.getWebSocketClient().subscribe(device)
-                .timeout(7, TimeUnit.SECONDS)
-                .subscribe(new Subscriber<Object>() {
+        device.subscribeToCloudReadings()
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Reading>() {
                     @Override
                     public void onCompleted() {
                     }
@@ -160,15 +155,13 @@ public class NotificationDetailsFragment extends WhatFragment {
                     }
 
                     @Override
-                    public void onNext(Object o) {
-                        Reading reading = new Gson().fromJson(o.toString(), Reading.class);
-
-                        if (mCurrentSensorProgress != null) {
-                            mCurrentSensorProgress.setVisibility(View.GONE);
-                            mSensorValue.setVisibility(View.VISIBLE);
-
-                            mSensorValue.setText(SensorUtil.formatToUiValue(sensor, reading));
-                        }
+                    public void onNext(Reading reading) {
+                        if (mCurrentSensorProgress != null && mSensorValue != null)
+                            if (SensorUtil.checkReadingType(sensor, reading)) {
+                                mCurrentSensorProgress.setVisibility(View.GONE);
+                                mSensorValue.setVisibility(View.VISIBLE);
+                                mSensorValue.setText(SensorUtil.formatToUiValue(sensor, reading));
+                            }
                     }
                 });
     }

@@ -80,7 +80,8 @@ public class DataMapper {
 
         rule.operatorType = dbRule.getCondition().getOperator().ordinal();
 
-        rule.value = SensorUtil.scaleToUiData(rule.getSensorType(), dbRule.getCondition().getValue());
+        rule.value = (float) SensorUtil.scaleToUiData(rule.getSensorType(),
+                (double) dbRule.getCondition().getValue());
 
         rule.modified = dbRule.getDetails().getModified();
 

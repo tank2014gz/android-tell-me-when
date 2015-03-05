@@ -20,4 +20,9 @@ public class WhenEvents {
         public BackPressed(){
         }
     }
+
+    public static class RefreshNotifications {
+        public RefreshNotifications(){
+        }
+    }
 }

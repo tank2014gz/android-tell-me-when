@@ -38,12 +38,14 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
 import io.relayr.tellmewhen.R;
 import io.relayr.tellmewhen.app.MainActivity;
+import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.model.TMWRule;
 import io.relayr.tellmewhen.storage.Storage;
-import io.relayr.tellmewhen.consts.SensorType;
 import io.relayr.tellmewhen.util.SensorUtil;
+import io.relayr.tellmewhen.util.WhenEvents;
 
 import static android.support.v4.app.NotificationCompat.Builder;
 import static android.support.v4.app.NotificationCompat.InboxStyle;
@@ -69,12 +71,12 @@ public class GcmIntentService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(Intent i) {
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
 
-        String messageType = gcm.getMessageType(intent);
+        String messageType = gcm.getMessageType(i);
 
-        if (!intent.getExtras().isEmpty()) {
+        if (!i.getExtras().isEmpty()) {
             switch (messageType) {
                 case GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR:
                     sendNotification("Message type send error.");
@@ -83,13 +85,13 @@ public class GcmIntentService extends IntentService {
                     sendNotification("Message type deleted.");
                     break;
                 case GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE:
-                    if (!Storage.isNotificationScreenVisible())
-                        sendNotification(intent.getExtras());
+                    EventBus.getDefault().post(new WhenEvents.RefreshNotifications());
+                    if (!Storage.isNotificationScreenVisible()) sendNotification(i.getExtras());
                     break;
             }
         }
 
-        GcmBroadcastReceiver.completeWakefulIntent(intent);
+        GcmBroadcastReceiver.completeWakefulIntent(i);
     }
 
     private void sendNotification(Bundle msg) {
@@ -156,7 +158,7 @@ public class GcmIntentService extends IntentService {
             }
 
             String notificationText = getString(R.string.push_notification_value) + " " +
-                    SensorUtil.scaleToUiData(sensorType, entry.getValue()) +
+                    SensorUtil.scaleToUiData(sensorType, (double) entry.getValue()) +
                     sensorType.getUnit();
 
             String all = ruleName + " (" + notificationText + ")";

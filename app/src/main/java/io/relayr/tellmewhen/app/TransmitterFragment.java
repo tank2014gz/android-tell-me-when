@@ -76,7 +76,6 @@ public class TransmitterFragment extends WhatFragment {
     private void findSensorId(final Transmitter transmitter, final SensorType sensorType) {
         RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(transmitter.id)
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
                     @Override

@@ -57,9 +57,14 @@ public abstract class WhatFragment extends Fragment {
             switchTo(name);
     }
 
-    protected void showToast(int stringId) {
+    protected void showToast(final int stringId) {
         if (getActivity() != null)
-            Toast.makeText(getActivity(), getActivity().getString(stringId), Toast.LENGTH_SHORT).show();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getActivity(), getActivity().getString(stringId), Toast.LENGTH_SHORT).show();
+                }
+            });
     }
 
     protected void inject(Object o) {

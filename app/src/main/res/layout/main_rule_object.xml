@@ -14,8 +14,7 @@
         android:layout_marginLeft="@dimen/default_object_padding"
         android:layout_marginRight="@dimen/default_object_padding"
         android:gravity="center_vertical"
-        android:layout_gravity="center_vertical"
-        android:descendantFocusability="blocksDescendants">
+        android:layout_gravity="center_vertical">
 
         <ImageView
             android:id="@+id/object_image"
@@ -93,7 +92,5 @@
             android:paddingRight="@dimen/default_object_padding"
             android:textAllCaps="true"
             style="@style/NormalText"/>
-
     </RelativeLayout>
-
 </FrameLayout>

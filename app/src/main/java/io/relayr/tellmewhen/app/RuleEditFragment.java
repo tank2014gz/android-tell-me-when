@@ -11,10 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -23,16 +20,15 @@ import io.relayr.RelayrSdk;
 import io.relayr.model.Reading;
 import io.relayr.model.TransmitterDevice;
 import io.relayr.tellmewhen.R;
-import io.relayr.tellmewhen.util.LogUtil;
-import io.relayr.tellmewhen.model.TMWRule;
-import io.relayr.tellmewhen.storage.Storage;
 import io.relayr.tellmewhen.consts.FragmentName;
 import io.relayr.tellmewhen.consts.SensorType;
+import io.relayr.tellmewhen.model.TMWRule;
+import io.relayr.tellmewhen.storage.Storage;
+import io.relayr.tellmewhen.util.LogUtil;
 import io.relayr.tellmewhen.util.SensorUtil;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
@@ -150,8 +146,8 @@ public class RuleEditFragment extends WhatFragment {
 
     private void saveRule() {
         ruleService.updateRule(Storage.getRule())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Boolean>() {
                     @Override
                     public void onCompleted() {
@@ -189,7 +185,6 @@ public class RuleEditFragment extends WhatFragment {
         mDeviceSubscription = RelayrSdk.getRelayrApi()
                 .getTransmitterDevices(transmitterId)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.newThread())
                 .subscribe(new Subscriber<List<TransmitterDevice>>() {
                     @Override
                     public void onCompleted() {
@@ -214,9 +209,9 @@ public class RuleEditFragment extends WhatFragment {
 
     private void subscribeForDeviceReadings(TransmitterDevice device, final SensorType sensor) {
         mDeviceId = device.id;
-        RelayrSdk.getWebSocketClient().subscribe(device)
-                .timeout(7, TimeUnit.SECONDS)
-                .subscribe(new Subscriber<Object>() {
+        device.subscribeToCloudReadings()
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Reading>() {
                     @Override
                     public void onCompleted() {
                     }
@@ -230,17 +225,20 @@ public class RuleEditFragment extends WhatFragment {
                     }
 
                     @Override
-                    public void onNext(Object o) {
-                        Reading reading = new Gson().fromJson(o.toString(), Reading.class);
-
+                    public void onNext(Reading reading) {
                         if (mCurrentSensorProgress != null && mSensorValue != null) {
-                            mCurrentSensorProgress.setVisibility(View.GONE);
-                            mSensorValue.setVisibility(View.VISIBLE);
-                            mSensorValue.setText(getString(R.string
-                                    .current_reading) + ": " +
-                                    SensorUtil.formatToUiValue(sensor, reading));
+                            if (SensorUtil.checkReadingType(sensor, reading))
+                                updateValue(sensor, reading);
                         }
                     }
                 });
+    }
+
+    private void updateValue(SensorType sensor, Reading reading) {
+        mCurrentSensorProgress.setVisibility(View.GONE);
+        mSensorValue.setVisibility(View.VISIBLE);
+        mSensorValue.setText(getString(R.string
+                .current_reading) + ": " +
+                SensorUtil.formatToUiValue(sensor, reading));
     }
 }
